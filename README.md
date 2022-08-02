@@ -1,6 +1,6 @@
 # our_community
 
-A new Flutter project.
+An app to make sure our voices are heard in our community.
 
 ## Getting Started
 
