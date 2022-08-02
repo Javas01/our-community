@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "962590288743",
+    "project_id": "our-community-eda3c",
+    "storage_bucket": "our-community-eda3c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:962590288743:android:253b0d63e6ec2afd7a1dc2",
+        "android_client_info": {
+          "package_name": "com.example.our_community"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "962590288743-gllo24e5pmjgk3q1pnhkq9p856h1o9b9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAj8I0Q3eR69Ng4H5mMOspU1UiJFwtc6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "962590288743-gllo24e5pmjgk3q1pnhkq9p856h1o9b9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
