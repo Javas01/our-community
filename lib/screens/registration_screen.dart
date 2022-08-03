@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:our_community/components/text_form_field_components.dart';
 import 'package:our_community/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../components/registration_subtext_component.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -21,85 +23,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final firstNameField = TextFormField(
-        autofocus: false,
-        controller: firstNameController,
-        keyboardType: TextInputType.name,
-        //  validator: () {},
-        onSaved: (value) {
-          firstNameController.text = value!;
-        },
-        textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.person),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: 'First name',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
-    final lastNameField = TextFormField(
-        autofocus: false,
-        controller: lastNameController,
-        keyboardType: TextInputType.name,
-        //  validator: () {},
-        onSaved: (value) {
-          lastNameController.text = value!;
-        },
-        textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.person),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: 'Last name',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
-    final emailField = TextFormField(
-        autofocus: false,
-        controller: emailController,
-        keyboardType: TextInputType.emailAddress,
-        //  validator: () {},
-        onSaved: (value) {
-          emailController.text = value!;
-        },
-        textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.email),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: 'Email',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
-    final passwordField = TextFormField(
-        autofocus: false,
-        controller: passwordController,
-        keyboardType: TextInputType.visiblePassword,
-        //  validator: () {},
-        onSaved: (value) {
-          passwordController.text = value!;
-        },
-        textInputAction: TextInputAction.done,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.password),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: 'Password',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
-    final signupButton = Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(30),
-        color: Colors.redAccent,
-        child: MaterialButton(
-            padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            minWidth: MediaQuery.of(context).size.width,
-            onPressed: () {
-              createAccount(emailController.text, passwordController.text);
-            },
-            child: const Text(
-              'Create Account',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
-            )));
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -121,30 +44,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       fit: BoxFit.contain,
                     ),
                   ),
-                  firstNameField,
+                  NameField(
+                      nameController: firstNameController,
+                      hintText: 'First name'),
                   const SizedBox(height: 20),
-                  lastNameField,
+                  NameField(
+                      nameController: lastNameController,
+                      hintText: 'Last name'),
                   const SizedBox(height: 20),
-                  emailField,
+                  EmailField(emailController: emailController),
                   const SizedBox(height: 20),
-                  passwordField,
+                  PasswordField(passwordController: passwordController),
                   const SizedBox(height: 20),
-                  signupButton,
+                  FormSubmitButton(
+                      emailController: emailController,
+                      passwordController: passwordController,
+                      onPressed: () {
+                        createAccount(
+                            emailController.text, passwordController.text);
+                      },
+                      text: 'Signup'),
                   const SizedBox(height: 20),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Text("Already have an account? "),
-                        GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Login',
-                                style: TextStyle(
-                                    color: Colors.redAccent,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15)))
-                      ])
+                  const RegistrationSubtext(
+                      text: 'Already have an Account? ', linkText: 'Login')
                 ],
               ),
             ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:our_community/screens/home_screen.dart';
 import 'package:our_community/screens/registration_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../components/registration_subtext_component.dart';
+import '../components/text_form_field_components.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,71 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final emailField = TextFormField(
-        autofocus: false,
-        controller: emailController,
-        keyboardType: TextInputType.emailAddress,
-        validator: (value) {
-          bool emailValid = RegExp(
-                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-              .hasMatch(value!);
-          if (value.isEmpty) {
-            return ('Email cannot be empty');
-          }
-          if (!emailValid) {
-            return ('Please enter a valid email');
-          }
-          return null;
-        },
-        onSaved: (value) {
-          emailController.text = value!;
-        },
-        textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.email),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: 'Email',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
-    final passwordField = TextFormField(
-        autofocus: false,
-        controller: passwordController,
-        obscureText: true,
-        validator: (value) {
-          if (value!.isEmpty) {
-            return ('Password cannot be empty');
-          }
-          return null;
-        },
-        onSaved: (value) {
-          passwordController.text = value!;
-        },
-        textInputAction: TextInputAction.done,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.password),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: 'Password',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
-    final loginButton = Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(30),
-        color: Colors.redAccent,
-        child: MaterialButton(
-            padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            minWidth: MediaQuery.of(context).size.width,
-            onPressed: () {
-              signIn(emailController.text, passwordController.text);
-            },
-            child: const Text(
-              'Login',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
-            )));
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -117,30 +54,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       fit: BoxFit.contain,
                     ),
                   ),
-                  emailField,
+                  EmailField(emailController: emailController),
                   const SizedBox(height: 20),
-                  passwordField,
+                  PasswordField(passwordController: passwordController),
                   const SizedBox(height: 20),
-                  loginButton,
+                  FormSubmitButton(
+                    emailController: emailController,
+                    passwordController: passwordController,
+                    text: 'Login',
+                    onPressed: () {
+                      signIn(emailController.text, passwordController.text);
+                    },
+                  ),
                   const SizedBox(height: 20),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Text("Dont have an account? "),
-                        GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          const RegistrationScreen())));
-                            },
-                            child: const Text('SignUp',
-                                style: TextStyle(
-                                    color: Colors.redAccent,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15)))
-                      ])
+                  const RegistrationSubtext(
+                    text: 'Dont have an Account? ',
+                    linkText: 'Signup',
+                    screen: RegistrationScreen(),
+                  )
                 ],
               ),
             ),

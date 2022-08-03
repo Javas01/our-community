@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
             showModalBottomSheet<void>(
                 context: context,
                 builder: (BuildContext context) {
-                  return const CreatePostModal();
+                  return CreatePostModal();
                 });
           } else {
             setState(() {

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:our_community/components/onboard_content_component.dart';
 import 'package:our_community/screens/login_screen.dart';
 
+import '../../components/dot_indicator_component.dart';
+import 'onboarding_config.dart';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
 
@@ -91,56 +94,3 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         )));
   }
 }
-
-class DotIndicator extends StatelessWidget {
-  const DotIndicator({
-    Key? key,
-    this.isActive = false,
-  }) : super(key: key);
-
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      height: isActive ? 12 : 4,
-      width: 4,
-      decoration: BoxDecoration(
-          color:
-              isActive ? Colors.redAccent : Colors.redAccent.withOpacity(0.4),
-          borderRadius: const BorderRadius.all(Radius.circular(12))),
-    );
-  }
-}
-
-class Onboard {
-  final String image, title, description;
-
-  Onboard({
-    required this.image,
-    required this.title,
-    required this.description,
-  });
-}
-
-final List<Onboard> onboardPages = [
-  Onboard(
-    image: "assets/news.jpg",
-    title: "Share",
-    description:
-        "Share news, events, gripes, accomplishments, etc. going on in our community that you feel everyone should know.",
-  ),
-  Onboard(
-    image: "assets/discuss.jpg",
-    title: "Discuss",
-    description:
-        "Discuss important community topics and make sure that your voice is heard!",
-  ),
-  Onboard(
-    image: "assets/vote.jpg",
-    title: "Vote",
-    description:
-        "Upvote or downvote to make sure that the important conversations gain visibility.",
-  )
-];

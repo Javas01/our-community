@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:our_community/screens/home_screen.dart';
-import 'package:our_community/screens/onboarding_screen.dart';
+import 'package:our_community/screens/OnboardingScreen/onboarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
