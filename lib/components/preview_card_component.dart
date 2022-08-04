@@ -1,28 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:our_community/components/tag_component.dart';
+
+import '../constants/tag_options.dart';
 
 class PreviewCard extends StatefulWidget {
-  const PreviewCard(
-      {Key? key,
-      required this.image,
-      required this.title,
-      required this.description,
-      required this.toggleExpanded})
-      : super(key: key);
+  late DocumentReference post;
+  PreviewCard({
+    Key? key,
+    required this.image,
+    required this.title,
+    required this.description,
+    required this.toggleExpanded,
+    required this.itemKey,
+    required this.upVotes,
+    required this.downVotes,
+    required this.postId,
+    required this.firstName,
+    required this.lastName,
+    required this.tags,
+  }) : super(key: key) {
+    post = FirebaseFirestore.instance.collection('Posts').doc(postId);
+  }
 
-  final String image, title, description;
+  final String image, title, description, postId, firstName, lastName;
+  final List<dynamic> upVotes, downVotes, tags;
   final VoidCallback toggleExpanded;
+  final GlobalKey itemKey;
 
   @override
   State<PreviewCard> createState() => _PreviewCardState();
 }
 
 class _PreviewCardState extends State<PreviewCard> {
-  int _voteCount = 0;
-  bool _isUpvoted = false;
-  bool _isDownvoted = false;
+  final _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
+    String voteCount =
+        (widget.upVotes.length - widget.downVotes.length).toString();
+    bool isUpVoted = widget.upVotes.contains(_auth.currentUser!.uid);
+    bool isDownVoted = widget.downVotes.contains(_auth.currentUser!.uid);
+
     return Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -36,7 +56,8 @@ class _PreviewCardState extends State<PreviewCard> {
               Card(
                   elevation: 5.0,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)),
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
                   clipBehavior: Clip.antiAlias,
                   child: Image.asset(
                     widget.image,
@@ -47,9 +68,33 @@ class _PreviewCardState extends State<PreviewCard> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      Text('${widget.firstName} ${widget.lastName}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w300,
+                          )),
+                      const Spacer(),
+                      ...widget.tags.map<Widget>((tag) {
+                        return Tag(
+                          color: tagOptions[tag]!,
+                          title: tag,
+                        );
+                      }).toList()
+                    ]),
+                    Text(
+                      widget.title,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     Text(
                       widget.description,
-                      maxLines: 3,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                     ),
@@ -59,13 +104,16 @@ class _PreviewCardState extends State<PreviewCard> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Scrollable.ensureVisible(
-                              context,
-                              alignment: 0.0,
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeInOut,
-                            );
                             widget.toggleExpanded();
+                            Future.delayed(const Duration(milliseconds: 50),
+                                () {
+                              Scrollable.ensureVisible(
+                                widget.itemKey.currentContext!,
+                                alignment: 0.0,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeInOut,
+                              );
+                            });
                           },
                           child: const Icon(
                             Icons.chat_outlined,
@@ -74,47 +122,29 @@ class _PreviewCardState extends State<PreviewCard> {
                         ),
                         Row(
                           children: [
-                            Text('$_voteCount'),
+                            Text(voteCount),
                             GestureDetector(
                               onTap: () {
-                                setState(() {
-                                  if (_isUpvoted) {
-                                    _isUpvoted = false;
-                                    _voteCount -= 1;
-                                  } else if (_isDownvoted) {
-                                    _isUpvoted = true;
-                                    _isDownvoted = false;
-                                    _voteCount += 2;
-                                  } else {
-                                    _isUpvoted = true;
-                                    _voteCount += 1;
-                                  }
-                                });
+                                isUpVoted ? vote('remove') : vote('up');
                               },
-                              child: Icon(Icons.keyboard_arrow_up_outlined,
-                                  color: _isUpvoted ? Colors.redAccent : null,
-                                  size: _isUpvoted ? 22.0 : 20.0),
+                              child: Icon(
+                                Icons.keyboard_arrow_up_outlined,
+                                color:
+                                    isUpVoted ? Colors.lightBlueAccent : null,
+                                size: isUpVoted ? 22.0 : 20.0,
+                              ),
                             ),
                             GestureDetector(
                                 onTap: () {
-                                  setState(() {
-                                    if (_isDownvoted) {
-                                      _isDownvoted = false;
-                                      _voteCount += 1;
-                                    } else if (_isUpvoted) {
-                                      _isDownvoted = true;
-                                      _isUpvoted = false;
-                                      _voteCount -= 2;
-                                    } else {
-                                      _isDownvoted = true;
-                                      _voteCount -= 1;
-                                    }
-                                  });
+                                  isDownVoted ? vote('remove') : vote('down');
                                 },
-                                child: Icon(Icons.keyboard_arrow_down_outlined,
-                                    color:
-                                        _isDownvoted ? Colors.redAccent : null,
-                                    size: _isDownvoted ? 22.0 : 20.0))
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                  color: isDownVoted
+                                      ? Colors.lightBlueAccent
+                                      : null,
+                                  size: isDownVoted ? 22.0 : 20.0,
+                                ))
                           ],
                         )
                       ],
@@ -125,5 +155,34 @@ class _PreviewCardState extends State<PreviewCard> {
             ],
           ),
         ));
+  }
+
+  Future<void> vote(String voteType) {
+    switch (voteType) {
+      case 'up':
+        {
+          widget.upVotes.add(_auth.currentUser!.uid);
+          widget.downVotes.remove(_auth.currentUser!.uid);
+        }
+        break;
+      case 'down':
+        {
+          widget.downVotes.add(_auth.currentUser!.uid);
+          widget.upVotes.remove(_auth.currentUser!.uid);
+        }
+        break;
+      // default is remove vote
+      default:
+        {
+          widget.upVotes.remove(_auth.currentUser!.uid);
+          widget.downVotes.remove(_auth.currentUser!.uid);
+        }
+        break;
+    }
+
+    return widget.post.update({
+      'upVotes': widget.upVotes,
+      'downVotes': widget.downVotes,
+    }).catchError((error) => Future.error(error));
   }
 }

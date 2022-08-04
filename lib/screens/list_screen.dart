@@ -23,13 +23,35 @@ class ListScreen extends StatelessWidget {
           return const Text("Loading");
         }
 
+        List<QueryDocumentSnapshot> postDocs = snapshot.data!.docs;
+
+        // sort posts by vote count (in ascending order)
+        postDocs.sort((a, b) {
+          Map<String, dynamic> aData = a.data()! as Map<String, dynamic>;
+          Map<String, dynamic> bData = b.data()! as Map<String, dynamic>;
+          List aUpVotes = aData['upVotes'] ?? [];
+          List bUpVotes = bData['upVotes'] ?? [];
+          List aDownVotes = aData['downVotes'] ?? [];
+          List bDownVotes = bData['downVotes'] ?? [];
+          int aVoteCount = aUpVotes.length - aDownVotes.length;
+          int bVoteCount = bUpVotes.length - bDownVotes.length;
+
+          return aVoteCount.compareTo(bVoteCount);
+        });
+
         return ListView(
-            children: snapshot.data!.docs.map((DocumentSnapshot document) {
+            children: postDocs.reversed.map((DocumentSnapshot document) {
           Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
           return ImageCardComponent(
             title: data['title'],
             description: data['description'],
             image: 'assets/masjid.jpeg',
+            upVotes: data['upVotes'] ?? [],
+            downVotes: data['downVotes'] ?? [],
+            firstName: data['createdBy']['firstName'] ?? '',
+            lastName: data['createdBy']['lastName'] ?? '',
+            tags: data['tags'] ?? [],
+            postId: document.id,
           );
         }).toList());
       },

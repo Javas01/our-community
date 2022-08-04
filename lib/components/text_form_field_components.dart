@@ -16,7 +16,12 @@ class NameField extends StatelessWidget {
         autofocus: false,
         controller: nameController,
         keyboardType: TextInputType.name,
-        //  validator: () {},
+        validator: (value) {
+          if (value!.isEmpty) {
+            return ('Name cannot be empty');
+          }
+          return null;
+        },
         onSaved: (value) {
           nameController.text = value!;
         },
@@ -104,14 +109,9 @@ class PasswordField extends StatelessWidget {
 
 class FormSubmitButton extends StatelessWidget {
   const FormSubmitButton(
-      {Key? key,
-      required this.emailController,
-      required this.passwordController,
-      required this.onPressed,
-      required this.text})
+      {Key? key, required this.onPressed, required this.text})
       : super(key: key);
 
-  final TextEditingController emailController, passwordController;
   final Function onPressed;
   final String text;
 
@@ -120,7 +120,7 @@ class FormSubmitButton extends StatelessWidget {
     return Material(
         elevation: 5,
         borderRadius: BorderRadius.circular(30),
-        color: Colors.redAccent,
+        color: Colors.lightBlueAccent,
         child: MaterialButton(
             padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
             minWidth: MediaQuery.of(context).size.width,

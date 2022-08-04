@@ -45,23 +45,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                   NameField(
-                      nameController: firstNameController,
-                      hintText: 'First name'),
+                    nameController: firstNameController,
+                    hintText: 'First name',
+                  ),
                   const SizedBox(height: 20),
                   NameField(
-                      nameController: lastNameController,
-                      hintText: 'Last name'),
+                    nameController: lastNameController,
+                    hintText: 'Last name',
+                  ),
                   const SizedBox(height: 20),
                   EmailField(emailController: emailController),
                   const SizedBox(height: 20),
                   PasswordField(passwordController: passwordController),
                   const SizedBox(height: 20),
                   FormSubmitButton(
-                      emailController: emailController,
-                      passwordController: passwordController,
                       onPressed: () {
                         createAccount(
-                            emailController.text, passwordController.text);
+                          firstNameController.text,
+                          lastNameController.text,
+                          emailController.text,
+                          passwordController.text,
+                        );
                       },
                       text: 'Signup'),
                   const SizedBox(height: 20),
@@ -76,16 +80,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  void createAccount(String email, String password) async {
+  void createAccount(String firstName, lastName, email, password) async {
     if (_formKey.currentState!.validate()) {
+      String displayName = '$firstName $lastName';
+
       await _auth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((value) => {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => const HomeScreen())),
-                    (route) => false)
+                value.user!
+                    .updateDisplayName(displayName)
+                    .then((_) => {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => const HomeScreen())),
+                              (route) => false)
+                        })
+                    .catchError((error) => Future.error(error))
               })
           .catchError((error) => {Future.error(error)});
     }

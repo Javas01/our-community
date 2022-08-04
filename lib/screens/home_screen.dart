@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.lightBlueAccent,
         elevation: 1,
         title: const Text("Our Community"),
         leading: null,
@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Settings',
           ),
         ],
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.lightBlueAccent,
         selectedItemColor: Colors.white,
         currentIndex: currentIndex,
         onTap: (value) {

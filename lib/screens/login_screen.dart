@@ -59,8 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   PasswordField(passwordController: passwordController),
                   const SizedBox(height: 20),
                   FormSubmitButton(
-                    emailController: emailController,
-                    passwordController: passwordController,
                     text: 'Login',
                     onPressed: () {
                       signIn(emailController.text, passwordController.text);
