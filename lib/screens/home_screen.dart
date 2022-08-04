@@ -12,7 +12,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
-  final screens = [ListScreen(), const Scaffold(), const SettingsScreen()];
+  final screens = [
+    const ListScreen(),
+    const Scaffold(),
+    const SettingsScreen()
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
             showModalBottomSheet<void>(
                 context: context,
                 builder: (BuildContext context) {
-                  return CreatePostModal();
+                  return const CreatePostModal();
                 });
           } else {
             setState(() {
