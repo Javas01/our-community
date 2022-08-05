@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:our_community/components/text_field_components.dart';
 
 class UserComment extends StatefulWidget {
   const UserComment({
@@ -11,20 +12,24 @@ class UserComment extends StatefulWidget {
     required this.commentText,
     required this.replies,
     required this.postId,
-    required this.setParentComment,
     required this.commentId,
   }) : super(key: key);
   final String firstName, lastName, creatorId, commentText, postId, commentId;
   final List replies;
-  final Function setParentComment;
 
   @override
   State<UserComment> createState() => _UserCommentState();
 }
 
 class _UserCommentState extends State<UserComment> {
+  final firstName =
+      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
+  final lastName =
+      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
   bool _isSelected = false;
   final userId = FirebaseAuth.instance.currentUser!.uid;
+
+  TextEditingController commentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +44,12 @@ class _UserCommentState extends State<UserComment> {
           });
         },
         onTap: () {
-          setState(() {
-            _isSelected = false;
-          });
+          if (_isSelected) {
+            commentController.text = '';
+            setState(() {
+              _isSelected = false;
+            });
+          }
         },
         child: Column(
           children: [
@@ -62,26 +70,49 @@ class _UserCommentState extends State<UserComment> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(widget.commentText),
+                      Text(
+                        widget.commentText,
+                        style: const TextStyle(fontSize: 16),
+                      ),
                       if (_isSelected)
                         Row(
                           children: [
-                            if (isCreator)
-                              const Icon(
-                                Icons.delete_rounded,
-                                size: 17,
+                            // TODO: delete Message (not MVP)
+                            // if (isCreator)
+                            //   const Icon(
+                            //     Icons.delete_rounded,
+                            //     size: 17,
+                            //   ),
+                            Expanded(
+                              child: Container(
+                                constraints:
+                                    const BoxConstraints(maxHeight: 200),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                        child: CommentField(
+                                      commentController: commentController,
+                                      hintText: 'Reply to comment',
+                                      contentPadding: const EdgeInsets.fromLTRB(
+                                          0, 0, 10, 0),
+                                    )),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          minimumSize: const Size(40, 40),
+                                          shape: const CircleBorder()),
+                                      onPressed: () => replyToComment(
+                                          commentController.text),
+                                      child: const Icon(Icons.reply_rounded),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            GestureDetector(
-                              onTap: () {
-                                widget.setParentComment(widget.commentId);
-                              },
-                              child: const Icon(
-                                Icons.reply_rounded,
-                                size: 18,
-                              ),
-                            )
+                            ),
                           ],
-                        )
+                        ),
                     ],
                   ),
                 ),
@@ -117,9 +148,7 @@ class _UserCommentState extends State<UserComment> {
                       return const Text('Something went wrong');
                     }
 
-                    if (data.connectionState == ConnectionState.waiting) {
-                      return const Text("Loading");
-                    }
+                    if (data.connectionState == ConnectionState.waiting) {}
                     List newReplies = data.data ?? [];
 
                     return Container(
@@ -137,7 +166,6 @@ class _UserCommentState extends State<UserComment> {
                         commentText: reply['text'],
                         replies: newReplies,
                         postId: widget.postId,
-                        setParentComment: widget.setParentComment,
                         commentId: reply['commentId'],
                       ),
                     );
@@ -147,5 +175,39 @@ class _UserCommentState extends State<UserComment> {
         ),
       ),
     );
+  }
+
+  Future<void> replyToComment(String text) {
+    if (text == '') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reply cant be empty')),
+      );
+      return Future.value();
+    }
+    commentController.text = '';
+
+    CollectionReference comments = FirebaseFirestore.instance
+        .collection('Posts')
+        .doc(widget.postId)
+        .collection('Comments');
+
+    return comments.add({
+      'text': text,
+      'isReply': true,
+      'createdBy': {
+        'firstName': firstName,
+        'lastName': lastName,
+        'id': userId,
+      },
+    }).then((doc) {
+      DocumentReference parentComment = comments.doc(widget.commentId);
+      parentComment.get().then((document) {
+        var parentCommentData = document.data()! as Map<String, dynamic>;
+        List parentCommentReplies = parentCommentData['replies'] ?? [];
+        List newReplies = [...parentCommentReplies, doc.id];
+
+        parentComment.update({'replies': newReplies});
+      });
+    }).catchError((error) => print("Failed to add comment: $error"));
   }
 }

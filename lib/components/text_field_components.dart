@@ -4,21 +4,26 @@ class CommentField extends StatelessWidget {
   const CommentField({
     Key? key,
     required this.commentController,
-    required this.focusNode,
+    required this.hintText,
+    required this.contentPadding,
   }) : super(key: key);
 
   final TextEditingController commentController;
-  final FocusNode focusNode;
+  final String hintText;
+  final EdgeInsets contentPadding;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
-        controller: commentController,
-        focusNode: focusNode,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.chat_outlined),
-            hintText: 'Reply',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
+      controller: commentController,
+      keyboardType: TextInputType.multiline,
+      maxLines: null,
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.chat_outlined),
+        contentPadding: contentPadding,
+        hintText: hintText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 }

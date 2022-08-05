@@ -7,12 +7,10 @@ class PostComments extends StatelessWidget {
     Key? key,
     required this.commentsStream,
     required this.postId,
-    required this.setParentComment,
   }) : super(key: key);
 
   final Stream<QuerySnapshot> commentsStream;
   final String postId;
-  final Function setParentComment;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +59,6 @@ class PostComments extends StatelessWidget {
               commentText: data['text'],
               replies: replyComments,
               postId: postId,
-              setParentComment: setParentComment,
               commentId: document.id,
             );
           }).toList());

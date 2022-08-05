@@ -42,8 +42,6 @@ class _ExpandedCardState extends State<ExpandedCard> {
 
   TextEditingController commentController = TextEditingController();
 
-  bool _isReply = false;
-  String _parentCommentId = '';
   late FocusNode myFocusNode;
 
   @override
@@ -61,14 +59,6 @@ class _ExpandedCardState extends State<ExpandedCard> {
     super.dispose();
   }
 
-  void setParentComment(String commentId) {
-    myFocusNode.requestFocus();
-    setState(() {
-      _isReply = true;
-      _parentCommentId = commentId;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -76,14 +66,15 @@ class _ExpandedCardState extends State<ExpandedCard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       color: Theme.of(context).colorScheme.surfaceVariant,
       child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  widget.toggleExpanded();
-                },
-                child: Row(children: [
+        padding: const EdgeInsets.all(4.0),
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () {
+                widget.toggleExpanded();
+              },
+              child: Row(
+                children: [
                   Card(
                     elevation: 5.0,
                     shape: RoundedRectangleBorder(
@@ -94,55 +85,62 @@ class _ExpandedCardState extends State<ExpandedCard> {
                       width: 100,
                     ),
                   ),
-                  const Spacer(),
-                  Column(
-                    children: [
-                      Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.title,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(widget.description),
-                    ],
+                        Text(widget.description),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
-                ]),
+                ],
               ),
-              const Divider(
-                height: 10,
-                thickness: 2,
-              ),
-              PostComments(
-                commentsStream: widget._commentsStream,
-                postId: widget.postId,
-                setParentComment: setParentComment,
-              ),
-              SizedBox(
-                height: 50,
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: CommentField(
-                        commentController: commentController,
-                        focusNode: myFocusNode,
-                      ),
+            ),
+            const Divider(
+              height: 10,
+              thickness: 2,
+            ),
+            PostComments(
+              commentsStream: widget._commentsStream,
+              postId: widget.postId,
+            ),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: CommentField(
+                      commentController: commentController,
+                      hintText: 'Reply to post',
+                      contentPadding: const EdgeInsets.all(10),
                     ),
-                    const SizedBox(
-                      width: 5,
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(50, 50),
+                      shape: const CircleBorder(),
                     ),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(50, 50),
-                            shape: const CircleBorder()),
-                        onPressed: () => addComment(commentController.text),
-                        child: const Icon(Icons.send_rounded)),
-                  ],
-                ),
+                    onPressed: () => addComment(commentController.text),
+                    child: const Icon(
+                      Icons.send_rounded,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          )),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -157,23 +155,12 @@ class _ExpandedCardState extends State<ExpandedCard> {
 
     return widget.comments.add({
       'text': text,
-      'isReply': _isReply,
+      'isReply': false,
       'createdBy': {
         'firstName': firstName,
         'lastName': lastName,
         'id': userId,
       },
-    }).then((doc) {
-      if (_isReply == true) {
-        DocumentReference parentComment = widget.comments.doc(_parentCommentId);
-        parentComment.get().then((document) {
-          var parentCommentData = document.data()! as Map<String, dynamic>;
-          List parentCommentReplies = parentCommentData['replies'] ?? [];
-          List newReplies = [...parentCommentReplies, doc.id];
-
-          parentComment.update({'replies': newReplies});
-        });
-      }
     }).catchError((error) => print("Failed to add comment: $error"));
   }
 }
