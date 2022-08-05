@@ -86,6 +86,7 @@ class _ListScreenState extends State<ListScreen> {
               downVotes: data['downVotes'] ?? [],
               firstName: data['createdBy']['firstName'] ?? '',
               lastName: data['createdBy']['lastName'] ?? '',
+              creatorId: data['createdBy']['id'] ?? '',
               tags: data['tags'] ?? [],
               postId: document.id,
             );

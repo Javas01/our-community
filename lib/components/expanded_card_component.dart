@@ -42,6 +42,33 @@ class _ExpandedCardState extends State<ExpandedCard> {
 
   TextEditingController commentController = TextEditingController();
 
+  bool _isReply = false;
+  String _parentCommentId = '';
+  late FocusNode myFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+
+    myFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    myFocusNode.dispose();
+
+    super.dispose();
+  }
+
+  void setParentComment(String commentId) {
+    myFocusNode.requestFocus();
+    setState(() {
+      _isReply = true;
+      _parentCommentId = commentId;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -56,31 +83,52 @@ class _ExpandedCardState extends State<ExpandedCard> {
                 onTap: () {
                   widget.toggleExpanded();
                 },
-                child: Column(children: [
+                child: Row(children: [
                   Card(
-                      elevation: 5.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0)),
-                      clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
-                        widget.image,
-                        width: 200,
-                      )),
-                  Text(widget.description),
+                    elevation: 5.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0)),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      widget.image,
+                      width: 100,
+                    ),
+                  ),
+                  const Spacer(),
+                  Column(
+                    children: [
+                      Text(
+                        widget.title,
+                        style: const TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(widget.description),
+                    ],
+                  ),
+                  const Spacer(),
                 ]),
               ),
               const Divider(
                 height: 10,
                 thickness: 2,
               ),
-              PostComments(commentsStream: widget._commentsStream),
+              PostComments(
+                commentsStream: widget._commentsStream,
+                postId: widget.postId,
+                setParentComment: setParentComment,
+              ),
               SizedBox(
                 height: 50,
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                        child:
-                            CommentField(commentController: commentController)),
+                      child: CommentField(
+                        commentController: commentController,
+                        focusNode: myFocusNode,
+                      ),
+                    ),
                     const SizedBox(
                       width: 5,
                     ),
@@ -100,21 +148,32 @@ class _ExpandedCardState extends State<ExpandedCard> {
 
   Future<void> addComment(String text) {
     if (text == '') {
-      const snackBar = SnackBar(content: Text('Comment cant be empty'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment cant be empty')),
+      );
       return Future.value();
     }
     commentController.text = '';
-    return widget.comments
-        .add({
-          'text': text,
-          'createdBy': {
-            'firstName': firstName,
-            'lastName': lastName,
-            'id': userId,
-          },
-        })
-        .then((value) => print(value))
-        .catchError((error) => print("Failed to add comment: $error"));
+
+    return widget.comments.add({
+      'text': text,
+      'isReply': _isReply,
+      'createdBy': {
+        'firstName': firstName,
+        'lastName': lastName,
+        'id': userId,
+      },
+    }).then((doc) {
+      if (_isReply == true) {
+        DocumentReference parentComment = widget.comments.doc(_parentCommentId);
+        parentComment.get().then((document) {
+          var parentCommentData = document.data()! as Map<String, dynamic>;
+          List parentCommentReplies = parentCommentData['replies'] ?? [];
+          List newReplies = [...parentCommentReplies, doc.id];
+
+          parentComment.update({'replies': newReplies});
+        });
+      }
+    }).catchError((error) => print("Failed to add comment: $error"));
   }
 }

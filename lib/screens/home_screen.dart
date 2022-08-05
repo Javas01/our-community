@@ -22,6 +22,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        // actions: [
+        //   PopupMenuButton(
+        //       itemBuilder: (context) => <PopupMenuEntry>[
+        //             PopupMenuItem(
+        //               value: 'one',
+        //               child: IconButton(
+        //                   iconSize: 10,
+        //                   onPressed: () {},
+        //                   icon: const Icon(Icons.sort)),
+        //             )
+        //           ]),
+        // ],
         backgroundColor: Colors.lightBlueAccent,
         elevation: 1,
         title: const Text("Our Community"),

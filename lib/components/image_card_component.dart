@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'expanded_card_component.dart';
 import 'preview_card_component.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ImageCardComponent extends StatefulWidget {
   const ImageCardComponent({
@@ -14,9 +16,16 @@ class ImageCardComponent extends StatefulWidget {
     required this.firstName,
     required this.lastName,
     required this.tags,
+    required this.creatorId,
   }) : super(key: key);
 
-  final String image, title, description, postId, firstName, lastName;
+  final String image,
+      title,
+      description,
+      postId,
+      firstName,
+      lastName,
+      creatorId;
   final List<dynamic> upVotes, downVotes, tags;
 
   @override
@@ -25,6 +34,8 @@ class ImageCardComponent extends StatefulWidget {
 
 class _ImageCardComponentState extends State<ImageCardComponent> {
   final dataKey = GlobalKey();
+
+  final userId = FirebaseAuth.instance.currentUser!.uid;
   bool _isExpanded = false;
 
   void toggleExpanded() {
@@ -35,28 +46,64 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
 
   Offset? _tapPosition;
 
+  GlobalKey? _selectedPostKey;
+
   void _showCustomMenu() {
+    final isCreator = userId == widget.creatorId;
     final RenderBox overlay =
         Overlay.of(context)!.context.findRenderObject() as RenderBox;
+
+    setState(() {
+      _selectedPostKey = dataKey;
+    });
 
     showMenu(
       context: context,
       items: [
         PopupMenuItem(
-            value: 1,
-            child: Row(children: const [
-              Icon(Icons.delete),
-              SizedBox(
-                width: 10,
-              ),
-              Text('Delete')
-            ]))
+          value: 1,
+          onTap: isCreator ? deletePost : null,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: isCreator
+                ? const [
+                    Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      'Delete',
+                      style: TextStyle(color: Colors.red),
+                    )
+                  ]
+                : const [
+                    Icon(
+                      Icons.flag,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      'Flag',
+                    )
+                  ],
+          ),
+        )
       ],
       position: RelativeRect.fromRect(
-        _tapPosition! & const Size(40, 40), // smaller rect, the touch area
+        _tapPosition! & context.size!, // smaller rect, the touch area
         Offset.zero & overlay.size, // Bigger rect, the entire screen
       ),
     );
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      setState(() {
+        _selectedPostKey = null;
+      });
+    });
   }
 
   void _storePosition(TapDownDetails details) {
@@ -91,8 +138,22 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
                 firstName: widget.firstName,
                 lastName: widget.lastName,
                 tags: widget.tags,
+                isSelected: dataKey == _selectedPostKey ? true : false,
               ),
             ),
     );
+  }
+
+  void deletePost() {
+    const snackBar = SnackBar(content: Text('Post deleted'));
+
+    FirebaseFirestore.instance
+        .collection('Posts')
+        .doc(widget.postId)
+        .delete()
+        .then(
+          (doc) => ScaffoldMessenger.of(context).showSnackBar(snackBar),
+          onError: (e) => print("Error deleting post $e"),
+        );
   }
 }
