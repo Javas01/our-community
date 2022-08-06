@@ -61,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: const Icon(Icons.password_rounded),
                     hintText: 'Password',
                     isLast: true,
+                    obscureText: true,
                   ),
                   const SizedBox(height: 20),
                   FormSubmitButton(

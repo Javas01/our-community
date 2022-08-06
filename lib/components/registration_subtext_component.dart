@@ -22,7 +22,7 @@ class RegistrationSubtext extends StatelessWidget {
           },
           child: Text(linkText,
               style: const TextStyle(
-                  color: Colors.redAccent,
+                  color: Colors.blue,
                   fontWeight: FontWeight.bold,
                   fontSize: 15)))
     ]);
