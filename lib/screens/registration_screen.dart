@@ -18,6 +18,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController communityController = TextEditingController();
 
   final _auth = FirebaseAuth.instance;
 
@@ -44,19 +45,35 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       fit: BoxFit.contain,
                     ),
                   ),
-                  NameField(
-                    nameController: firstNameController,
+                  FormInputField(
+                    controller: firstNameController,
+                    icon: const Icon(Icons.person),
                     hintText: 'First name',
+                    isLast: false,
                   ),
                   const SizedBox(height: 20),
-                  NameField(
-                    nameController: lastNameController,
+                  FormInputField(
+                    controller: lastNameController,
+                    icon: const Icon(Icons.person),
                     hintText: 'Last name',
+                    isLast: false,
                   ),
                   const SizedBox(height: 20),
                   EmailField(emailController: emailController),
                   const SizedBox(height: 20),
-                  PasswordField(passwordController: passwordController),
+                  FormInputField(
+                    controller: passwordController,
+                    icon: const Icon(Icons.password_rounded),
+                    hintText: 'Password',
+                    isLast: false,
+                  ),
+                  const SizedBox(height: 20),
+                  FormInputField(
+                    controller: communityController,
+                    icon: const Icon(Icons.lock),
+                    hintText: 'Community code',
+                    isLast: true,
+                  ),
                   const SizedBox(height: 20),
                   FormSubmitButton(
                       onPressed: () {
@@ -65,6 +82,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           lastNameController.text,
                           emailController.text,
                           passwordController.text,
+                          communityController.text,
                         );
                       },
                       text: 'Signup'),
@@ -80,7 +98,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  void createAccount(String firstName, lastName, email, password) async {
+  void createAccount(
+    String firstName,
+    String lastName,
+    String email,
+    String password,
+    String communityCode,
+  ) async {
+    print('TODO: Store community code');
     if (_formKey.currentState!.validate()) {
       String displayName = '$firstName $lastName';
 

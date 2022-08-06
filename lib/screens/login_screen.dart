@@ -56,7 +56,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   EmailField(emailController: emailController),
                   const SizedBox(height: 20),
-                  PasswordField(passwordController: passwordController),
+                  FormInputField(
+                    controller: passwordController,
+                    icon: const Icon(Icons.password_rounded),
+                    hintText: 'Password',
+                    isLast: true,
+                  ),
                   const SizedBox(height: 20),
                   FormSubmitButton(
                     text: 'Login',

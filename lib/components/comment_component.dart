@@ -13,9 +13,11 @@ class UserComment extends StatefulWidget {
     required this.replies,
     required this.postId,
     required this.commentId,
+    required this.unFocus,
   }) : super(key: key);
   final String firstName, lastName, creatorId, commentText, postId, commentId;
   final List replies;
+  final VoidCallback unFocus;
 
   @override
   State<UserComment> createState() => _UserCommentState();
@@ -26,10 +28,11 @@ class _UserCommentState extends State<UserComment> {
       FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
   final lastName =
       FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
-  bool _isSelected = false;
   final userId = FirebaseAuth.instance.currentUser!.uid;
 
   TextEditingController commentController = TextEditingController();
+
+  bool _isSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,7 @@ class _UserCommentState extends State<UserComment> {
         },
         onTap: () {
           if (_isSelected) {
-            commentController.text = '';
+            widget.unFocus();
             setState(() {
               _isSelected = false;
             });
@@ -74,45 +77,68 @@ class _UserCommentState extends State<UserComment> {
                         widget.commentText,
                         style: const TextStyle(fontSize: 16),
                       ),
-                      if (_isSelected)
-                        Row(
+                      if (_isSelected) ...{
+                        Column(
                           children: [
-                            // TODO: delete Message (not MVP)
-                            // if (isCreator)
-                            //   const Icon(
-                            //     Icons.delete_rounded,
-                            //     size: 17,
-                            //   ),
-                            Expanded(
-                              child: Container(
-                                constraints:
-                                    const BoxConstraints(maxHeight: 200),
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                        child: CommentField(
-                                      commentController: commentController,
-                                      hintText: 'Reply to comment',
-                                      contentPadding: const EdgeInsets.fromLTRB(
-                                          0, 0, 10, 0),
-                                    )),
-                                    const SizedBox(
-                                      width: 5,
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                if (isCreator)
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.delete_rounded,
+                                      color: Colors.red[700],
+                                      size: 30,
                                     ),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          minimumSize: const Size(40, 40),
-                                          shape: const CircleBorder()),
-                                      onPressed: () => replyToComment(
-                                          commentController.text),
-                                      child: const Icon(Icons.reply_rounded),
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Delete comment coming soon'),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                Expanded(
+                                  child: Container(
+                                    constraints:
+                                        const BoxConstraints(maxHeight: 300),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: CommentField(
+                                            commentController:
+                                                commentController,
+                                            hintText: 'Reply to comment',
+                                            unFocus: widget.unFocus,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            fixedSize: const Size(30, 30),
+                                            shape: const CircleBorder(),
+                                          ),
+                                          onPressed: () {
+                                            widget.unFocus();
+                                            replyToComment(
+                                                commentController.text);
+                                          },
+                                          child:
+                                              const Icon(Icons.reply_rounded),
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
-                        ),
+                        )
+                      }
                     ],
                   ),
                 ),
@@ -167,6 +193,7 @@ class _UserCommentState extends State<UserComment> {
                         replies: newReplies,
                         postId: widget.postId,
                         commentId: reply['commentId'],
+                        unFocus: widget.unFocus,
                       ),
                     );
                   });

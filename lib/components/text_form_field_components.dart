@@ -1,39 +1,6 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
-
-class NameField extends StatelessWidget {
-  const NameField({
-    Key? key,
-    required this.nameController,
-    required this.hintText,
-  }) : super(key: key);
-
-  final TextEditingController nameController;
-  final String hintText;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-        autofocus: false,
-        controller: nameController,
-        keyboardType: TextInputType.name,
-        validator: (value) {
-          if (value!.isEmpty) {
-            return ('Name cannot be empty');
-          }
-          return null;
-        },
-        onSaved: (value) {
-          nameController.text = value!;
-        },
-        textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.person),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: hintText,
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
-  }
-}
 
 class EmailField extends StatelessWidget {
   const EmailField({
@@ -74,36 +41,42 @@ class EmailField extends StatelessWidget {
   }
 }
 
-class PasswordField extends StatelessWidget {
-  const PasswordField({
+class FormInputField extends StatelessWidget {
+  const FormInputField({
     Key? key,
-    required this.passwordController,
+    required this.controller,
+    required this.icon,
+    required this.hintText,
+    required this.isLast,
   }) : super(key: key);
 
-  final TextEditingController passwordController;
+  final TextEditingController controller;
+  final Icon icon;
+  final String hintText;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
         autofocus: false,
-        controller: passwordController,
+        controller: controller,
         obscureText: true,
         validator: (value) {
           if (value!.isEmpty) {
-            return ('Password cannot be empty');
+            return ('$hintText cannot be empty');
           }
           return null;
         },
         onSaved: (value) {
-          passwordController.text = value!;
+          controller.text = value!;
         },
-        textInputAction: TextInputAction.done,
+        textInputAction: isLast ? TextInputAction.done : TextInputAction.next,
         decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.password),
-            contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            hintText: 'Password',
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))));
+          prefixIcon: icon,
+          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+          hintText: hintText,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ));
   }
 }
 
@@ -118,20 +91,20 @@ class FormSubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-        elevation: 5,
-        borderRadius: BorderRadius.circular(30),
-        color: Colors.lightBlueAccent,
-        child: MaterialButton(
-            padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-            minWidth: MediaQuery.of(context).size.width,
-            onPressed: () => onPressed(),
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
-            )));
+      elevation: 5,
+      borderRadius: BorderRadius.circular(30),
+      color: Colors.lightBlueAccent,
+      child: MaterialButton(
+        padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+        minWidth: MediaQuery.of(context).size.width,
+        onPressed: () => onPressed(),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+              fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
   }
 }

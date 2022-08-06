@@ -7,10 +7,12 @@ class PostComments extends StatelessWidget {
     Key? key,
     required this.commentsStream,
     required this.postId,
+    required this.unFocus,
   }) : super(key: key);
 
   final Stream<QuerySnapshot> commentsStream;
   final String postId;
+  final VoidCallback unFocus;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +62,7 @@ class PostComments extends StatelessWidget {
               replies: replyComments,
               postId: postId,
               commentId: document.id,
+              unFocus: unFocus,
             );
           }).toList());
         },

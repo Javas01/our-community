@@ -128,24 +128,26 @@ class _CreatePostModalState extends State<CreatePostModal> {
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
-                    controller: descriptionController,
-                    onSaved: (value) {
-                      descriptionController.text = value!;
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return ('Description cannot be empty');
-                      }
-                      return null;
-                    },
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    minLines: 9,
-                    decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.description),
-                        hintText: 'Description',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)))),
+                  controller: descriptionController,
+                  onSaved: (value) {
+                    descriptionController.text = value!;
+                  },
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return ('Description cannot be empty');
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 9,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.description),
+                    hintText: 'Description',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
