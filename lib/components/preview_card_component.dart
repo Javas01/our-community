@@ -56,16 +56,17 @@ class _PreviewCardState extends State<PreviewCard> {
         padding: const EdgeInsets.all(4.0),
         child: Row(
           children: [
-            Card(
-                elevation: 5.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  widget.image,
-                  width: 100,
-                )),
+            // Card(
+            //   elevation: 5.0,
+            //   shape: RoundedRectangleBorder(
+            //     borderRadius: BorderRadius.circular(15.0),
+            //   ),
+            //   clipBehavior: Clip.antiAlias,
+            //   child: Image.asset(
+            //     widget.image,
+            //     width: 100,
+            //   ),
+            // ),
             Expanded(
                 child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -85,23 +86,36 @@ class _PreviewCardState extends State<PreviewCard> {
                       );
                     }).toList()
                   ]),
-                  Text(
-                    widget.title,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 5),
+                            Text(
+                              widget.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Text(
+                              widget.description,
+                              maxLines: null,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    widget.description,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

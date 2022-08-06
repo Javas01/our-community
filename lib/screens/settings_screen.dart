@@ -40,18 +40,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 10,
               ),
               Expanded(
-                child: NameField(
-                  nameController: firstNameController,
+                child: FormInputField(
+                  controller: firstNameController,
                   hintText: firstName ?? 'First Name',
+                  icon: const Icon(Icons.person),
+                  isLast: false,
                 ),
               ),
               const SizedBox(
                 width: 15,
               ),
               Expanded(
-                child: NameField(
-                  nameController: lastNameController,
+                child: FormInputField(
+                  controller: lastNameController,
                   hintText: lastName ?? 'Last Name',
+                  icon: const Icon(Icons.person),
+                  isLast: true,
                 ),
               ),
               const SizedBox(

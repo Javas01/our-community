@@ -109,6 +109,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                 ),
                 const SizedBox(height: 10),
                 TextFormField(
+                  maxLength: 50,
                   controller: titleController,
                   onSaved: (value) {
                     titleController.text = value!;
@@ -139,8 +140,8 @@ class _CreatePostModalState extends State<CreatePostModal> {
                     return null;
                   },
                   keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  minLines: 9,
+                  maxLines: 8,
+                  minLines: 8,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.description),
                     hintText: 'Description',

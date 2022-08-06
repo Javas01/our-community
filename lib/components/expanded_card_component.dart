@@ -72,16 +72,16 @@ class _ExpandedCardState extends State<ExpandedCard> {
                 },
                 child: Row(
                   children: [
-                    Card(
-                      elevation: 5.0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0)),
-                      clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
-                        widget.image,
-                        width: 100,
-                      ),
-                    ),
+                    // Card(
+                    //   elevation: 5.0,
+                    //   shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(15.0)),
+                    //   clipBehavior: Clip.antiAlias,
+                    //   child: Image.asset(
+                    //     widget.image,
+                    //     width: 100,
+                    //   ),
+                    // ),
                     Expanded(
                       child: Column(
                         children: [
@@ -93,7 +93,10 @@ class _ExpandedCardState extends State<ExpandedCard> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(widget.description),
+                          Text(
+                            widget.description,
+                            maxLines: null,
+                          ),
                         ],
                       ),
                     ),
