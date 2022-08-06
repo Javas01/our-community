@@ -48,25 +48,39 @@ class FormInputField extends StatelessWidget {
     required this.icon,
     required this.hintText,
     required this.isLast,
+    this.validator,
+    this.maxLength,
+    this.keyboardType,
+    this.minLines,
+    this.maxLines,
+    this.obscureText,
   }) : super(key: key);
 
   final TextEditingController controller;
   final Icon icon;
   final String hintText;
   final bool isLast;
+  final bool? obscureText;
+  final String? Function(String?)? validator;
+  final int? maxLength, minLines, maxLines;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-        autofocus: false,
+        keyboardType: keyboardType,
+        minLines: minLines,
+        maxLines: maxLines ?? 1,
+        maxLength: maxLength,
         controller: controller,
-        obscureText: true,
-        validator: (value) {
-          if (value!.isEmpty) {
-            return ('$hintText cannot be empty');
-          }
-          return null;
-        },
+        obscureText: obscureText ?? false,
+        validator: validator ??
+            (value) {
+              if (value!.isEmpty) {
+                return ('$hintText cannot be empty');
+              }
+              return null;
+            },
         onSaved: (value) {
           controller.text = value!;
         },

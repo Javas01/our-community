@@ -70,37 +70,23 @@ class _ExpandedCardState extends State<ExpandedCard> {
                 onTap: () {
                   widget.toggleExpanded();
                 },
-                child: Row(
-                  children: [
-                    // Card(
-                    //   elevation: 5.0,
-                    //   shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(15.0)),
-                    //   clipBehavior: Clip.antiAlias,
-                    //   child: Image.asset(
-                    //     widget.image,
-                    //     width: 100,
-                    //   ),
-                    // ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            widget.title,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            widget.description,
-                            maxLines: null,
-                          ),
-                        ],
+                child: Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        widget.title,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        widget.description,
+                        maxLines: null,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const Divider(

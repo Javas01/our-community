@@ -73,6 +73,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     icon: const Icon(Icons.lock),
                     hintText: 'Community code',
                     isLast: true,
+                    validator: (String? value) {
+                      if (value?.toUpperCase().trim() != 'ATLMASJID') {
+                        return 'Incorrect community code';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
                   FormSubmitButton(

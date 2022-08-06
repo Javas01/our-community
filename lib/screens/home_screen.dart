@@ -62,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (value == 1) {
             showModalBottomSheet<void>(
                 context: context,
+                isScrollControlled: true,
                 builder: (BuildContext context) {
                   return const CreatePostModal();
                 });
