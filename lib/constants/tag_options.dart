@@ -4,14 +4,16 @@ final tagOptions = {
   'Events': Colors.redAccent,
   'School': Colors.blueAccent,
   'Masjid': Colors.deepPurpleAccent,
-  'Meet': Colors.greenAccent,
-  'Business': Colors.orangeAccent
+  'Meetup': Colors.greenAccent,
+  'Business': Colors.orangeAccent,
+  'Other': Colors.cyanAccent,
 };
 
 final tagOptionsList = <Map>[
   {'Events': Colors.redAccent},
   {'School': Colors.blueAccent},
   {'Masjid': Colors.deepPurpleAccent},
-  {'Meet': Colors.greenAccent},
+  {'Meetup': Colors.greenAccent},
   {'Business': Colors.orangeAccent},
+  {'Other': Colors.cyanAccent},
 ];

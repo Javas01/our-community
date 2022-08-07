@@ -112,6 +112,9 @@ class _UserCommentState extends State<UserComment> {
                                                 commentController,
                                             hintText: 'Reply to comment',
                                             unFocus: widget.unFocus,
+                                            hasBorder: false,
+                                            hintStyle:
+                                                const TextStyle(height: 1.5),
                                           ),
                                         ),
                                         const SizedBox(
@@ -147,6 +150,8 @@ class _UserCommentState extends State<UserComment> {
             ...widget.replies.map((reply) {
               List replies = reply['replies'] ?? [];
               var comments = FirebaseFirestore.instance
+                  .collection('Communities')
+                  .doc('ATLMasjid')
                   .collection('Posts')
                   .doc(widget.postId)
                   .collection('Comments')
@@ -214,6 +219,8 @@ class _UserCommentState extends State<UserComment> {
     commentController.text = '';
 
     CollectionReference comments = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc('ATLMasjid')
         .collection('Posts')
         .doc(widget.postId)
         .collection('Comments');

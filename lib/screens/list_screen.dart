@@ -13,8 +13,11 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  final Stream<QuerySnapshot> _postsStream =
-      FirebaseFirestore.instance.collection('Posts').snapshots();
+  final Stream<QuerySnapshot> _postsStream = FirebaseFirestore.instance
+      .collection('Communities')
+      .doc('ATLMasjid')
+      .collection('Posts')
+      .snapshots();
 
   String _selectedTag = '';
 

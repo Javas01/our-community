@@ -62,7 +62,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       items: [
         PopupMenuItem(
           value: 1,
-          onTap: isCreator ? deletePost : null,
+          onTap: isCreator ? deletePost : flagPost,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: isCreator
@@ -148,6 +148,8 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
     const snackBar = SnackBar(content: Text('Post deleted'));
 
     FirebaseFirestore.instance
+        .collection('Communities')
+        .doc('ATLMasjid')
         .collection('Posts')
         .doc(widget.postId)
         .delete()
@@ -155,5 +157,10 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
           (doc) => ScaffoldMessenger.of(context).showSnackBar(snackBar),
           onError: (e) => print("Error deleting post $e"),
         );
+  }
+
+  void flagPost() {
+    const snackBar = SnackBar(content: Text('Flag posts coming soon'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

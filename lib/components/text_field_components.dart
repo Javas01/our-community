@@ -7,12 +7,16 @@ class CommentField extends StatefulWidget {
     required this.hintText,
     required this.unFocus,
     this.focus,
+    this.hasBorder,
+    this.hintStyle,
   }) : super(key: key);
 
   final TextEditingController commentController;
   final String hintText;
   final VoidCallback unFocus;
   final FocusNode? focus;
+  final bool? hasBorder;
+  final TextStyle? hintStyle;
 
   @override
   State<CommentField> createState() => _CommentFieldState();
@@ -36,9 +40,12 @@ class _CommentFieldState extends State<CommentField> {
             size: 20,
           ),
           hintText: widget.hintText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          hintStyle: widget.hintStyle,
+          border: widget.hasBorder != false
+              ? OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                )
+              : null,
           suffixIcon: IconButton(
             onPressed: () {
               widget.commentController.clear();
