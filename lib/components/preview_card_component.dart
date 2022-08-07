@@ -21,7 +21,11 @@ class PreviewCard extends StatefulWidget {
     required this.tags,
     required this.isSelected,
   }) : super(key: key) {
-    post = FirebaseFirestore.instance.collection('Posts').doc(postId);
+    post = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc('ATLMasjid')
+        .collection('Posts')
+        .doc(postId);
   }
 
   final String image, title, description, postId, firstName, lastName;
@@ -90,12 +94,12 @@ class _PreviewCardState extends State<PreviewCard> {
                             ),
                           ),
                           const SizedBox(
-                            height: 15,
+                            height: 10,
                           ),
                           Text(
                             widget.description,
                             maxLines: null,
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.left,
                           ),
                           const SizedBox(height: 10),
                         ],

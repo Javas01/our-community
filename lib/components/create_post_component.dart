@@ -26,11 +26,13 @@ class _CreatePostModalState extends State<CreatePostModal> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  final CollectionReference posts =
-      FirebaseFirestore.instance.collection('Posts');
+  final CollectionReference posts = FirebaseFirestore.instance
+      .collection('Communities')
+      .doc('ATLMasjid')
+      .collection('Posts');
 
   String? typeDropdownValue = 'Text';
-  String? tagDropdownValue;
+  String? tagDropdownValue = 'Other';
 
   @override
   Widget build(BuildContext context) {
