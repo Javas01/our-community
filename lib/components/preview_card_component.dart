@@ -58,104 +58,102 @@ class _PreviewCardState extends State<PreviewCard> {
       color: Theme.of(context).colorScheme.surfaceVariant,
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Text('${widget.firstName} ${widget.lastName}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w300,
-                      )),
-                  const Spacer(),
-                  ...widget.tags.map<Widget>((tag) {
-                    return Tag(
-                      color: tagOptions[tag]!,
-                      title: tag,
-                    );
-                  }).toList()
-                ]),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 5),
-                          Text(
-                            widget.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            widget.description,
-                            maxLines: null,
-                            textAlign: TextAlign.left,
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        widget.toggleExpanded();
-                        Future.delayed(const Duration(milliseconds: 50), () {
-                          Scrollable.ensureVisible(
-                            widget.itemKey.currentContext!,
-                            alignment: 0.0,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut,
-                          );
-                        });
-                      },
-                      child: const Icon(
-                        Icons.chat_outlined,
-                        size: 18,
-                      ),
-                    ),
-                    Row(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                Text('${widget.firstName} ${widget.lastName}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w300,
+                    )),
+                const Spacer(),
+                ...widget.tags.map<Widget>((tag) {
+                  return Tag(
+                    color: tagOptions[tag]!,
+                    title: tag,
+                  );
+                }).toList()
+              ]),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
                       children: [
-                        Text(voteCount),
-                        GestureDetector(
-                          onTap: () {
-                            isUpVoted ? vote('remove') : vote('up');
-                          },
-                          child: Icon(
-                            Icons.keyboard_arrow_up_outlined,
-                            color: isUpVoted ? Colors.lightBlueAccent : null,
-                            size: isUpVoted ? 22.0 : 20.0,
+                        const SizedBox(height: 5),
+                        Text(
+                          widget.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-                        GestureDetector(
-                            onTap: () {
-                              isDownVoted ? vote('remove') : vote('down');
-                            },
-                            child: Icon(
-                              Icons.keyboard_arrow_down_outlined,
-                              color:
-                                  isDownVoted ? Colors.lightBlueAccent : null,
-                              size: isDownVoted ? 22.0 : 20.0,
-                            ))
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          widget.description,
+                          maxLines: null,
+                          textAlign: TextAlign.left,
+                        ),
+                        const SizedBox(height: 10),
                       ],
-                    )
-                  ],
-                )
-              ],
-            ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      widget.toggleExpanded();
+                      Future.delayed(const Duration(milliseconds: 50), () {
+                        Scrollable.ensureVisible(
+                          widget.itemKey.currentContext!,
+                          alignment: 0.0,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
+                      });
+                    },
+                    child: const Icon(
+                      Icons.chat_outlined,
+                      size: 18,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Text(voteCount),
+                      GestureDetector(
+                        onTap: () {
+                          isUpVoted ? vote('remove') : vote('up');
+                        },
+                        child: Icon(
+                          Icons.keyboard_arrow_up_outlined,
+                          color: isUpVoted ? Colors.lightBlueAccent : null,
+                          size: isUpVoted ? 22.0 : 20.0,
+                        ),
+                      ),
+                      GestureDetector(
+                          onTap: () {
+                            isDownVoted ? vote('remove') : vote('down');
+                          },
+                          child: Icon(
+                            Icons.keyboard_arrow_down_outlined,
+                            color:
+                                isDownVoted ? Colors.lightBlueAccent : null,
+                            size: isDownVoted ? 22.0 : 20.0,
+                          ))
+                    ],
+                  )
+                ],
+              )
+            ],
           ),
         ),
       ),

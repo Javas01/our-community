@@ -83,26 +83,24 @@ class _ExpandedCardState extends State<ExpandedCard> {
                     onTap: () {
                       widget.toggleExpanded();
                     },
-                    child: Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            widget.title,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
+                    child: Column(
+                      children: [
+                        Text(
+                          widget.title,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Text(
-                              widget.description,
-                              maxLines: null,
-                            ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Text(
+                            widget.description,
+                            maxLines: null,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const Divider(
