@@ -6,6 +6,7 @@ import '../constants/tag_options.dart';
 
 class PreviewCard extends StatefulWidget {
   late DocumentReference post;
+  late Future<QuerySnapshot> commentCount;
   PreviewCard({
     Key? key,
     required this.image,
@@ -26,6 +27,13 @@ class PreviewCard extends StatefulWidget {
         .doc('ATLMasjid')
         .collection('Posts')
         .doc(postId);
+    commentCount = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc('ATLMasjid')
+        .collection('Posts')
+        .doc(postId)
+        .collection('Comments')
+        .get();
   }
 
   final String image, title, description, postId, firstName, lastName;
@@ -121,9 +129,28 @@ class _PreviewCardState extends State<PreviewCard> {
                         );
                       });
                     },
-                    child: const Icon(
-                      Icons.chat_outlined,
-                      size: 18,
+                    child: Row(
+                      children: [
+                        FutureBuilder(
+                          future: widget.commentCount,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              return const Text('0');
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Text('0');
+                            }
+                            return Text(snapshot.data!.docs.length.toString());
+                          },
+                        ),
+                        SizedBox(width: 5),
+                        const Icon(
+                          Icons.chat_outlined,
+                          size: 18,
+                        ),
+                      ],
                     ),
                   ),
                   Row(
@@ -145,8 +172,7 @@ class _PreviewCardState extends State<PreviewCard> {
                           },
                           child: Icon(
                             Icons.keyboard_arrow_down_outlined,
-                            color:
-                                isDownVoted ? Colors.lightBlueAccent : null,
+                            color: isDownVoted ? Colors.lightBlueAccent : null,
                             size: isDownVoted ? 22.0 : 20.0,
                           ))
                     ],
