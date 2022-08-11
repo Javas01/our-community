@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'expanded_card_component.dart';
 import 'preview_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 
 class ImageCardComponent extends StatefulWidget {
   const ImageCardComponent({
@@ -37,6 +39,7 @@ class ImageCardComponent extends StatefulWidget {
 class _ImageCardComponentState extends State<ImageCardComponent> {
   final dataKey = GlobalKey();
   final userId = FirebaseAuth.instance.currentUser!.uid;
+  final userEmail = FirebaseAuth.instance.currentUser!.email;
   bool _isExpanded = false;
   Offset? _tapPosition;
   GlobalKey? _selectedPostKey;
@@ -173,8 +176,29 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
         );
   }
 
-  void flagPost() {
-    const snackBar = SnackBar(content: Text('Flag posts coming soon'));
+  void flagPost() async {
+    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+    final response = await http.post(url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'accessToken': 'RSpCM_xJwri5l9DjMIGAy',
+          'service_id': 'service_ydieaun',
+          'template_id': 'template_ejdq7ar',
+          'user_id': 'zycID_4Z1ijq9fgbW',
+          'template_params': {
+            'user_email': userEmail,
+            'content_type': 'post',
+            'user_id': userId,
+            'post_id': widget.postId,
+            'comment_id': '',
+          }
+        }));
+    print(response.body);
+
+    const snackBar = SnackBar(
+      content: Text(
+          'Thank you, we received your report and will make a decision after reviewing'),
+    );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

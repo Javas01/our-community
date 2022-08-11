@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:our_community/components/text_form_field_components.dart';
 import 'package:our_community/screens/home_screen.dart';
@@ -21,6 +22,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController communityController = TextEditingController();
 
   final _auth = FirebaseAuth.instance;
+  bool _isChecked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -104,19 +106,54 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 const SizedBox(height: 20),
                 FormSubmitButton(
-                    onPressed: () {
-                      createAccount(
-                        firstNameController.text,
-                        lastNameController.text,
-                        emailController.text,
-                        passwordController.text,
-                        communityController.text,
-                      );
-                    },
-                    text: 'Signup'),
+                  onPressed: () {
+                    createAccount(
+                      firstNameController.text,
+                      lastNameController.text,
+                      emailController.text,
+                      passwordController.text,
+                      communityController.text,
+                    );
+                  },
+                  text: 'Signup',
+                ),
                 const SizedBox(height: 20),
                 const RegistrationSubtext(
-                    text: 'Already have an Account? ', linkText: 'Login')
+                  text: 'Already have an Account? ',
+                  linkText: 'Login',
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _isChecked,
+                      onChanged: (newValue) {
+                        setState(() {
+                          _isChecked = true;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(text: 'Agree to ', children: [
+                          TextSpan(
+                            text: 'Terms and Conditions ',
+                            style: const TextStyle(color: Colors.blue),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => print('object'),
+                          ),
+                          const TextSpan(text: 'and '),
+                          TextSpan(
+                            text: 'Privacy Policy ',
+                            style: const TextStyle(color: Colors.blue),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => print('object'),
+                          ),
+                        ]),
+                      ),
+                    )
+                  ],
+                )
               ],
             ),
           ),
@@ -134,6 +171,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   ) async {
     print('TODO: Store community code');
     if (_formKey.currentState!.validate()) {
+      if (_isChecked == false) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('You must agree to terms and conditions to register.'),
+          ),
+        );
+        return;
+      }
+
       String displayName = '$firstName $lastName';
 
       await _auth

@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/components/text_field_components.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class UserComment extends StatefulWidget {
   const UserComment({
@@ -11,6 +13,7 @@ class UserComment extends StatefulWidget {
     required this.lastName,
     required this.creatorId,
     required this.isDeleted,
+    required this.isRemoved,
     required this.timestamp,
     required this.commentText,
     required this.replies,
@@ -21,7 +24,7 @@ class UserComment extends StatefulWidget {
   final String firstName, lastName, creatorId, commentText, postId, commentId;
   final List replies;
   final VoidCallback unFocus;
-  final bool isDeleted;
+  final bool isDeleted, isRemoved;
   final Timestamp timestamp;
 
   @override
@@ -34,6 +37,7 @@ class _UserCommentState extends State<UserComment> {
   final lastName =
       FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
   final userId = FirebaseAuth.instance.currentUser!.uid;
+  final userEmail = FirebaseAuth.instance.currentUser!.email;
 
   TextEditingController commentController = TextEditingController();
 
@@ -50,7 +54,7 @@ class _UserCommentState extends State<UserComment> {
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
         onLongPress: () {
-          if (widget.isDeleted == true) return;
+          if (widget.isDeleted || widget.isRemoved) return;
 
           setState(() {
             _isSelected = true;
@@ -75,41 +79,52 @@ class _UserCommentState extends State<UserComment> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      widget.isDeleted
-                          ? const Text(
-                              'Comment deleted by user',
-                              style: TextStyle(
+                      widget.isDeleted || widget.isRemoved
+                          ? Text(
+                              widget.isDeleted
+                                  ? 'Comment deleted by user'
+                                  : 'Comment removed by moderator',
+                              style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w300,
                               ),
                             )
                           : Text(
-                              '${widget.firstName} ${widget.lastName} - ${commentDate}',
+                              '${widget.firstName} ${widget.lastName} - $commentDate',
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w300,
                               ),
                             ),
                       const SizedBox(height: 4),
-                      Text(
-                        widget.commentText,
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                      if (widget.isDeleted == false &&
+                          widget.isRemoved == false)
+                        Text(
+                          widget.commentText,
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       if (_isSelected) ...{
                         Column(
                           children: [
                             const SizedBox(height: 10),
                             Row(
                               children: [
-                                if (isCreator)
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.delete_rounded,
-                                      color: Colors.red[700],
-                                      size: 30,
-                                    ),
-                                    onPressed: deleteComment,
-                                  ),
+                                isCreator
+                                    ? IconButton(
+                                        icon: Icon(
+                                          Icons.delete_rounded,
+                                          color: Colors.red[700],
+                                          size: 30,
+                                        ),
+                                        onPressed: deleteComment,
+                                      )
+                                    : IconButton(
+                                        icon: const Icon(
+                                          Icons.flag,
+                                          size: 30,
+                                        ),
+                                        onPressed: flagComment,
+                                      ),
                                 Expanded(
                                   child: Container(
                                     constraints:
@@ -204,8 +219,9 @@ class _UserCommentState extends State<UserComment> {
                         firstName: reply['createdBy']['firstName'],
                         lastName: reply['createdBy']['lastName'],
                         creatorId: reply['createdBy']['id'],
-                        isDeleted: reply['isDeleted'],
-                        timestamp: reply['timestamp'],
+                        isDeleted: reply['isDeleted'] ?? false,
+                        isRemoved: reply['isRemoved'] ?? false,
+                        timestamp: reply['timestamp'] ?? Timestamp.now(),
                         commentText: reply['text'],
                         replies: newReplies,
                         postId: widget.postId,
@@ -268,9 +284,37 @@ class _UserCommentState extends State<UserComment> {
         .doc(widget.commentId);
     comment
         .update(({
-          'text': '',
           'isDeleted': true,
         }))
         .catchError((error) => Future.error(error));
+  }
+
+  void flagComment() async {
+    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+    final response = await http.post(url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'accessToken': 'RSpCM_xJwri5l9DjMIGAy',
+          'service_id': 'service_ydieaun',
+          'template_id': 'template_ejdq7ar',
+          'user_id': 'zycID_4Z1ijq9fgbW',
+          'template_params': {
+            'user_email': userEmail,
+            'content_type': 'comment',
+            'user_id': userId,
+            'post_id': widget.postId,
+            'comment_id': widget.commentId,
+          }
+        }));
+    print(response.body);
+    // Message
+    const snackBar = SnackBar(
+      content: Text(
+          'Thank you, we received your report and will make a decision after reviewing'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    setState(() {
+      _isSelected = false;
+    });
   }
 }
