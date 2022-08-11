@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/components/text_field_components.dart';
+import 'package:intl/intl.dart';
 
 class UserComment extends StatefulWidget {
   const UserComment({
@@ -9,6 +10,8 @@ class UserComment extends StatefulWidget {
     required this.firstName,
     required this.lastName,
     required this.creatorId,
+    required this.isDeleted,
+    required this.timestamp,
     required this.commentText,
     required this.replies,
     required this.postId,
@@ -18,6 +21,8 @@ class UserComment extends StatefulWidget {
   final String firstName, lastName, creatorId, commentText, postId, commentId;
   final List replies;
   final VoidCallback unFocus;
+  final bool isDeleted;
+  final Timestamp timestamp;
 
   @override
   State<UserComment> createState() => _UserCommentState();
@@ -37,11 +42,16 @@ class _UserCommentState extends State<UserComment> {
   @override
   Widget build(BuildContext context) {
     final isCreator = userId == widget.creatorId;
+    final commentDate = DateFormat('yyyy-MM-dd (hh:mm aa)').format(
+        DateTime.fromMicrosecondsSinceEpoch(
+            widget.timestamp.microsecondsSinceEpoch));
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
         onLongPress: () {
+          if (widget.isDeleted == true) return;
+
           setState(() {
             _isSelected = true;
           });
@@ -65,13 +75,21 @@ class _UserCommentState extends State<UserComment> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${widget.firstName} ${widget.lastName}',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
+                      widget.isDeleted
+                          ? const Text(
+                              'Comment deleted by user',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            )
+                          : Text(
+                              '${widget.firstName} ${widget.lastName} - ${commentDate}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
                       const SizedBox(height: 4),
                       Text(
                         widget.commentText,
@@ -90,15 +108,7 @@ class _UserCommentState extends State<UserComment> {
                                       color: Colors.red[700],
                                       size: 30,
                                     ),
-                                    onPressed: () {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'Delete comment coming soon'),
-                                        ),
-                                      );
-                                    },
+                                    onPressed: deleteComment,
                                   ),
                                 Expanded(
                                   child: Container(
@@ -194,6 +204,8 @@ class _UserCommentState extends State<UserComment> {
                         firstName: reply['createdBy']['firstName'],
                         lastName: reply['createdBy']['lastName'],
                         creatorId: reply['createdBy']['id'],
+                        isDeleted: reply['isDeleted'],
+                        timestamp: reply['timestamp'],
                         commentText: reply['text'],
                         replies: newReplies,
                         postId: widget.postId,
@@ -244,5 +256,21 @@ class _UserCommentState extends State<UserComment> {
         parentComment.update({'replies': newReplies});
       });
     }).catchError((error) => print("Failed to add comment: $error"));
+  }
+
+  Future<void> deleteComment() async {
+    DocumentReference comment = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc('ATLMasjid')
+        .collection('Posts')
+        .doc(widget.postId)
+        .collection('Comments')
+        .doc(widget.commentId);
+    comment
+        .update(({
+          'text': '',
+          'isDeleted': true,
+        }))
+        .catchError((error) => Future.error(error));
   }
 }

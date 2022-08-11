@@ -29,8 +29,8 @@ class _TagState extends State<Tag> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        height: _showTag ? 20 : 7,
-        width: _showTag ? 60 : 7,
+        height: _showTag ? 20 : 10,
+        width: _showTag ? 60 : 10,
         decoration: BoxDecoration(
             color: widget.color,
             borderRadius: const BorderRadius.all(Radius.circular(12))),

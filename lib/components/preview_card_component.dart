@@ -134,7 +134,7 @@ class _PreviewCardState extends State<PreviewCard> {
                       const SizedBox(width: 5),
                       const Icon(
                         Icons.chat_outlined,
-                        size: 18,
+                        size: 20,
                       ),
                     ],
                   ),
@@ -148,7 +148,7 @@ class _PreviewCardState extends State<PreviewCard> {
                         child: Icon(
                           Icons.keyboard_arrow_up_outlined,
                           color: isUpVoted ? Colors.lightBlueAccent : null,
-                          size: isUpVoted ? 22.0 : 20.0,
+                          size: isUpVoted ? 30.0 : 25.0,
                         ),
                       ),
                       GestureDetector(
@@ -158,7 +158,7 @@ class _PreviewCardState extends State<PreviewCard> {
                           child: Icon(
                             Icons.keyboard_arrow_down_outlined,
                             color: isDownVoted ? Colors.lightBlueAccent : null,
-                            size: isDownVoted ? 22.0 : 20.0,
+                            size: isDownVoted ? 30.0 : 25.0,
                           ))
                     ],
                   )
