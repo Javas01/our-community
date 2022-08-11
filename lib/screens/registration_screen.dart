@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:our_community/components/text_form_field_components.dart';
 import 'package:our_community/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../components/registration_subtext_component.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -140,14 +141,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             text: 'Terms and Conditions ',
                             style: const TextStyle(color: Colors.blue),
                             recognizer: TapGestureRecognizer()
-                              ..onTap = () => print('object'),
+                              ..onTap = () async {
+                                final url = Uri.parse(
+                                    'https://privacyterms.io/view/1nbUFdsr-KOxNJ8F0-zaIOkv/');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                } else {
+                                  throw 'Could not launch $url';
+                                }
+                              },
                           ),
                           const TextSpan(text: 'and '),
                           TextSpan(
                             text: 'Privacy Policy ',
                             style: const TextStyle(color: Colors.blue),
                             recognizer: TapGestureRecognizer()
-                              ..onTap = () => print('object'),
+                              ..onTap = () async {
+                                final url = Uri.parse(
+                                    'https://privacyterms.io/view/VMK9NY83-GNckF1Jn-2e3RSD/');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                } else {
+                                  throw 'Could not launch $url';
+                                }
+                              },
                           ),
                         ]),
                       ),
