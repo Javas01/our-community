@@ -40,7 +40,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Container(
         constraints: const BoxConstraints(minHeight: 500),
-        color: Colors.lightBlueAccent,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Form(
