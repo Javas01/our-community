@@ -28,10 +28,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Center(
-            child: Icon(
-          Icons.account_circle_rounded,
-          size: 200,
-        )),
+          child: Icon(
+            Icons.account_circle_rounded,
+            size: 200,
+          ),
+        ),
         Form(
           key: _formKey,
           child: Row(
@@ -75,12 +76,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
               text: 'Update Profile'),
         ),
         const Spacer(),
-        Center(
-            child: ElevatedButton(
-                onPressed: () {
-                  logOut();
-                },
-                child: const Text('Log out')))
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                logOut();
+              },
+              child: const Text('Log out'),
+            ),
+            const SizedBox(width: 20),
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.red),
+              ),
+              onPressed: () {
+                deleteAccount();
+              },
+              child: const Text('Delete Account'),
+            ),
+          ],
+        )
       ],
     );
   }
@@ -104,5 +120,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
           .updateDisplayName(displayName)
           .then((_) => ScaffoldMessenger.of(context).showSnackBar(snackBar));
     }
+  }
+
+  void deleteAccount() {
+    const snackBar = SnackBar(content: Text('Profile deleted'));
+
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('This action cannot be undone.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => _auth.currentUser!.delete().then((_) {
+              _auth.signOut();
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => const OnboardingScreen())),
+                  (route) => false);
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

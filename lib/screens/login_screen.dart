@@ -23,13 +23,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Colors.redAccent,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -37,47 +35,42 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: Center(
         child: SingleChildScrollView(
-            child: Container(
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(36.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    height: 200,
-                    child: Image.asset(
-                      'assets/community.jpg',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  EmailField(emailController: emailController),
-                  const SizedBox(height: 20),
-                  FormInputField(
-                    controller: passwordController,
-                    icon: const Icon(Icons.password_rounded),
-                    hintText: 'Password',
-                    isLast: true,
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 20),
-                  FormSubmitButton(
-                    text: 'Login',
-                    onPressed: () {
-                      signIn(emailController.text, passwordController.text);
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  const RegistrationSubtext(
-                    text: 'Dont have an Account? ',
-                    linkText: 'Signup',
-                    screen: RegistrationScreen(),
-                  )
-                ],
-              ),
+            child: Padding(
+          padding: const EdgeInsets.all(36.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                const Image(
+                  height: 200,
+                  image: AssetImage('assets/community.jpg'),
+                ),
+                const SizedBox(height: 10),
+                EmailField(emailController: emailController),
+                const SizedBox(height: 20),
+                FormInputField(
+                  controller: passwordController,
+                  icon: const Icon(Icons.password_rounded),
+                  hintText: 'Password',
+                  isLast: true,
+                  obscureText: true,
+                ),
+                const SizedBox(height: 20),
+                FormSubmitButton(
+                  text: 'Login',
+                  onPressed: () {
+                    signIn(emailController.text, passwordController.text);
+                  },
+                ),
+                const SizedBox(height: 20),
+                const RegistrationSubtext(
+                  text: 'Dont have an Account? ',
+                  linkText: 'Signup',
+                  screen: RegistrationScreen(),
+                )
+              ],
             ),
           ),
         )),

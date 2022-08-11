@@ -114,7 +114,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                   ),
                   const SizedBox(height: 10),
                   FormInputField(
-                    maxLength: 50,
+                    maxLength: 30,
                     icon: const Icon(Icons.title_outlined),
                     hintText: 'Title',
                     controller: titleController,

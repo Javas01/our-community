@@ -49,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Settings',
           ),
         ],
-        selectedItemColor: Colors.lightBlueAccent,
         currentIndex: currentIndex,
         onTap: (value) {
           if (value == 0 &&

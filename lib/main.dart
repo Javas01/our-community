@@ -16,29 +16,40 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Login',
       theme: ThemeData(
         brightness: Brightness.light,
-        appBarTheme: const AppBarTheme(color: Colors.lightBlueAccent),
+        appBarTheme: const AppBarTheme(
+          color: Colors.lightBlueAccent,
+          iconTheme: IconThemeData(color: Colors.lightBlueAccent),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             backgroundColor:
                 MaterialStateProperty.all<Color>(Colors.lightBlueAccent),
           ),
         ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Colors.lightBlueAccent,
+        ),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        appBarTheme: const AppBarTheme(color: Colors.blueAccent),
+        appBarTheme: const AppBarTheme(
+          color: Colors.blueAccent,
+          iconTheme: IconThemeData(color: Colors.blueAccent),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             backgroundColor:
                 MaterialStateProperty.all<Color>(Colors.blueAccent),
           ),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Colors.blueAccent,
         ),
       ),
       home: _getLandingPage(),

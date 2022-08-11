@@ -13,34 +13,33 @@ class OnboardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
         body: SafeArea(
-          child: Column(
-            children: [
-              const Spacer(),
-              Image.asset(
-                image,
-                height: 250,
-              ),
-              const Spacer(),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .headline5!
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Text(
-                description,
-                textAlign: TextAlign.center,
-              ),
-              const Spacer()
-            ],
+      child: Column(
+        children: [
+          const Spacer(),
+          Image.asset(
+            image,
+            height: 250,
           ),
-        ));
+          const Spacer(),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .headline5!
+                .copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          Text(
+            description,
+            textAlign: TextAlign.center,
+          ),
+          const Spacer()
+        ],
+      ),
+    ));
   }
 }
