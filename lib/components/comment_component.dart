@@ -233,6 +233,7 @@ class _UserCommentState extends State<UserComment> {
         'lastName': lastName,
         'id': userId,
       },
+      'timestamp': FieldValue.serverTimestamp(),
     }).then((doc) {
       DocumentReference parentComment = comments.doc(widget.commentId);
       parentComment.get().then((document) {

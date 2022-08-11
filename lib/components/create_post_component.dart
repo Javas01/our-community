@@ -180,6 +180,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
             },
             'type': type,
             'tags': tag.isNotEmpty ? [tag] : null,
+            'timestamp': FieldValue.serverTimestamp(),
           })
           .then((value) => Navigator.pop(context))
           .catchError((error) => print("Failed to create post: $error"));

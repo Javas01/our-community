@@ -17,6 +17,7 @@ class ImageCardComponent extends StatefulWidget {
     required this.lastName,
     required this.tags,
     required this.creatorId,
+    required this.resetValueNotifier,
   }) : super(key: key);
 
   final String image,
@@ -27,6 +28,7 @@ class ImageCardComponent extends StatefulWidget {
       lastName,
       creatorId;
   final List<dynamic> upVotes, downVotes, tags;
+  final ValueNotifier<bool> resetValueNotifier;
 
   @override
   State<ImageCardComponent> createState() => _ImageCardComponentState();
@@ -34,19 +36,16 @@ class ImageCardComponent extends StatefulWidget {
 
 class _ImageCardComponentState extends State<ImageCardComponent> {
   final dataKey = GlobalKey();
-
   final userId = FirebaseAuth.instance.currentUser!.uid;
   bool _isExpanded = false;
+  Offset? _tapPosition;
+  GlobalKey? _selectedPostKey;
 
-  void toggleExpanded() {
+  void setExpanded(bool isExpanded) {
     setState(() {
-      _isExpanded = !_isExpanded;
+      _isExpanded = isExpanded;
     });
   }
-
-  Offset? _tapPosition;
-
-  GlobalKey? _selectedPostKey;
 
   void _showCustomMenu() {
     final isCreator = userId == widget.creatorId;
@@ -112,6 +111,10 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.resetValueNotifier.value) {
+      setExpanded(false);
+    }
+
     return SizedBox(
       key: dataKey,
       height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
@@ -120,17 +123,28 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
               description: widget.description,
               title: widget.title,
               image: widget.image,
-              toggleExpanded: toggleExpanded,
+              setExpanded: setExpanded,
               postId: widget.postId,
             )
           : GestureDetector(
               onLongPress: _showCustomMenu,
               onTapDown: _storePosition,
+              onTap: () {
+                setExpanded(true);
+                Future.delayed(const Duration(milliseconds: 50), () {
+                  Scrollable.ensureVisible(
+                    dataKey.currentContext!,
+                    alignment: 0.0,
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                  );
+                });
+                widget.resetValueNotifier.value = false;
+              },
               child: PreviewCard(
                 description: widget.description,
                 title: widget.title,
                 image: widget.image,
-                toggleExpanded: toggleExpanded,
                 upVotes: widget.upVotes,
                 downVotes: widget.downVotes,
                 postId: widget.postId,

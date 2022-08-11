@@ -12,11 +12,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
-  final screens = [
-    const ListScreen(),
-    const Scaffold(),
-    const SettingsScreen()
-  ];
+  late List screens;
+  ValueNotifier<bool> resetValueNotifier = ValueNotifier(false);
+
+  @override
+  void initState() {
+    screens = [
+      ListScreen(resetValueNotifier: resetValueNotifier),
+      const Scaffold(),
+      const SettingsScreen()
+    ];
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.white,
         currentIndex: currentIndex,
         onTap: (value) {
+          if (value == 0 &&
+              currentIndex == 0 &&
+              resetValueNotifier.value == false) {
+            resetValueNotifier.value = true;
+            setState(() {
+              screens[0] = ListScreen(resetValueNotifier: resetValueNotifier);
+            });
+          }
           if (value == 1) {
             if (currentIndex == 2) {
               setState(() {

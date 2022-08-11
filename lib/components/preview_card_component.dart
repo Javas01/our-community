@@ -12,7 +12,6 @@ class PreviewCard extends StatefulWidget {
     required this.image,
     required this.title,
     required this.description,
-    required this.toggleExpanded,
     required this.itemKey,
     required this.upVotes,
     required this.downVotes,
@@ -39,7 +38,6 @@ class PreviewCard extends StatefulWidget {
   final String image, title, description, postId, firstName, lastName;
   final bool isSelected;
   final List<dynamic> upVotes, downVotes, tags;
-  final VoidCallback toggleExpanded;
   final GlobalKey itemKey;
 
   @override
@@ -117,41 +115,28 @@ class _PreviewCardState extends State<PreviewCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      widget.toggleExpanded();
-                      Future.delayed(const Duration(milliseconds: 50), () {
-                        Scrollable.ensureVisible(
-                          widget.itemKey.currentContext!,
-                          alignment: 0.0,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                        );
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        FutureBuilder(
-                          future: widget.commentCount,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            if (snapshot.hasError) {
-                              return const Text('0');
-                            }
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Text('0');
-                            }
-                            return Text(snapshot.data!.docs.length.toString());
-                          },
-                        ),
-                        SizedBox(width: 5),
-                        const Icon(
-                          Icons.chat_outlined,
-                          size: 18,
-                        ),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      FutureBuilder(
+                        future: widget.commentCount,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text('0');
+                          }
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Text('0');
+                          }
+                          return Text(snapshot.data!.docs.length.toString());
+                        },
+                      ),
+                      const SizedBox(width: 5),
+                      const Icon(
+                        Icons.chat_outlined,
+                        size: 18,
+                      ),
+                    ],
                   ),
                   Row(
                     children: [

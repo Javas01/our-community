@@ -6,7 +6,9 @@ import 'package:our_community/constants/tag_options.dart';
 class ListScreen extends StatefulWidget {
   const ListScreen({
     Key? key,
+    required this.resetValueNotifier,
   }) : super(key: key);
+  final ValueNotifier<bool> resetValueNotifier;
 
   @override
   State<ListScreen> createState() => _ListScreenState();
@@ -92,6 +94,7 @@ class _ListScreenState extends State<ListScreen> {
               creatorId: data['createdBy']['id'] ?? '',
               tags: data['tags'] ?? [],
               postId: document.id,
+              resetValueNotifier: widget.resetValueNotifier,
             );
           }).toList()
         ]);

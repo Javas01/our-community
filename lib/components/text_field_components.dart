@@ -23,6 +23,7 @@ class CommentField extends StatefulWidget {
 }
 
 class _CommentFieldState extends State<CommentField> {
+  bool _showClear = false;
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
@@ -34,6 +35,15 @@ class _CommentFieldState extends State<CommentField> {
         keyboardType: TextInputType.multiline,
         maxLines: null,
         style: const TextStyle(fontSize: 12, height: 1),
+        onChanged: (content) {
+          content != ''
+              ? setState(() {
+                  _showClear = true;
+                })
+              : setState(() {
+                  _showClear = false;
+                });
+        },
         decoration: InputDecoration(
           prefixIcon: const Icon(
             Icons.chat_outlined,
@@ -46,15 +56,20 @@ class _CommentFieldState extends State<CommentField> {
                   borderRadius: BorderRadius.circular(10),
                 )
               : null,
-          suffixIcon: IconButton(
-            onPressed: () {
-              widget.commentController.clear();
-              widget.unFocus();
-            },
-            icon: const Icon(
-              Icons.clear_rounded,
-            ),
-          ),
+          suffixIcon: _showClear
+              ? IconButton(
+                  onPressed: () {
+                    widget.commentController.clear();
+                    widget.unFocus();
+                    setState(() {
+                      _showClear = false;
+                    });
+                  },
+                  icon: const Icon(
+                    Icons.clear_rounded,
+                  ),
+                )
+              : null,
         ),
       ),
     );

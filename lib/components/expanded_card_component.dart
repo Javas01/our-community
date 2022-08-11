@@ -7,14 +7,14 @@ import 'text_field_components.dart';
 class ExpandedCard extends StatefulWidget {
   late Stream<QuerySnapshot> _commentsStream;
   late CollectionReference comments;
-  ExpandedCard(
-      {Key? key,
-      required this.image,
-      required this.title,
-      required this.description,
-      required this.toggleExpanded,
-      required this.postId})
-      : super(key: key) {
+  ExpandedCard({
+    Key? key,
+    required this.image,
+    required this.title,
+    required this.description,
+    required this.setExpanded,
+    required this.postId,
+  }) : super(key: key) {
     _commentsStream = FirebaseFirestore.instance
         .collection('Communities')
         .doc('ATLMasjid')
@@ -30,7 +30,7 @@ class ExpandedCard extends StatefulWidget {
         .collection('Comments');
   }
 
-  final VoidCallback toggleExpanded;
+  final void Function(bool) setExpanded;
   final String image, title, description, postId;
 
   @override
@@ -72,7 +72,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
               right: -5,
               child: IconButton(
                 icon: const Icon(Icons.close_rounded),
-                onPressed: widget.toggleExpanded,
+                onPressed: () => widget.setExpanded(false),
               ),
             ),
             Padding(
@@ -81,7 +81,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      widget.toggleExpanded();
+                      widget.setExpanded(false);
                     },
                     child: Column(
                       children: [
@@ -172,6 +172,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
         'lastName': lastName,
         'id': userId,
       },
+      'timestamp': FieldValue.serverTimestamp(),
     }).catchError((error) => print("Failed to add comment: $error"));
   }
 }
