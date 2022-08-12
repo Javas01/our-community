@@ -60,7 +60,8 @@ class PostComments extends StatelessWidget {
               creatorId: data['createdBy']['id'] ?? '',
               isDeleted: data['isDeleted'] ?? false,
               isRemoved: data['isRemoved'] ?? false,
-              timestamp: data['timestamp'] ?? Timestamp.now(),
+              timestamp: data['timestamp'] ??
+                  Timestamp.fromMicrosecondsSinceEpoch(1660312350),
               commentText: data['text'],
               replies: replyComments,
               postId: postId,

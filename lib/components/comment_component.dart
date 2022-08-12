@@ -221,7 +221,8 @@ class _UserCommentState extends State<UserComment> {
                         creatorId: reply['createdBy']['id'],
                         isDeleted: reply['isDeleted'] ?? false,
                         isRemoved: reply['isRemoved'] ?? false,
-                        timestamp: reply['timestamp'] ?? Timestamp.now(),
+                        timestamp: reply['timestamp'] ??
+                            Timestamp.fromMicrosecondsSinceEpoch(1660312350),
                         commentText: reply['text'],
                         replies: newReplies,
                         postId: widget.postId,
