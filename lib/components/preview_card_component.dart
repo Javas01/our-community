@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/components/tag_component.dart';
 import '../constants/tag_options.dart';
+import 'package:intl/intl.dart';
 
 class PreviewCard extends StatefulWidget {
   late DocumentReference post;
@@ -19,6 +20,7 @@ class PreviewCard extends StatefulWidget {
     required this.firstName,
     required this.lastName,
     required this.tags,
+    required this.timestamp,
     required this.isSelected,
   }) : super(key: key) {
     post = FirebaseFirestore.instance
@@ -39,6 +41,7 @@ class PreviewCard extends StatefulWidget {
   final bool isSelected;
   final List<dynamic> upVotes, downVotes, tags;
   final GlobalKey itemKey;
+  final Timestamp timestamp;
 
   @override
   State<PreviewCard> createState() => _PreviewCardState();
@@ -53,6 +56,9 @@ class _PreviewCardState extends State<PreviewCard> {
         (widget.upVotes.length - widget.downVotes.length).toString();
     bool isUpVoted = widget.upVotes.contains(_auth.currentUser!.uid);
     bool isDownVoted = widget.downVotes.contains(_auth.currentUser!.uid);
+    final postDate = DateFormat('yyyy-MM-dd (hh:mm aa)').format(
+        DateTime.fromMicrosecondsSinceEpoch(
+            widget.timestamp.microsecondsSinceEpoch));
 
     return Card(
       elevation: widget.isSelected ? 10 : 0,
@@ -69,7 +75,7 @@ class _PreviewCardState extends State<PreviewCard> {
           child: Column(
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Text('${widget.firstName} ${widget.lastName}',
+                Text('${widget.firstName} ${widget.lastName} - $postDate',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,

@@ -208,11 +208,11 @@ class _UserCommentState extends State<UserComment> {
                     List newReplies = data.data ?? [];
 
                     return Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                           border: Border(
                               left: BorderSide(
                         width: 1,
-                        color: Colors.blueAccent,
+                        color: Theme.of(context).appBarTheme.backgroundColor!,
                       ))),
                       child: UserComment(
                         key: GlobalKey(),
