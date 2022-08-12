@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/constants/tag_options.dart';
 
 class ListScreen extends StatefulWidget {
-  const ListScreen({
-    Key? key,
-    required this.resetValueNotifier,
-  }) : super(key: key);
+  const ListScreen(
+      {Key? key, required this.resetValueNotifier, required this.sortValue})
+      : super(key: key);
   final ValueNotifier<bool> resetValueNotifier;
+  final String sortValue;
 
   @override
   State<ListScreen> createState() => _ListScreenState();
@@ -52,14 +52,21 @@ class _ListScreenState extends State<ListScreen> {
         filteredDocs.sort((a, b) {
           Map<String, dynamic> aData = a.data()! as Map<String, dynamic>;
           Map<String, dynamic> bData = b.data()! as Map<String, dynamic>;
-          List aUpVotes = aData['upVotes'] ?? [];
-          List bUpVotes = bData['upVotes'] ?? [];
-          List aDownVotes = aData['downVotes'] ?? [];
-          List bDownVotes = bData['downVotes'] ?? [];
-          int aVoteCount = aUpVotes.length - aDownVotes.length;
-          int bVoteCount = bUpVotes.length - bDownVotes.length;
+          if (widget.sortValue == 'Upvotes') {
+            List aUpVotes = aData['upVotes'] ?? [];
+            List bUpVotes = bData['upVotes'] ?? [];
+            List aDownVotes = aData['downVotes'] ?? [];
+            List bDownVotes = bData['downVotes'] ?? [];
+            int aVoteCount = aUpVotes.length - aDownVotes.length;
+            int bVoteCount = bUpVotes.length - bDownVotes.length;
 
-          return aVoteCount.compareTo(bVoteCount);
+            return aVoteCount.compareTo(bVoteCount);
+          } else {
+            Timestamp aTimestamp = aData['timestamp'];
+            Timestamp bTimestamp = bData['timestamp'];
+
+            return aTimestamp.compareTo(bTimestamp);
+          }
         });
 
         return ListView(children: [
@@ -92,6 +99,7 @@ class _ListScreenState extends State<ListScreen> {
               firstName: data['createdBy']['firstName'] ?? '',
               lastName: data['createdBy']['lastName'] ?? '',
               creatorId: data['createdBy']['id'] ?? '',
+              timestamp: data['timestamp'],
               tags: data['tags'] ?? [],
               postId: document.id,
               resetValueNotifier: widget.resetValueNotifier,
@@ -133,7 +141,7 @@ class TagFilter extends StatelessWidget {
         focusNode: FocusNode(),
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all<Color>(
-            selectedTag == name ? color : color.withOpacity(0.5),
+            selectedTag == name ? color : color.withOpacity(0.3),
           ),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(

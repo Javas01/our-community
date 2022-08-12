@@ -18,6 +18,7 @@ class ImageCardComponent extends StatefulWidget {
     required this.firstName,
     required this.lastName,
     required this.tags,
+    required this.timestamp,
     required this.creatorId,
     required this.resetValueNotifier,
   }) : super(key: key);
@@ -31,6 +32,7 @@ class ImageCardComponent extends StatefulWidget {
       creatorId;
   final List<dynamic> upVotes, downVotes, tags;
   final ValueNotifier<bool> resetValueNotifier;
+  final Timestamp timestamp;
 
   @override
   State<ImageCardComponent> createState() => _ImageCardComponentState();
@@ -156,6 +158,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
                 lastName: widget.lastName,
                 tags: widget.tags,
                 isSelected: dataKey == _selectedPostKey ? true : false,
+                timestamp: widget.timestamp,
               ),
             ),
     );
