@@ -66,36 +66,33 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       items: [
         PopupMenuItem(
           value: 1,
-          onTap: isCreator ? deletePost : flagPost,
+          onTap: isCreator ? () {} : flagPost,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: isCreator
-                ? const [
-                    Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      'Delete',
-                      style: TextStyle(color: Colors.red),
-                    )
-                  ]
-                : const [
-                    Icon(
-                      Icons.flag,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      'Flag',
-                    )
-                  ],
+                ? const [Icon(Icons.edit), SizedBox(width: 10), Text('Edit')]
+                : const [Icon(Icons.flag), SizedBox(width: 10), Text('Flag')],
           ),
-        )
+        ),
+        if (isCreator)
+          PopupMenuItem(
+            value: 2,
+            onTap: deletePost,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                )
+              ],
+            ),
+          )
       ],
       position: RelativeRect.fromRect(
         _tapPosition! & context.size!, // smaller rect, the touch area
