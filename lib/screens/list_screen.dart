@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/constants/tag_options.dart';
 
 class ListScreen extends StatefulWidget {
-  const ListScreen(
-      {Key? key, required this.resetValueNotifier, required this.sortValue})
-      : super(key: key);
+  const ListScreen({
+    Key? key,
+    required this.resetValueNotifier,
+    required this.sortValue,
+  }) : super(key: key);
   final ValueNotifier<bool> resetValueNotifier;
   final String sortValue;
 
@@ -25,6 +27,11 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.resetValueNotifier.value) {
+      setState(() {
+        _selectedTag = '';
+      });
+    }
     return StreamBuilder<QuerySnapshot>(
       stream: _postsStream,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -114,6 +121,7 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {
       _selectedTag = _selectedTag == tagName ? '' : tagName;
     });
+    widget.resetValueNotifier.value = false;
   }
 }
 
