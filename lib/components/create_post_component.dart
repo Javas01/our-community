@@ -8,7 +8,16 @@ import '../constants/tag_options.dart';
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({
     Key? key,
+    this.tags,
+    this.title,
+    this.description,
+    this.postId,
+    required this.isEdit,
   }) : super(key: key);
+
+  final List<dynamic>? tags;
+  final String? title, description, postId;
+  final bool isEdit;
 
   @override
   State<CreatePostModal> createState() => _CreatePostModalState();
@@ -31,8 +40,20 @@ class _CreatePostModalState extends State<CreatePostModal> {
       .doc('ATLMasjid')
       .collection('Posts');
 
-  String? typeDropdownValue = 'Text';
-  String? tagDropdownValue = 'Other';
+  String typeDropdownValue = 'Text';
+  late String tagDropdownValue;
+
+  @override
+  void initState() {
+    if (widget.isEdit) {
+      tagDropdownValue = widget.tags!.first;
+      titleController.text = widget.title!;
+      descriptionController.text = widget.description!;
+    } else {
+      tagDropdownValue = 'Other';
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +69,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Create New Post",
+                    widget.isEdit ? "Edit Post" : "Create New Post",
                     style: Theme.of(context)
                         .textTheme
                         .headline5!
@@ -147,13 +168,21 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       const SizedBox(width: 20),
                       ElevatedButton(
                           onPressed: () {
-                            createPost(
-                              titleController.text,
-                              descriptionController.text,
-                              typeDropdownValue ?? '',
-                              tagDropdownValue ?? '',
-                              context,
-                            );
+                            widget.isEdit
+                                ? editPost(
+                                    titleController.text,
+                                    descriptionController.text,
+                                    typeDropdownValue,
+                                    tagDropdownValue,
+                                    context,
+                                  )
+                                : createPost(
+                                    titleController.text,
+                                    descriptionController.text,
+                                    typeDropdownValue,
+                                    tagDropdownValue,
+                                    context,
+                                  );
                           },
                           child: const Text('Submit'))
                     ],
@@ -178,8 +207,27 @@ class _CreatePostModalState extends State<CreatePostModal> {
               'id': userId
             },
             'type': type,
-            'tags': tag.isNotEmpty ? [tag] : null,
+            'tags': [tag],
             'timestamp': Timestamp.now(),
+          })
+          .then((value) => Navigator.pop(context))
+          .catchError((error) => print("Failed to create post: $error"));
+    } else {
+      return Future.error('Invalid post');
+    }
+  }
+
+  Future<void> editPost(String title, String description, String type,
+      String tag, BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      return posts
+          .doc(widget.postId)
+          .update({
+            'title': title,
+            'description': description,
+            'type': type,
+            'tags': [tag],
+            'lastEdited': Timestamp.now(),
           })
           .then((value) => Navigator.pop(context))
           .catchError((error) => print("Failed to create post: $error"));

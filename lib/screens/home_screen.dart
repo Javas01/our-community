@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context: context,
                 isScrollControlled: true,
                 builder: (BuildContext context) {
-                  return const CreatePostModal();
+                  return const CreatePostModal(isEdit: false);
                 });
           } else {
             setState(() {

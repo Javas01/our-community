@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:our_community/components/create_post_component.dart';
 import 'expanded_card_component.dart';
 import 'preview_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,6 +22,7 @@ class ImageCardComponent extends StatefulWidget {
     required this.timestamp,
     required this.creatorId,
     required this.resetValueNotifier,
+    required this.lastEdited,
   }) : super(key: key);
 
   final String image,
@@ -33,6 +35,7 @@ class ImageCardComponent extends StatefulWidget {
   final List<dynamic> upVotes, downVotes, tags;
   final ValueNotifier<bool> resetValueNotifier;
   final Timestamp timestamp;
+  final Timestamp? lastEdited;
 
   @override
   State<ImageCardComponent> createState() => _ImageCardComponentState();
@@ -61,12 +64,11 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       _selectedPostKey = dataKey;
     });
 
-    showMenu(
+    showMenu<int>(
       context: context,
       items: [
         PopupMenuItem(
           value: 1,
-          onTap: isCreator ? () {} : flagPost,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: isCreator
@@ -98,7 +100,22 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
         _tapPosition! & context.size!, // smaller rect, the touch area
         Offset.zero & overlay.size, // Bigger rect, the entire screen
       ),
-    );
+    ).then((value) {
+      if (value == 1) {
+        showModalBottomSheet(
+          context: context,
+          builder: ((context) {
+            return CreatePostModal(
+              tags: widget.tags,
+              title: widget.title,
+              description: widget.description,
+              postId: widget.postId,
+              isEdit: true,
+            );
+          }),
+        );
+      }
+    });
 
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
@@ -156,6 +173,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
                 tags: widget.tags,
                 isSelected: dataKey == _selectedPostKey ? true : false,
                 timestamp: widget.timestamp,
+                lastEdited: widget.lastEdited,
               ),
             ),
     );

@@ -107,6 +107,7 @@ class _ListScreenState extends State<ListScreen> {
               lastName: data['createdBy']['lastName'] ?? '',
               creatorId: data['createdBy']['id'] ?? '',
               timestamp: data['timestamp'],
+              lastEdited: data['lastEdited'],
               tags: data['tags'] ?? [],
               postId: document.id,
               resetValueNotifier: widget.resetValueNotifier,

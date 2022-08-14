@@ -21,6 +21,7 @@ class PreviewCard extends StatefulWidget {
     required this.lastName,
     required this.tags,
     required this.timestamp,
+    required this.lastEdited,
     required this.isSelected,
   }) : super(key: key) {
     post = FirebaseFirestore.instance
@@ -42,6 +43,7 @@ class PreviewCard extends StatefulWidget {
   final List<dynamic> upVotes, downVotes, tags;
   final GlobalKey itemKey;
   final Timestamp timestamp;
+  final Timestamp? lastEdited;
 
   @override
   State<PreviewCard> createState() => _PreviewCardState();
@@ -56,9 +58,21 @@ class _PreviewCardState extends State<PreviewCard> {
         (widget.upVotes.length - widget.downVotes.length).toString();
     bool isUpVoted = widget.upVotes.contains(_auth.currentUser!.uid);
     bool isDownVoted = widget.downVotes.contains(_auth.currentUser!.uid);
-    final postDate = DateFormat('yyyy-MM-dd (hh:mm aa)').format(
-        DateTime.fromMicrosecondsSinceEpoch(
-            widget.timestamp.microsecondsSinceEpoch));
+    final String postDate = widget.lastEdited == null
+        ? DateFormat(
+            'yyyy-MM-dd (hh:mm aa)',
+          ).format(
+            DateTime.fromMicrosecondsSinceEpoch(
+              widget.timestamp.microsecondsSinceEpoch,
+            ),
+          )
+        : 'edited on ${DateFormat(
+            'yyyy-MM-dd (hh:mm aa)',
+          ).format(
+            DateTime.fromMicrosecondsSinceEpoch(
+              widget.lastEdited!.microsecondsSinceEpoch,
+            ),
+          )}';
 
     return Card(
       elevation: widget.isSelected ? 10 : 0,
