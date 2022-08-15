@@ -1,76 +1,109 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'comment_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostComments extends StatelessWidget {
-  const PostComments({
+  late Stream<QuerySnapshot> _commentsStream;
+
+  PostComments({
     Key? key,
-    required this.commentsStream,
     required this.postId,
     required this.unFocus,
-  }) : super(key: key);
+  }) : super(key: key) {
+    _commentsStream = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc('ATLMasjid')
+        .collection('Posts')
+        .doc(postId)
+        .collection('Comments')
+        .snapshots();
+  }
 
-  final Stream<QuerySnapshot> commentsStream;
+  final Stream<QuerySnapshot> _usersStream =
+      FirebaseFirestore.instance.collection('Users').snapshots();
   final String postId;
   final VoidCallback unFocus;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: StreamBuilder<QuerySnapshot>(
-        stream: commentsStream,
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Something went wrong');
-          }
+      child: StreamBuilder(
+          stream: _usersStream,
+          builder: (BuildContext context,
+              AsyncSnapshot<QuerySnapshot> usersSnapshot) {
+            if (usersSnapshot.hasError) {
+              return const Text('Something went wrong');
+            }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
-          }
+            if (usersSnapshot.connectionState == ConnectionState.waiting) {
+              return const Text("Loading");
+            }
+            final List<QueryDocumentSnapshot> users = usersSnapshot.data!.docs;
 
-          List<QueryDocumentSnapshot> filteredComments =
-              snapshot.data!.docs.where(
-            (DocumentSnapshot document) {
-              Map<String, dynamic> data =
-                  document.data()! as Map<String, dynamic>;
+            final currUser = users
+                .firstWhere(
+                    (e) => e.id == FirebaseAuth.instance.currentUser!.uid)
+                .data() as Map;
 
-              return !data['isReply'];
-            },
-          ).toList();
+            return StreamBuilder<QuerySnapshot>(
+              stream: _commentsStream,
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return const Text('Something went wrong');
+                }
 
-          return ListView(
-              children: filteredComments.map((DocumentSnapshot document) {
-            Map<String, dynamic> data =
-                document.data()! as Map<String, dynamic>;
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text("Loading");
+                }
+                final commentDocs = snapshot.data!.docs;
 
-            List replies = data['replies'] ?? [];
-            List replyComments = snapshot.data!.docs
-                .where((doc) => replies.contains(doc.id))
-                .map((DocumentSnapshot document) {
-              Map<String, dynamic> replyData =
-                  document.data()! as Map<String, dynamic>;
+                List<QueryDocumentSnapshot> filteredComments =
+                    commentDocs.where(
+                  (DocumentSnapshot document) {
+                    Map<String, dynamic> data =
+                        document.data()! as Map<String, dynamic>;
 
-              return {...replyData, 'commentId': document.id};
-            }).toList();
+                    return !data['isReply'];
+                  },
+                ).toList();
 
-            return UserComment(
-              key: GlobalKey(),
-              firstName: data['createdBy']['firstName'] ?? '',
-              lastName: data['createdBy']['lastName'] ?? '',
-              creatorId: data['createdBy']['id'] ?? '',
-              isDeleted: data['isDeleted'] ?? false,
-              isRemoved: data['isRemoved'] ?? false,
-              timestamp: data['timestamp'] ??
-                  Timestamp.fromMicrosecondsSinceEpoch(1660312350),
-              commentText: data['text'],
-              replies: replyComments,
-              postId: postId,
-              commentId: document.id,
-              unFocus: unFocus,
+                return ListView(
+                    children: filteredComments.map((DocumentSnapshot document) {
+                  Map<String, dynamic> data =
+                      document.data()! as Map<String, dynamic>;
+
+                  List replies = data['replies'] ?? [];
+                  List replyComments = snapshot.data!.docs
+                      .where((doc) => replies.contains(doc.id))
+                      .map((DocumentSnapshot document) {
+                    Map<String, dynamic> replyData =
+                        document.data()! as Map<String, dynamic>;
+
+                    return {...replyData, 'commentId': document.id};
+                  }).toList();
+
+                  return UserComment(
+                    key: GlobalKey(),
+                    firstName: data['createdBy']['firstName'],
+                    lastName: data['createdBy']['lastName'],
+                    creatorId: data['createdBy']['id'],
+                    isDeleted: data['isDeleted'] ?? false,
+                    isRemoved: data['isRemoved'] ?? false,
+                    timestamp: data['timestamp'] ??
+                        Timestamp.fromMicrosecondsSinceEpoch(1660312350),
+                    commentText: data['text'],
+                    replies: replyComments,
+                    postId: postId,
+                    commentId: document.id,
+                    unFocus: unFocus,
+                    blockedUsers: currUser['blockedUsers'] ?? [],
+                  );
+                }).toList());
+              },
             );
-          }).toList());
-        },
-      ),
+          }),
     );
   }
 }

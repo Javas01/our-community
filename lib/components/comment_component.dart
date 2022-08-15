@@ -20,9 +20,10 @@ class UserComment extends StatefulWidget {
     required this.postId,
     required this.commentId,
     required this.unFocus,
+    required this.blockedUsers,
   }) : super(key: key);
   final String firstName, lastName, creatorId, commentText, postId, commentId;
-  final List replies;
+  final List replies, blockedUsers;
   final VoidCallback unFocus;
   final bool isDeleted, isRemoved;
   final Timestamp timestamp;
@@ -42,6 +43,13 @@ class _UserCommentState extends State<UserComment> {
   TextEditingController commentController = TextEditingController();
 
   bool _isSelected = false;
+  late bool _isUserBlocked;
+
+  @override
+  void initState() {
+    _isUserBlocked = widget.blockedUsers.contains(widget.creatorId);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,13 +108,18 @@ class _UserCommentState extends State<UserComment> {
                                       child: const Text('Cancel'),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () => blockUser(context),
+                                      onPressed: () => _isUserBlocked
+                                          ? unBlock(widget.creatorId, context)
+                                          : blockUser(context),
                                       style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all(
+                                        backgroundColor: _isUserBlocked
+                                            ? null
+                                            : MaterialStateProperty.all(
                                                 Colors.red),
                                       ),
-                                      child: const Text('Block'),
+                                      child: _isUserBlocked
+                                          ? const Text('Unblock')
+                                          : const Text('Block'),
                                     ),
                                   ]
                                 : [],
@@ -121,11 +134,13 @@ class _UserCommentState extends State<UserComment> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      widget.isDeleted || widget.isRemoved
+                      widget.isDeleted || widget.isRemoved || _isUserBlocked
                           ? Text(
                               widget.isDeleted
                                   ? 'Comment deleted by user'
-                                  : 'Comment removed by moderator',
+                                  : widget.isRemoved
+                                      ? 'Comment removed by moderator'
+                                      : 'You have this user blocked',
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w300,
@@ -140,7 +155,8 @@ class _UserCommentState extends State<UserComment> {
                             ),
                       const SizedBox(height: 4),
                       if (widget.isDeleted == false &&
-                          widget.isRemoved == false)
+                          widget.isRemoved == false &&
+                          _isUserBlocked == false)
                         Text(
                           widget.commentText,
                           style: const TextStyle(fontSize: 16),
@@ -270,6 +286,7 @@ class _UserCommentState extends State<UserComment> {
                         postId: widget.postId,
                         commentId: reply['commentId'],
                         unFocus: widget.unFocus,
+                        blockedUsers: widget.blockedUsers,
                       ),
                     );
                   });
@@ -378,6 +395,28 @@ class _UserCommentState extends State<UserComment> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('user blocked'),
+        ),
+      );
+    });
+  }
+
+  void unBlock(String blockedUserId, BuildContext context) async {
+    final currUser = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+    List blockedUsers = await currUser.get().then((doc) {
+      final Map user = doc.data() as Map;
+      return user['blockedUsers'] ?? [];
+    });
+    blockedUsers.remove(blockedUserId);
+
+    currUser.update({
+      'blockedUsers': blockedUsers,
+    }).then((value) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('user unblocked'),
         ),
       );
     });

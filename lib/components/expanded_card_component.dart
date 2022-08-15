@@ -5,7 +5,6 @@ import 'post_comments_component.dart';
 import 'text_field_components.dart';
 
 class ExpandedCard extends StatefulWidget {
-  late Stream<QuerySnapshot> _commentsStream;
   late CollectionReference comments;
   ExpandedCard({
     Key? key,
@@ -15,13 +14,6 @@ class ExpandedCard extends StatefulWidget {
     required this.setExpanded,
     required this.postId,
   }) : super(key: key) {
-    _commentsStream = FirebaseFirestore.instance
-        .collection('Communities')
-        .doc('ATLMasjid')
-        .collection('Posts')
-        .doc(postId)
-        .collection('Comments')
-        .snapshots();
     comments = FirebaseFirestore.instance
         .collection('Communities')
         .doc('ATLMasjid')
@@ -108,7 +100,6 @@ class _ExpandedCardState extends State<ExpandedCard> {
                     thickness: 2,
                   ),
                   PostComments(
-                    commentsStream: widget._commentsStream,
                     postId: widget.postId,
                     unFocus: unFocus,
                   ),
