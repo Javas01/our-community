@@ -132,7 +132,7 @@ class _PreviewCardState extends State<PreviewCard> {
                                     child: const Text('Cancel'),
                                   ),
                                   ElevatedButton(
-                                    onPressed: blockUser,
+                                    onPressed: () => blockUser(context),
                                     style: ButtonStyle(
                                       backgroundColor:
                                           MaterialStateProperty.all(Colors.red),
@@ -284,7 +284,7 @@ class _PreviewCardState extends State<PreviewCard> {
     }).catchError((error) => Future.error(error));
   }
 
-  void blockUser() async {
+  void blockUser(BuildContext context) async {
     final currUser = FirebaseFirestore.instance
         .collection('Users')
         .doc(_auth.currentUser!.uid);

@@ -18,25 +18,15 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
+  final Stream<QuerySnapshot> _usersStream =
+      FirebaseFirestore.instance.collection('Users').snapshots();
   final Stream<QuerySnapshot> _postsStream = FirebaseFirestore.instance
       .collection('Communities')
       .doc('ATLMasjid')
       .collection('Posts')
       .snapshots();
-  late final Map currUser;
+  final currUserId = FirebaseAuth.instance.currentUser!.uid;
   String _selectedTag = '';
-
-  @override
-  void initState() {
-    FirebaseFirestore.instance
-        .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get()
-        .then((doc) {
-      currUser = doc.data() as Map;
-    });
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,97 +35,123 @@ class _ListScreenState extends State<ListScreen> {
         _selectedTag = '';
       });
     }
-    return StreamBuilder<QuerySnapshot>(
-      stream: _postsStream,
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Something went wrong');
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("Loading");
-        }
-
-        List<QueryDocumentSnapshot> postDocs = snapshot.data!.docs;
-
-        // filter posts by blockedUsers
-        var notBlockedDocs = postDocs.where((doc) {
-          List blockedUsers = currUser['blockedUsers'] ?? [];
-          Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-          String postCreator = data['createdBy']['id'];
-
-          return !blockedUsers.contains(postCreator);
-        });
-
-        // filter posts by selected tag filter
-        var filteredDocs = notBlockedDocs.where((doc) {
-          if (_selectedTag.isEmpty) return true;
-
-          Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-          List tags = data['tags'] ?? [];
-
-          return tags.contains(_selectedTag);
-        }).toList();
-
-        // sort posts by vote count (in ascending order)
-        filteredDocs.sort((a, b) {
-          Map<String, dynamic> aData = a.data()! as Map<String, dynamic>;
-          Map<String, dynamic> bData = b.data()! as Map<String, dynamic>;
-          if (widget.sortValue == 'Upvotes') {
-            List aUpVotes = aData['upVotes'] ?? [];
-            List bUpVotes = bData['upVotes'] ?? [];
-            List aDownVotes = aData['downVotes'] ?? [];
-            List bDownVotes = bData['downVotes'] ?? [];
-            int aVoteCount = aUpVotes.length - aDownVotes.length;
-            int bVoteCount = bUpVotes.length - bDownVotes.length;
-
-            return aVoteCount.compareTo(bVoteCount);
-          } else {
-            Timestamp aTimestamp = aData['timestamp'];
-            Timestamp bTimestamp = bData['timestamp'];
-
-            return aTimestamp.compareTo(bTimestamp);
+    return StreamBuilder(
+        stream: _usersStream,
+        builder:
+            (BuildContext context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
+          if (usersSnapshot.hasError) {
+            return const Text('Something went wrong');
           }
-        });
 
-        return ListView(children: [
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: SizedBox(
-              height: 35,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: tagOptionsList
-                    .map<Widget>((tag) => TagFilter(
-                          name: tag.keys.first,
-                          color: tag.values.first,
-                          selectedTag: _selectedTag,
-                          selectTagFilter: selectTagFilter,
-                        ))
-                    .toList(),
-              ),
-            ),
-          ),
-          ...filteredDocs.reversed.map((DocumentSnapshot document) {
-            Map<String, dynamic> data =
-                document.data()! as Map<String, dynamic>;
-            return ImageCardComponent(
-              title: data['title'],
-              description: data['description'],
-              image: 'assets/masjid.jpeg',
-              upVotes: data['upVotes'] ?? [],
-              downVotes: data['downVotes'] ?? [],
-              creatorId: data['createdBy']['id'] ?? '',
-              timestamp: data['timestamp'],
-              lastEdited: data['lastEdited'],
-              tags: data['tags'] ?? [],
-              postId: document.id,
-              resetValueNotifier: widget.resetValueNotifier,
-            );
-          }).toList()
-        ]);
-      },
-    );
+          if (usersSnapshot.connectionState == ConnectionState.waiting) {
+            return const Text("Loading");
+          }
+          final List<QueryDocumentSnapshot> users = usersSnapshot.data!.docs;
+          final currUser =
+              users.firstWhere((e) => e.id == currUserId).data() as Map;
+
+          return StreamBuilder<QuerySnapshot>(
+            stream: _postsStream,
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Something went wrong');
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text("Loading");
+              }
+
+              List<QueryDocumentSnapshot> postDocs = snapshot.data!.docs;
+
+              // filter posts by blockedUsers
+              var notBlockedDocs = postDocs.where((doc) {
+                List blockedUsers = currUser['blockedUsers'] ?? [];
+                Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
+                String postCreatorId = data['createdBy']['id'];
+
+                return !blockedUsers.contains(postCreatorId);
+              });
+
+              // filter posts by selected tag filter
+              var filteredDocs = notBlockedDocs.where((doc) {
+                if (_selectedTag.isEmpty) return true;
+
+                Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
+                List tags = data['tags'] ?? [];
+
+                return tags.contains(_selectedTag);
+              }).toList();
+
+              // sort posts by vote count (in ascending order)
+              filteredDocs.sort((a, b) {
+                Map<String, dynamic> aData = a.data()! as Map<String, dynamic>;
+                Map<String, dynamic> bData = b.data()! as Map<String, dynamic>;
+                if (widget.sortValue == 'Upvotes') {
+                  List aUpVotes = aData['upVotes'] ?? [];
+                  List bUpVotes = bData['upVotes'] ?? [];
+                  List aDownVotes = aData['downVotes'] ?? [];
+                  List bDownVotes = bData['downVotes'] ?? [];
+                  int aVoteCount = aUpVotes.length - aDownVotes.length;
+                  int bVoteCount = bUpVotes.length - bDownVotes.length;
+
+                  return aVoteCount.compareTo(bVoteCount);
+                } else {
+                  Timestamp aTimestamp = aData['timestamp'];
+                  Timestamp bTimestamp = bData['timestamp'];
+
+                  return aTimestamp.compareTo(bTimestamp);
+                }
+              });
+
+              return ListView(children: [
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: SizedBox(
+                    height: 35,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: tagOptionsList
+                          .map<Widget>((tag) => TagFilter(
+                                name: tag.keys.first,
+                                color: tag.values.first,
+                                selectedTag: _selectedTag,
+                                selectTagFilter: selectTagFilter,
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ),
+                ...filteredDocs.reversed.map((DocumentSnapshot document) {
+                  Map<String, dynamic> data =
+                      document.data()! as Map<String, dynamic>;
+
+                  // get post creator user object
+                  String postCreatorId = data['createdBy']['id'];
+
+                  final Map postCreator = users
+                      .firstWhere((e) => e.id == postCreatorId)
+                      .data() as Map;
+
+                  return ImageCardComponent(
+                    title: data['title'],
+                    description: data['description'],
+                    image: 'assets/masjid.jpeg',
+                    upVotes: data['upVotes'] ?? [],
+                    downVotes: data['downVotes'] ?? [],
+                    creatorId: data['createdBy']['id'] ?? '',
+                    timestamp: data['timestamp'],
+                    lastEdited: data['lastEdited'],
+                    tags: data['tags'] ?? [],
+                    postId: document.id,
+                    resetValueNotifier: widget.resetValueNotifier,
+                    postCreator: postCreator,
+                  );
+                }).toList()
+              ]);
+            },
+          );
+        });
   }
 
   void selectTagFilter(String tagName) {
