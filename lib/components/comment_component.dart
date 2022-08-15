@@ -73,7 +73,49 @@ class _UserCommentState extends State<UserComment> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.account_circle),
+                GestureDetector(
+                    onTap: (() {
+                      showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return AlertDialog(
+                            title: Column(
+                              children: [
+                                const Icon(
+                                  Icons.account_circle,
+                                  size: 100,
+                                ),
+                                Center(
+                                  child: Text(
+                                    '${widget.firstName} ${widget.lastName}',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            actions: !isCreator
+                                ? [
+                                    ElevatedButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, 'Cancel'),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => blockUser(context),
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                Colors.red),
+                                      ),
+                                      child: const Text('Block'),
+                                    ),
+                                  ]
+                                : [],
+                            actionsAlignment: MainAxisAlignment.center,
+                          );
+                        }),
+                      );
+                    }),
+                    child: const Icon(Icons.account_circle)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -316,6 +358,28 @@ class _UserCommentState extends State<UserComment> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
     setState(() {
       _isSelected = false;
+    });
+  }
+
+  void blockUser(BuildContext context) async {
+    final currUser = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+    List blockedUsers = await currUser.get().then((doc) {
+      final Map user = doc.data() as Map;
+      return user['blockedUsers'] ?? [];
+    });
+    blockedUsers.add(widget.creatorId);
+
+    currUser.update({
+      'blockedUsers': blockedUsers,
+    }).then((value) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('user blocked'),
+        ),
+      );
     });
   }
 }
