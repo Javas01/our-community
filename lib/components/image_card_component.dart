@@ -16,8 +16,6 @@ class ImageCardComponent extends StatefulWidget {
     required this.postId,
     required this.upVotes,
     required this.downVotes,
-    required this.firstName,
-    required this.lastName,
     required this.tags,
     required this.timestamp,
     required this.creatorId,
@@ -25,13 +23,7 @@ class ImageCardComponent extends StatefulWidget {
     required this.lastEdited,
   }) : super(key: key);
 
-  final String image,
-      title,
-      description,
-      postId,
-      firstName,
-      lastName,
-      creatorId;
+  final String image, title, description, postId, creatorId;
   final List<dynamic> upVotes, downVotes, tags;
   final ValueNotifier<bool> resetValueNotifier;
   final Timestamp timestamp;
@@ -48,6 +40,8 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
   bool _isExpanded = false;
   Offset? _tapPosition;
   GlobalKey? _selectedPostKey;
+  final Stream<QuerySnapshot> _usersStream =
+      FirebaseFirestore.instance.collection('Users').snapshots();
 
   void setExpanded(bool isExpanded) {
     setState(() {
@@ -134,49 +128,66 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       setExpanded(false);
     }
 
-    return SizedBox(
-      key: dataKey,
-      height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
-      child: _isExpanded
-          ? ExpandedCard(
-              description: widget.description,
-              title: widget.title,
-              image: widget.image,
-              setExpanded: setExpanded,
-              postId: widget.postId,
-            )
-          : GestureDetector(
-              onLongPress: _showCustomMenu,
-              onTapDown: _storePosition,
-              onTap: () {
-                setExpanded(true);
-                Future.delayed(const Duration(milliseconds: 50), () {
-                  Scrollable.ensureVisible(
-                    dataKey.currentContext!,
-                    alignment: 0.0,
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                  );
-                });
-                widget.resetValueNotifier.value = false;
-              },
-              child: PreviewCard(
-                description: widget.description,
-                title: widget.title,
-                image: widget.image,
-                upVotes: widget.upVotes,
-                downVotes: widget.downVotes,
-                postId: widget.postId,
-                itemKey: dataKey,
-                firstName: widget.firstName,
-                lastName: widget.lastName,
-                tags: widget.tags,
-                isSelected: dataKey == _selectedPostKey ? true : false,
-                timestamp: widget.timestamp,
-                lastEdited: widget.lastEdited,
-              ),
-            ),
-    );
+    return StreamBuilder(
+        stream: _usersStream,
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text("Loading");
+          }
+          Map postCreator = snapshot.data!.docs
+              .firstWhere((DocumentSnapshot doc) => doc.id == widget.creatorId)
+              .data() as Map;
+
+          return SizedBox(
+            key: dataKey,
+            height:
+                _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
+            child: _isExpanded
+                ? ExpandedCard(
+                    description: widget.description,
+                    title: widget.title,
+                    image: widget.image,
+                    setExpanded: setExpanded,
+                    postId: widget.postId,
+                  )
+                : GestureDetector(
+                    onLongPress: _showCustomMenu,
+                    onTapDown: _storePosition,
+                    onTap: () {
+                      setExpanded(true);
+                      Future.delayed(const Duration(milliseconds: 50), () {
+                        Scrollable.ensureVisible(
+                          dataKey.currentContext!,
+                          alignment: 0.0,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
+                      });
+                      widget.resetValueNotifier.value = false;
+                    },
+                    child: PreviewCard(
+                      description: widget.description,
+                      title: widget.title,
+                      image: widget.image,
+                      upVotes: widget.upVotes,
+                      downVotes: widget.downVotes,
+                      postId: widget.postId,
+                      itemKey: dataKey,
+                      postCreator: postCreator,
+                      tags: widget.tags,
+                      isSelected: dataKey == _selectedPostKey ? true : false,
+                      timestamp: widget.timestamp,
+                      lastEdited: widget.lastEdited,
+                      creatorId: widget.creatorId,
+                      isCreator: userId == widget.creatorId,
+                    ),
+                  ),
+          );
+        });
   }
 
   void deletePost() {
@@ -196,27 +207,29 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
 
   void flagPost() async {
     final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-    final response = await http.post(url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'accessToken': 'RSpCM_xJwri5l9DjMIGAy',
-          'service_id': 'service_ydieaun',
-          'template_id': 'template_ejdq7ar',
-          'user_id': 'zycID_4Z1ijq9fgbW',
-          'template_params': {
-            'user_email': userEmail,
-            'content_type': 'post',
-            'user_id': userId,
-            'post_id': widget.postId,
-            'comment_id': '',
-          }
-        }));
-    print(response.body);
-
-    const snackBar = SnackBar(
-      content: Text(
-          'Thank you, we received your report and will make a decision after reviewing'),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    await http
+        .post(url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'accessToken': 'RSpCM_xJwri5l9DjMIGAy',
+              'service_id': 'service_ydieaun',
+              'template_id': 'template_ejdq7ar',
+              'user_id': 'zycID_4Z1ijq9fgbW',
+              'template_params': {
+                'user_email': userEmail,
+                'content_type': 'post',
+                'user_id': userId,
+                'post_id': widget.postId,
+                'comment_id': '',
+              }
+            }))
+        .then(
+          (_) => ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Thank you, we received your report and will make a decision after reviewing'),
+            ),
+          ),
+        );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:our_community/components/image_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,8 +23,20 @@ class _ListScreenState extends State<ListScreen> {
       .doc('ATLMasjid')
       .collection('Posts')
       .snapshots();
-
+  late final Map currUser;
   String _selectedTag = '';
+
+  @override
+  void initState() {
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((doc) {
+      currUser = doc.data() as Map;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +58,17 @@ class _ListScreenState extends State<ListScreen> {
 
         List<QueryDocumentSnapshot> postDocs = snapshot.data!.docs;
 
+        // filter posts by blockedUsers
+        var notBlockedDocs = postDocs.where((doc) {
+          List blockedUsers = currUser['blockedUsers'] ?? [];
+          Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
+          String postCreator = data['createdBy']['id'];
+
+          return !blockedUsers.contains(postCreator);
+        });
+
         // filter posts by selected tag filter
-        var filteredDocs = postDocs.where((doc) {
+        var filteredDocs = notBlockedDocs.where((doc) {
           if (_selectedTag.isEmpty) return true;
 
           Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
@@ -103,8 +125,6 @@ class _ListScreenState extends State<ListScreen> {
               image: 'assets/masjid.jpeg',
               upVotes: data['upVotes'] ?? [],
               downVotes: data['downVotes'] ?? [],
-              firstName: data['createdBy']['firstName'] ?? '',
-              lastName: data['createdBy']['lastName'] ?? '',
               creatorId: data['createdBy']['id'] ?? '',
               timestamp: data['timestamp'],
               lastEdited: data['lastEdited'],

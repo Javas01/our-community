@@ -17,12 +17,13 @@ class PreviewCard extends StatefulWidget {
     required this.upVotes,
     required this.downVotes,
     required this.postId,
-    required this.firstName,
-    required this.lastName,
+    required this.postCreator,
     required this.tags,
     required this.timestamp,
     required this.lastEdited,
     required this.isSelected,
+    required this.creatorId,
+    required this.isCreator,
   }) : super(key: key) {
     post = FirebaseFirestore.instance
         .collection('Communities')
@@ -38,8 +39,9 @@ class PreviewCard extends StatefulWidget {
         .get();
   }
 
-  final String image, title, description, postId, firstName, lastName;
-  final bool isSelected;
+  final String image, title, description, postId, creatorId;
+  final Map postCreator;
+  final bool isSelected, isCreator;
   final List<dynamic> upVotes, downVotes, tags;
   final GlobalKey itemKey;
   final Timestamp timestamp;
@@ -51,6 +53,20 @@ class PreviewCard extends StatefulWidget {
 
 class _PreviewCardState extends State<PreviewCard> {
   final _auth = FirebaseAuth.instance;
+  late final Map postCreator;
+  int resetCount = 0;
+
+  @override
+  void initState() {
+    FirebaseFirestore.instance
+        .collection('Users')
+        .doc(widget.creatorId)
+        .get()
+        .then((doc) {
+      postCreator = doc.data() as Map;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +105,54 @@ class _PreviewCardState extends State<PreviewCard> {
           child: Column(
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Text('${widget.firstName} ${widget.lastName} - $postDate',
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: ((context) {
+                        return AlertDialog(
+                          title: Column(
+                            children: [
+                              const Icon(
+                                Icons.account_circle,
+                                size: 100,
+                              ),
+                              Center(
+                                child: Text(
+                                  '${postCreator['firstName']} ${postCreator['lastName']}',
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: !widget.isCreator
+                              ? [
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, 'Cancel'),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: blockUser,
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(Colors.red),
+                                    ),
+                                    child: const Text('Block'),
+                                  ),
+                                ]
+                              : [],
+                          actionsAlignment: MainAxisAlignment.center,
+                        );
+                      }),
+                    );
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 10.0),
+                    child: Icon(Icons.account_circle),
+                  ),
+                ),
+                Text(
+                    '${widget.postCreator['firstName']} ${widget.postCreator['lastName']} - $postDate',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,
@@ -172,14 +235,15 @@ class _PreviewCardState extends State<PreviewCard> {
                         ),
                       ),
                       GestureDetector(
-                          onTap: () {
-                            isDownVoted ? vote('remove') : vote('down');
-                          },
-                          child: Icon(
-                            Icons.keyboard_arrow_down_outlined,
-                            color: isDownVoted ? Colors.lightBlueAccent : null,
-                            size: isDownVoted ? 30.0 : 25.0,
-                          ))
+                        onTap: () {
+                          isDownVoted ? vote('remove') : vote('down');
+                        },
+                        child: Icon(
+                          Icons.keyboard_arrow_down_outlined,
+                          color: isDownVoted ? Colors.lightBlueAccent : null,
+                          size: isDownVoted ? 30.0 : 25.0,
+                        ),
+                      ),
                     ],
                   )
                 ],
@@ -218,5 +282,27 @@ class _PreviewCardState extends State<PreviewCard> {
       'upVotes': widget.upVotes,
       'downVotes': widget.downVotes,
     }).catchError((error) => Future.error(error));
+  }
+
+  void blockUser() async {
+    final currUser = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_auth.currentUser!.uid);
+    List blockedUsers = await currUser.get().then((doc) {
+      final Map user = doc.data() as Map;
+      return user['blockedUsers'] ?? [];
+    });
+    blockedUsers.add(widget.creatorId);
+
+    currUser.update({
+      'blockedUsers': blockedUsers,
+    }).then((value) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('user blocked'),
+        ),
+      );
+    });
   }
 }
