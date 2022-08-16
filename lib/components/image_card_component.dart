@@ -97,7 +97,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
         Offset.zero & overlay.size, // Bigger rect, the entire screen
       ),
     ).then((value) {
-      if (value == 1) {
+      if (value == 1 && isCreator) {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -111,6 +111,8 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
             );
           }),
         );
+      } else if (value == 1) {
+        flagPost();
       }
     });
 
