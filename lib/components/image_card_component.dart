@@ -100,6 +100,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       if (value == 1) {
         showModalBottomSheet(
           context: context,
+          isScrollControlled: true,
           builder: ((context) {
             return CreatePostModal(
               tags: widget.tags,

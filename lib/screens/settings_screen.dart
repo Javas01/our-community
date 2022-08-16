@@ -20,7 +20,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final lastName =
       FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
 
-  final _formKey = GlobalKey<FormState>();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
 
@@ -33,140 +32,127 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const Center(
           child: Icon(
             Icons.account_circle_rounded,
-            size: 200,
+            size: 150,
           ),
         ),
-        Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Row(
-                children: <Widget>[
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: FormInputField(
-                      controller: firstNameController,
-                      hintText: firstName ?? 'First Name',
-                      icon: const Icon(Icons.person),
-                      isLast: false,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  Expanded(
-                    child: FormInputField(
-                      controller: lastNameController,
-                      hintText: lastName ?? 'Last Name',
-                      icon: const Icon(Icons.person),
-                      isLast: true,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                ],
+        Row(
+          children: <Widget>[
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: FormInputField(
+                controller: firstNameController,
+                hintText: firstName ?? 'First Name',
+                icon: const Icon(Icons.person),
+                isLast: false,
               ),
-              const SizedBox(height: 20),
-              StreamBuilder(
-                stream: _usersStream,
-                builder: ((BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text('Something went wrong');
-                  }
-
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text("Loading");
-                  }
-
-                  final users = snapshot.data!.docs;
-                  final currUser = users.firstWhere(
-                      (element) => element.id == _auth.currentUser!.uid);
-                  List blockedUserIds = currUser['blockedUsers'];
-
-                  return FutureBuilder(
-                      future:
-                          FirebaseFirestore.instance.collection('Users').get(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text('Something went wrong');
-                        }
-
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Text("Loading");
-                        }
-                        final blockedUsers = snapshot.data!.docs
-                            .where((e) => blockedUserIds.contains(e.id));
-
-                        return SizedBox(
-                          height: 200,
-                          child: Column(
-                            children: [
-                              const Text(
-                                'Blocked Users',
-                                textScaleFactor: 1.5,
-                                style: TextStyle(
-                                    decoration: TextDecoration.underline),
-                              ),
-                              SizedBox(
-                                height: 170,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children: blockedUsers.map((e) {
-                                      final blockedUser = e.data() as Map;
-                                      final blockedUserName =
-                                          blockedUser['firstName'] +
-                                              " " +
-                                              blockedUser['lastName'];
-
-                                      return Card(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Stack(
-                                            children: [
-                                              Center(
-                                                child: Text(
-                                                  blockedUserName,
-                                                  textAlign: TextAlign.center,
-                                                  textScaleFactor: 1.2,
-                                                ),
-                                              ),
-                                              Positioned(
-                                                right: 10,
-                                                top: -14,
-                                                child: IconButton(
-                                                    onPressed: () =>
-                                                        unBlock(e.id),
-                                                    icon: const Icon(
-                                                      Icons.close_rounded,
-                                                      size: 20,
-                                                    )),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      });
-                }),
-              )
-            ],
-          ),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+            Expanded(
+              child: FormInputField(
+                controller: lastNameController,
+                hintText: lastName ?? 'Last Name',
+                icon: const Icon(Icons.person),
+                isLast: true,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+          ],
         ),
         const SizedBox(height: 20),
+        Flexible(
+          child: StreamBuilder(
+            stream: _usersStream,
+            builder:
+                ((BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Something went wrong');
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text("Loading");
+              }
+
+              final users = snapshot.data!.docs;
+              final currUser = users.firstWhere(
+                  (element) => element.id == _auth.currentUser!.uid);
+              List blockedUserIds = currUser['blockedUsers'];
+
+              return FutureBuilder(
+                  future: FirebaseFirestore.instance.collection('Users').get(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return const Text('Something went wrong');
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Text("Loading");
+                    }
+                    final blockedUsers = snapshot.data!.docs
+                        .where((e) => blockedUserIds.contains(e.id));
+
+                    return Column(
+                      children: [
+                        const Text(
+                          'Blocked Users',
+                          textScaleFactor: 1.5,
+                          style:
+                              TextStyle(decoration: TextDecoration.underline),
+                        ),
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: blockedUsers.map((e) {
+                                final blockedUser = e.data() as Map;
+                                final blockedUserName =
+                                    blockedUser['firstName'] +
+                                        " " +
+                                        blockedUser['lastName'];
+
+                                return Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Stack(
+                                      children: [
+                                        Center(
+                                          child: Text(
+                                            blockedUserName,
+                                            textAlign: TextAlign.center,
+                                            textScaleFactor: 1.2,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 10,
+                                          top: -14,
+                                          child: IconButton(
+                                              onPressed: () => unBlock(e.id),
+                                              icon: const Icon(
+                                                Icons.close_rounded,
+                                                size: 20,
+                                              )),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  });
+            }),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: FormSubmitButton(
@@ -176,7 +162,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
               text: 'Update Profile'),
         ),
-        const Spacer(),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -234,13 +219,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void updateProfile(String firstName, String lastName) {
-    if (_formKey.currentState!.validate()) {
+    if (firstName.isNotEmpty || lastName.isNotEmpty) {
       String displayName = '$firstName $lastName';
       const snackBar = SnackBar(content: Text('Profile updated successfully'));
 
       _auth.currentUser!
           .updateDisplayName(displayName)
           .then((_) => ScaffoldMessenger.of(context).showSnackBar(snackBar));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You havent changed anything'),
+        ),
+      );
     }
   }
 
