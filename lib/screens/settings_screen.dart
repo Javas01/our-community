@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:our_community/components/text_form_field_components.dart';
-import 'package:our_community/screens/OnboardingScreen/onboarding_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../components/text_form_field_components.dart';
+import '../screens/OnboardingScreen/onboarding_screen.dart';
+import '../models/user_model.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -17,8 +18,13 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _auth = FirebaseAuth.instance;
-  final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('Users').snapshots();
+  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
+      .collection('Users')
+      .withConverter(
+        fromFirestore: userFromFirestore,
+        toFirestore: userToFirestore,
+      )
+      .snapshots();
   final String currUserId = FirebaseAuth.instance.currentUser!.uid;
   final Reference profilePicRef = FirebaseStorage.instance
       .ref('profilePics')
@@ -46,11 +52,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 return const Text("Loading");
               }
 
-              final users = snapshot.data!.docs;
-              final currUser = users.firstWhere(
+              final users = snapshot.data!.docs
+                  .map((userDoc) => userDoc.data() as AppUser)
+                  .toList();
+              final AppUser currUser = users.firstWhere(
                   (element) => element.id == _auth.currentUser!.uid);
-              List blockedUserIds = currUser['blockedUsers'] ?? [];
-              List<QueryDocumentSnapshot> blockedUsers = users.where((user) {
+
+              final blockedUserIds = currUser.blockedUsers ?? [];
+              final blockedUsers = users.where((user) {
                 return blockedUserIds.contains(user.id);
               }).toList();
 
@@ -67,12 +76,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   radius: 100,
                                 ),
                               )
-                            : currUser['profilePicUrl'] != null
+                            : currUser.profilePicUrl != null
                                 ? GestureDetector(
                                     onTap: pickImage,
                                     child: CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                          currUser['profilePicUrl']),
+                                      backgroundImage:
+                                          NetworkImage(currUser.profilePicUrl!),
                                       radius: 100,
                                     ),
                                   )
@@ -94,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Expanded(
                         child: FormInputField(
                           controller: firstNameController,
-                          hintText: currUser['firstName'],
+                          hintText: currUser.firstName,
                           icon: const Icon(Icons.person),
                           isLast: false,
                         ),
@@ -105,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Expanded(
                         child: FormInputField(
                           controller: lastNameController,
-                          hintText: currUser['lastName'],
+                          hintText: currUser.lastName,
                           icon: const Icon(Icons.person),
                           isLast: true,
                         ),
@@ -126,11 +135,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       padding: const EdgeInsets.only(top: 8.0),
                       child: ListView(
                         shrinkWrap: true,
-                        children: blockedUsers.map((doc) {
-                          final blockedUser = doc.data() as Map;
-                          final blockedUserName = blockedUser['firstName'] +
-                              " " +
-                              blockedUser['lastName'];
+                        children: blockedUsers.map((blockedUser) {
+                          final blockedUserName =
+                              "${blockedUser.firstName} ${blockedUser.lastName}";
 
                           return Card(
                             child: Padding(
@@ -148,11 +155,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     right: 10,
                                     top: -14,
                                     child: IconButton(
-                                        onPressed: () => unBlock(doc.id),
-                                        icon: const Icon(
-                                          Icons.close_rounded,
-                                          size: 20,
-                                        )),
+                                      onPressed: () => unBlock(blockedUser.id),
+                                      icon: const Icon(
+                                        Icons.close_rounded,
+                                        size: 20,
+                                      ),
+                                    ),
                                   )
                                 ],
                               ),
@@ -211,10 +219,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void unBlock(String blockedUserId) async {
     final currUser = FirebaseFirestore.instance
         .collection('Users')
+        .withConverter(
+            fromFirestore: userFromFirestore, toFirestore: userToFirestore)
         .doc(_auth.currentUser!.uid);
     List blockedUsers = await currUser.get().then((doc) {
-      final Map user = doc.data() as Map;
-      return user['blockedUsers'] ?? [];
+      final user = doc.data() as AppUser;
+      return user.blockedUsers ?? [];
     });
     blockedUsers.remove(blockedUserId);
 

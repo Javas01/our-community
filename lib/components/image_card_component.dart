@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:our_community/components/create_post_component.dart';
+import '../models/user_model.dart';
 import 'expanded_card_component.dart';
 import 'preview_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,18 +20,18 @@ class ImageCardComponent extends StatefulWidget {
     required this.downVotes,
     required this.tags,
     required this.timestamp,
-    required this.creatorId,
+    required this.createdBy,
     required this.resetValueNotifier,
     required this.lastEdited,
     required this.postCreator,
   }) : super(key: key);
 
-  final String image, title, description, postId, creatorId;
+  final String image, title, description, postId, createdBy;
   final List<dynamic> upVotes, downVotes, tags;
   final ValueNotifier<bool> resetValueNotifier;
   final Timestamp timestamp;
   final Timestamp? lastEdited;
-  final Map postCreator;
+  final AppUser postCreator;
 
   @override
   State<ImageCardComponent> createState() => _ImageCardComponentState();
@@ -43,8 +44,6 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
   bool _isExpanded = false;
   Offset? _tapPosition;
   GlobalKey? _selectedPostKey;
-  final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('Users').snapshots();
 
   void setExpanded(bool isExpanded) {
     setState(() {
@@ -53,7 +52,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
   }
 
   void _showCustomMenu() {
-    final isCreator = userId == widget.creatorId;
+    final isCreator = userId == widget.createdBy;
     final RenderBox overlay =
         Overlay.of(context)!.context.findRenderObject() as RenderBox;
 
@@ -173,8 +172,8 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
                 isSelected: dataKey == _selectedPostKey ? true : false,
                 timestamp: widget.timestamp,
                 lastEdited: widget.lastEdited,
-                creatorId: widget.creatorId,
-                isCreator: userId == widget.creatorId,
+                createdBy: widget.createdBy,
+                isCreator: userId == widget.createdBy,
               ),
             ),
     );

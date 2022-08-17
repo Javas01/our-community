@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:our_community/components/tag_component.dart';
+import '../components/tag_component.dart';
+import '../models/user_model.dart';
 import '../constants/tag_options.dart';
-import 'package:intl/intl.dart';
 import '../../config.dart' show communityCode;
 
 class PreviewCard extends StatefulWidget {
@@ -23,7 +24,7 @@ class PreviewCard extends StatefulWidget {
     required this.timestamp,
     required this.lastEdited,
     required this.isSelected,
-    required this.creatorId,
+    required this.createdBy,
     required this.isCreator,
   }) : super(key: key) {
     post = FirebaseFirestore.instance
@@ -40,8 +41,8 @@ class PreviewCard extends StatefulWidget {
         .get();
   }
 
-  final String image, title, description, postId, creatorId;
-  final Map postCreator;
+  final String image, title, description, postId, createdBy;
+  final AppUser postCreator;
   final bool isSelected, isCreator;
   final List<dynamic> upVotes, downVotes, tags;
   final GlobalKey itemKey;
@@ -101,10 +102,10 @@ class _PreviewCardState extends State<PreviewCard> {
                         return AlertDialog(
                           title: Column(
                             children: [
-                              widget.postCreator['profilePicUrl'] != null
+                              widget.postCreator.profilePicUrl != null
                                   ? CircleAvatar(
                                       backgroundImage: NetworkImage(
-                                        widget.postCreator['profilePicUrl'],
+                                        widget.postCreator.profilePicUrl!,
                                       ),
                                       radius: 70,
                                     )
@@ -114,7 +115,7 @@ class _PreviewCardState extends State<PreviewCard> {
                                     ),
                               Center(
                                 child: Text(
-                                  '${widget.postCreator['firstName']} ${widget.postCreator['lastName']}',
+                                  '${widget.postCreator.firstName} ${widget.postCreator.lastName}',
                                 ),
                               ),
                             ],
@@ -143,10 +144,10 @@ class _PreviewCardState extends State<PreviewCard> {
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(right: 10.0),
-                    child: widget.postCreator['profilePicUrl'] != null
+                    child: widget.postCreator.profilePicUrl != null
                         ? CircleAvatar(
                             backgroundImage: NetworkImage(
-                              widget.postCreator['profilePicUrl'],
+                              widget.postCreator.profilePicUrl!,
                             ),
                             radius: 10,
                           )
@@ -154,7 +155,7 @@ class _PreviewCardState extends State<PreviewCard> {
                   ),
                 ),
                 Text(
-                    '${widget.postCreator['firstName']} ${widget.postCreator['lastName']} - $postDate',
+                    '${widget.postCreator.firstName} ${widget.postCreator.lastName} - $postDate',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,
@@ -294,7 +295,7 @@ class _PreviewCardState extends State<PreviewCard> {
       final Map user = doc.data() as Map;
       return user['blockedUsers'] ?? [];
     });
-    blockedUsers.add(widget.creatorId);
+    blockedUsers.add(widget.createdBy);
 
     currUser.update({
       'blockedUsers': blockedUsers,

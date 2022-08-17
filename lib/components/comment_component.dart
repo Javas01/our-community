@@ -6,11 +6,13 @@ import 'package:our_community/components/text_field_components.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import '../../config.dart' show communityCode;
+import '../actions/block_user.dart';
+import '../actions/unblock_user.dart';
 
 class UserComment extends StatefulWidget {
   const UserComment({
     Key? key,
-    required this.creatorId,
+    required this.createdBy,
     required this.isDeleted,
     required this.isRemoved,
     required this.timestamp,
@@ -21,7 +23,7 @@ class UserComment extends StatefulWidget {
     required this.unFocus,
     required this.blockedUsers,
   }) : super(key: key);
-  final String creatorId, commentText, postId, commentId;
+  final String createdBy, commentText, postId, commentId;
   final List replies, blockedUsers;
   final VoidCallback unFocus;
   final bool isDeleted, isRemoved;
@@ -46,13 +48,13 @@ class _UserCommentState extends State<UserComment> {
 
   @override
   void initState() {
-    _isUserBlocked = widget.blockedUsers.contains(widget.creatorId);
+    _isUserBlocked = widget.blockedUsers.contains(widget.createdBy);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isCreator = userId == widget.creatorId;
+    final isCreator = userId == widget.createdBy;
     final commentDate = DateFormat('yyyy-MM-dd (hh:mm aa)').format(
         DateTime.fromMicrosecondsSinceEpoch(
             widget.timestamp.microsecondsSinceEpoch));
@@ -80,7 +82,7 @@ class _UserCommentState extends State<UserComment> {
             FutureBuilder(
                 future: FirebaseFirestore.instance
                     .collection('Users')
-                    .doc(widget.creatorId)
+                    .doc(widget.createdBy)
                     .get(),
                 builder: (BuildContext context,
                     AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -131,8 +133,29 @@ class _UserCommentState extends State<UserComment> {
                                         ElevatedButton(
                                           onPressed: () => _isUserBlocked
                                               ? unBlock(
-                                                  widget.creatorId, context)
-                                              : blockUser(context),
+                                                  widget.createdBy, context,
+                                                  () {
+                                                  Navigator.pop(context);
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'user unblocked successfully'),
+                                                    ),
+                                                  );
+                                                })
+                                              : blockUser(
+                                                  context, widget.createdBy,
+                                                  () {
+                                                  Navigator.pop(context);
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'user blocked successfully'),
+                                                    ),
+                                                  );
+                                                }),
                                           style: ButtonStyle(
                                             backgroundColor: _isUserBlocked
                                                 ? null
@@ -309,7 +332,7 @@ class _UserCommentState extends State<UserComment> {
                       ))),
                       child: UserComment(
                         key: GlobalKey(),
-                        creatorId: reply['createdBy']['id'],
+                        createdBy: reply['createdBy'],
                         isDeleted: reply['isDeleted'] ?? false,
                         isRemoved: reply['isRemoved'] ?? false,
                         timestamp: reply['timestamp'] ??
@@ -349,11 +372,7 @@ class _UserCommentState extends State<UserComment> {
     return comments.add({
       'text': text,
       'isReply': true,
-      'createdBy': {
-        'firstName': firstName,
-        'lastName': lastName,
-        'id': userId,
-      },
+      'createdBy': userId,
       'timestamp': FieldValue.serverTimestamp(),
     }).then((doc) {
       DocumentReference parentComment = comments.doc(widget.commentId);
@@ -408,50 +427,6 @@ class _UserCommentState extends State<UserComment> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
     setState(() {
       _isSelected = false;
-    });
-  }
-
-  void blockUser(BuildContext context) async {
-    final currUser = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser!.uid);
-    List blockedUsers = await currUser.get().then((doc) {
-      final Map user = doc.data() as Map;
-      return user['blockedUsers'] ?? [];
-    });
-    blockedUsers.add(widget.creatorId);
-
-    currUser.update({
-      'blockedUsers': blockedUsers,
-    }).then((value) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('user blocked'),
-        ),
-      );
-    });
-  }
-
-  void unBlock(String blockedUserId, BuildContext context) async {
-    final currUser = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser!.uid);
-    List blockedUsers = await currUser.get().then((doc) {
-      final Map user = doc.data() as Map;
-      return user['blockedUsers'] ?? [];
-    });
-    blockedUsers.remove(blockedUserId);
-
-    currUser.update({
-      'blockedUsers': blockedUsers,
-    }).then((value) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('user unblocked'),
-        ),
-      );
     });
   }
 }

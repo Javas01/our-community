@@ -202,11 +202,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
           .add({
             'title': title,
             'description': description,
-            'createdBy': {
-              'firstName': firstName,
-              'lastName': lastName,
-              'id': userId
-            },
+            'createdBy': userId,
             'type': type,
             'tags': [tag],
             'timestamp': Timestamp.now(),

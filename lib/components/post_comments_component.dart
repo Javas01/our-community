@@ -87,7 +87,7 @@ class PostComments extends StatelessWidget {
 
                   return UserComment(
                     key: GlobalKey(),
-                    creatorId: data['createdBy']['id'],
+                    createdBy: data['createdBy'],
                     isDeleted: data['isDeleted'] ?? false,
                     isRemoved: data['isRemoved'] ?? false,
                     timestamp: data['timestamp'] ??

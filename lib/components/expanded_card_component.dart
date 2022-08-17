@@ -159,12 +159,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
     return widget.comments.add({
       'text': text,
       'isReply': false,
-      'createdBy': {
-        'firstName': currentUser['firstName'],
-        'lastName': currentUser['lastName'],
-        'profilePicUrl': currentUser['profilePicUrl'],
-        'id': userId,
-      },
+      'createdBy': userId,
       'timestamp': FieldValue.serverTimestamp(),
     }).catchError((error) => print("Failed to add comment: $error"));
   }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:our_community/components/image_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/constants/tag_options.dart';
+import '../models/user_model.dart';
+import '../models/post_model.dart';
 import '../../config.dart' show communityCode;
 
 class ListScreen extends StatefulWidget {
@@ -19,12 +21,21 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('Users').snapshots();
+  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
+      .collection('Users')
+      .withConverter(
+        fromFirestore: userFromFirestore,
+        toFirestore: userToFirestore,
+      )
+      .snapshots();
   final Stream<QuerySnapshot> _postsStream = FirebaseFirestore.instance
       .collection('Communities')
       .doc(communityCode)
       .collection('Posts')
+      .withConverter(
+        fromFirestore: postFromFirestore,
+        toFirestore: postToFirestore,
+      )
       .snapshots();
   final currUserId = FirebaseAuth.instance.currentUser!.uid;
   String _selectedTag = '';
@@ -47,9 +58,10 @@ class _ListScreenState extends State<ListScreen> {
           if (usersSnapshot.connectionState == ConnectionState.waiting) {
             return const Text("Loading");
           }
-          final List<QueryDocumentSnapshot> users = usersSnapshot.data!.docs;
-          final currUser =
-              users.firstWhere((e) => e.id == currUserId).data() as Map;
+          final users = usersSnapshot.data!.docs
+              .map((userDoc) => userDoc.data() as AppUser)
+              .toList();
+          final currUser = users.firstWhere((user) => user.id == currUserId);
 
           return StreamBuilder<QuerySnapshot>(
             stream: _postsStream,
@@ -58,50 +70,42 @@ class _ListScreenState extends State<ListScreen> {
               if (snapshot.hasError) {
                 return const Text('Something went wrong');
               }
-
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Text("Loading");
               }
 
-              List<QueryDocumentSnapshot> postDocs = snapshot.data!.docs;
+              List<Post> posts = snapshot.data!.docs
+                  .map((postDoc) => postDoc.data() as Post)
+                  .toList();
+              ;
 
               // filter posts by blockedUsers
-              var notBlockedDocs = postDocs.where((doc) {
-                List blockedUsers = currUser['blockedUsers'] ?? [];
-                Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-                String postCreatorId = data['createdBy']['id'];
+              final notBlockedPosts = posts.where((post) {
+                List blockedUsers = currUser.blockedUsers ?? [];
 
-                return !blockedUsers.contains(postCreatorId);
+                return !blockedUsers.contains(post.createdBy);
               });
 
               // filter posts by selected tag filter
-              var filteredDocs = notBlockedDocs.where((doc) {
+              var filteredPosts = notBlockedPosts.where((post) {
                 if (_selectedTag.isEmpty) return true;
 
-                Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-                List tags = data['tags'] ?? [];
-
-                return tags.contains(_selectedTag);
+                return post.tags.contains(_selectedTag);
               }).toList();
 
               // sort posts by vote count (in ascending order)
-              filteredDocs.sort((a, b) {
-                Map<String, dynamic> aData = a.data()! as Map<String, dynamic>;
-                Map<String, dynamic> bData = b.data()! as Map<String, dynamic>;
+              filteredPosts.sort((a, b) {
                 if (widget.sortValue == 'Upvotes') {
-                  List aUpVotes = aData['upVotes'] ?? [];
-                  List bUpVotes = bData['upVotes'] ?? [];
-                  List aDownVotes = aData['downVotes'] ?? [];
-                  List bDownVotes = bData['downVotes'] ?? [];
+                  List aUpVotes = a.upVotes ?? [];
+                  List bUpVotes = b.upVotes ?? [];
+                  List aDownVotes = a.downVotes ?? [];
+                  List bDownVotes = b.downVotes ?? [];
                   int aVoteCount = aUpVotes.length - aDownVotes.length;
                   int bVoteCount = bUpVotes.length - bDownVotes.length;
 
                   return aVoteCount.compareTo(bVoteCount);
                 } else {
-                  Timestamp aTimestamp = aData['timestamp'];
-                  Timestamp bTimestamp = bData['timestamp'];
-
-                  return aTimestamp.compareTo(bTimestamp);
+                  return a.timestamp.compareTo(b.timestamp);
                 }
               });
 
@@ -123,28 +127,22 @@ class _ListScreenState extends State<ListScreen> {
                     ),
                   ),
                 ),
-                ...filteredDocs.reversed.map((DocumentSnapshot document) {
-                  Map<String, dynamic> data =
-                      document.data()! as Map<String, dynamic>;
-
+                ...filteredPosts.reversed.map((post) {
                   // get post creator user object
-                  String postCreatorId = data['createdBy']['id'];
-
-                  final Map postCreator = users
-                      .firstWhere((e) => e.id == postCreatorId)
-                      .data() as Map;
+                  final AppUser postCreator =
+                      users.firstWhere((e) => e.id == post.createdBy);
 
                   return ImageCardComponent(
-                    title: data['title'],
-                    description: data['description'],
+                    title: post.title,
+                    description: post.description,
                     image: 'assets/masjid.jpeg',
-                    upVotes: data['upVotes'] ?? [],
-                    downVotes: data['downVotes'] ?? [],
-                    creatorId: data['createdBy']['id'] ?? '',
-                    timestamp: data['timestamp'],
-                    lastEdited: data['lastEdited'],
-                    tags: data['tags'] ?? [],
-                    postId: document.id,
+                    upVotes: post.upVotes ?? [],
+                    downVotes: post.downVotes ?? [],
+                    createdBy: post.createdBy,
+                    timestamp: post.timestamp,
+                    lastEdited: post.lastEdited,
+                    tags: post.tags,
+                    postId: post.id,
                     resetValueNotifier: widget.resetValueNotifier,
                     postCreator: postCreator,
                   );
