@@ -9,8 +9,6 @@ import 'package:http/http.dart' as http;
 class UserComment extends StatefulWidget {
   const UserComment({
     Key? key,
-    required this.firstName,
-    required this.lastName,
     required this.creatorId,
     required this.isDeleted,
     required this.isRemoved,
@@ -22,7 +20,7 @@ class UserComment extends StatefulWidget {
     required this.unFocus,
     required this.blockedUsers,
   }) : super(key: key);
-  final String firstName, lastName, creatorId, commentText, postId, commentId;
+  final String creatorId, commentText, postId, commentId;
   final List replies, blockedUsers;
   final VoidCallback unFocus;
   final bool isDeleted, isRemoved;
@@ -78,158 +76,194 @@ class _UserCommentState extends State<UserComment> {
         },
         child: Column(
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                    onTap: (() {
-                      showDialog(
-                        context: context,
-                        builder: ((context) {
-                          return AlertDialog(
-                            title: Column(
-                              children: [
-                                const Icon(
-                                  Icons.account_circle,
-                                  size: 100,
-                                ),
-                                Center(
-                                  child: Text(
-                                    '${widget.firstName} ${widget.lastName}',
-                                  ),
-                                ),
-                              ],
-                            ),
-                            actions: !isCreator
-                                ? [
-                                    ElevatedButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, 'Cancel'),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () => _isUserBlocked
-                                          ? unBlock(widget.creatorId, context)
-                                          : blockUser(context),
-                                      style: ButtonStyle(
-                                        backgroundColor: _isUserBlocked
-                                            ? null
-                                            : MaterialStateProperty.all(
-                                                Colors.red),
-                                      ),
-                                      child: _isUserBlocked
-                                          ? const Text('Unblock')
-                                          : const Text('Block'),
-                                    ),
-                                  ]
-                                : [],
-                            actionsAlignment: MainAxisAlignment.center,
-                          );
-                        }),
-                      );
-                    }),
-                    child: const Icon(Icons.account_circle)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
+            FutureBuilder(
+                future: FirebaseFirestore.instance
+                    .collection('Users')
+                    .doc(widget.creatorId)
+                    .get(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text('Something went wrong');
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Text("Loading");
+                  }
+                  final Map commentCreator = snapshot.data!.data() as Map;
+                  return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      widget.isDeleted || widget.isRemoved || _isUserBlocked
-                          ? Text(
-                              widget.isDeleted
-                                  ? 'Comment deleted by user'
-                                  : widget.isRemoved
-                                      ? 'Comment removed by moderator'
-                                      : 'You have this user blocked',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w300,
-                              ),
-                            )
-                          : Text(
-                              '${widget.firstName} ${widget.lastName} - $commentDate',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                      const SizedBox(height: 4),
-                      if (widget.isDeleted == false &&
-                          widget.isRemoved == false &&
-                          _isUserBlocked == false)
-                        Text(
-                          widget.commentText,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      if (_isSelected) ...{
-                        Column(
-                          children: [
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                isCreator
-                                    ? IconButton(
-                                        icon: Icon(
-                                          Icons.delete_rounded,
-                                          color: Colors.red[700],
-                                          size: 30,
-                                        ),
-                                        onPressed: deleteComment,
-                                      )
-                                    : IconButton(
-                                        icon: const Icon(
-                                          Icons.flag,
-                                          size: 30,
-                                        ),
-                                        onPressed: flagComment,
-                                      ),
-                                Expanded(
-                                  child: Container(
-                                    constraints:
-                                        const BoxConstraints(maxHeight: 300),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          child: CommentField(
-                                            commentController:
-                                                commentController,
-                                            hintText: 'Reply to comment',
-                                            unFocus: widget.unFocus,
-                                            hasBorder: false,
-                                            hintStyle:
-                                                const TextStyle(height: 1.5),
+                      GestureDetector(
+                        onTap: (() {
+                          showDialog(
+                            context: context,
+                            builder: ((context) {
+                              return AlertDialog(
+                                title: Column(
+                                  children: [
+                                    commentCreator['profilePicUrl'] != null
+                                        ? CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                              commentCreator['profilePicUrl'],
+                                            ),
+                                            radius: 70,
+                                          )
+                                        : const Icon(
+                                            Icons.account_circle,
+                                            size: 100,
                                           ),
-                                        ),
-                                        const SizedBox(
-                                          width: 5,
+                                    Center(
+                                      child: Text(
+                                        '${commentCreator['firstName']} ${commentCreator['lastName']}',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: !isCreator
+                                    ? [
+                                        ElevatedButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'Cancel'),
+                                          child: const Text('Cancel'),
                                         ),
                                         ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            fixedSize: const Size(30, 30),
-                                            shape: const CircleBorder(),
+                                          onPressed: () => _isUserBlocked
+                                              ? unBlock(
+                                                  widget.creatorId, context)
+                                              : blockUser(context),
+                                          style: ButtonStyle(
+                                            backgroundColor: _isUserBlocked
+                                                ? null
+                                                : MaterialStateProperty.all(
+                                                    Colors.red),
                                           ),
-                                          onPressed: () {
-                                            widget.unFocus();
-                                            replyToComment(
-                                                commentController.text);
-                                          },
-                                          child:
-                                              const Icon(Icons.reply_rounded),
+                                          child: _isUserBlocked
+                                              ? const Text('Unblock')
+                                              : const Text('Block'),
                                         ),
-                                      ],
+                                      ]
+                                    : [],
+                                actionsAlignment: MainAxisAlignment.center,
+                              );
+                            }),
+                          );
+                        }),
+                        child: commentCreator['profilePicUrl'] != null
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  commentCreator['profilePicUrl'],
+                                ),
+                                radius: 10,
+                              )
+                            : const Icon(
+                                Icons.account_circle,
+                              ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            widget.isDeleted ||
+                                    widget.isRemoved ||
+                                    _isUserBlocked
+                                ? Text(
+                                    widget.isDeleted
+                                        ? 'Comment deleted by user'
+                                        : widget.isRemoved
+                                            ? 'Comment removed by moderator'
+                                            : 'You have this user blocked',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  )
+                                : Text(
+                                    '${commentCreator['firstName']} ${commentCreator['lastName']} - $commentDate',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w300,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
+                            const SizedBox(height: 4),
+                            if (widget.isDeleted == false &&
+                                widget.isRemoved == false &&
+                                _isUserBlocked == false)
+                              Text(
+                                widget.commentText,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            if (_isSelected) ...{
+                              Column(
+                                children: [
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      isCreator
+                                          ? IconButton(
+                                              icon: Icon(
+                                                Icons.delete_rounded,
+                                                color: Colors.red[700],
+                                                size: 30,
+                                              ),
+                                              onPressed: deleteComment,
+                                            )
+                                          : IconButton(
+                                              icon: const Icon(
+                                                Icons.flag,
+                                                size: 30,
+                                              ),
+                                              onPressed: flagComment,
+                                            ),
+                                      Expanded(
+                                        child: Container(
+                                          constraints: const BoxConstraints(
+                                              maxHeight: 300),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Expanded(
+                                                child: CommentField(
+                                                  commentController:
+                                                      commentController,
+                                                  hintText: 'Reply to comment',
+                                                  unFocus: widget.unFocus,
+                                                  hasBorder: false,
+                                                  hintStyle: const TextStyle(
+                                                      height: 1.5),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  fixedSize: const Size(30, 30),
+                                                  shape: const CircleBorder(),
+                                                ),
+                                                onPressed: () {
+                                                  widget.unFocus();
+                                                  replyToComment(
+                                                      commentController.text);
+                                                },
+                                                child: const Icon(
+                                                    Icons.reply_rounded),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )
+                            }
                           ],
-                        )
-                      }
+                        ),
+                      ),
                     ],
-                  ),
-                ),
-              ],
-            ),
+                  );
+                }),
             ...widget.replies.map((reply) {
               List replies = reply['replies'] ?? [];
               var comments = FirebaseFirestore.instance
@@ -274,8 +308,6 @@ class _UserCommentState extends State<UserComment> {
                       ))),
                       child: UserComment(
                         key: GlobalKey(),
-                        firstName: reply['createdBy']['firstName'],
-                        lastName: reply['createdBy']['lastName'],
                         creatorId: reply['createdBy']['id'],
                         isDeleted: reply['isDeleted'] ?? false,
                         isRemoved: reply['isRemoved'] ?? false,

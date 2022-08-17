@@ -53,20 +53,7 @@ class PreviewCard extends StatefulWidget {
 
 class _PreviewCardState extends State<PreviewCard> {
   final _auth = FirebaseAuth.instance;
-  late final Map postCreator;
   int resetCount = 0;
-
-  @override
-  void initState() {
-    FirebaseFirestore.instance
-        .collection('Users')
-        .doc(widget.creatorId)
-        .get()
-        .then((doc) {
-      postCreator = doc.data() as Map;
-    });
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +100,20 @@ class _PreviewCardState extends State<PreviewCard> {
                         return AlertDialog(
                           title: Column(
                             children: [
-                              const Icon(
-                                Icons.account_circle,
-                                size: 100,
-                              ),
+                              widget.postCreator['profilePicUrl'] != null
+                                  ? CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                        widget.postCreator['profilePicUrl'],
+                                      ),
+                                      radius: 70,
+                                    )
+                                  : const Icon(
+                                      Icons.account_circle,
+                                      size: 100,
+                                    ),
                               Center(
                                 child: Text(
-                                  '${postCreator['firstName']} ${postCreator['lastName']}',
+                                  '${widget.postCreator['firstName']} ${widget.postCreator['lastName']}',
                                 ),
                               ),
                             ],
@@ -146,9 +140,16 @@ class _PreviewCardState extends State<PreviewCard> {
                       }),
                     );
                   },
-                  child: const Padding(
-                    padding: EdgeInsets.only(right: 10.0),
-                    child: Icon(Icons.account_circle),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: widget.postCreator['profilePicUrl'] != null
+                        ? CircleAvatar(
+                            backgroundImage: NetworkImage(
+                              widget.postCreator['profilePicUrl'],
+                            ),
+                            radius: 10,
+                          )
+                        : const Icon(Icons.account_circle),
                   ),
                 ),
                 Text(

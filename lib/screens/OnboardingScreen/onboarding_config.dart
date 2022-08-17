@@ -13,7 +13,7 @@ final List<Onboard> onboardPages = [
     image: "assets/news.jpg",
     title: "Share",
     description:
-        "Share news, events, gripes, accomplishments, etc. going on in our community that you feel everyone should know.",
+        "Ask questions or share open ended discussion topics about things going on in our community that you feel everyone should know.",
   ),
   Onboard(
     image: "assets/discuss.jpg",

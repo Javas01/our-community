@@ -30,10 +30,6 @@ class ExpandedCard extends StatefulWidget {
 }
 
 class _ExpandedCardState extends State<ExpandedCard> {
-  final firstName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
-  final lastName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
   final userId = FirebaseAuth.instance.currentUser!.uid;
 
   TextEditingController commentController = TextEditingController();
@@ -146,7 +142,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
     );
   }
 
-  Future<void> addComment(String text) {
+  addComment(String text) async {
     if (text == '') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Comment cant be empty')),
@@ -155,12 +151,17 @@ class _ExpandedCardState extends State<ExpandedCard> {
     }
     commentController.text = '';
 
+    DocumentSnapshot snapshot =
+        await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+    final Map currentUser = snapshot.data() as Map;
+
     return widget.comments.add({
       'text': text,
       'isReply': false,
       'createdBy': {
-        'firstName': firstName,
-        'lastName': lastName,
+        'firstName': currentUser['firstName'],
+        'lastName': currentUser['lastName'],
+        'profilePicUrl': currentUser['profilePicUrl'],
         'id': userId,
       },
       'timestamp': FieldValue.serverTimestamp(),
