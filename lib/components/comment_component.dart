@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/components/text_field_components.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import '../../config.dart' show communityCode;
 
 class UserComment extends StatefulWidget {
   const UserComment({
@@ -268,7 +269,7 @@ class _UserCommentState extends State<UserComment> {
               List replies = reply['replies'] ?? [];
               var comments = FirebaseFirestore.instance
                   .collection('Communities')
-                  .doc('ATLMasjid')
+                  .doc(communityCode)
                   .collection('Posts')
                   .doc(widget.postId)
                   .collection('Comments')
@@ -340,7 +341,7 @@ class _UserCommentState extends State<UserComment> {
 
     CollectionReference comments = FirebaseFirestore.instance
         .collection('Communities')
-        .doc('ATLMasjid')
+        .doc(communityCode)
         .collection('Posts')
         .doc(widget.postId)
         .collection('Comments');
@@ -369,7 +370,7 @@ class _UserCommentState extends State<UserComment> {
   Future<void> deleteComment() async {
     DocumentReference comment = FirebaseFirestore.instance
         .collection('Communities')
-        .doc('ATLMasjid')
+        .doc(communityCode)
         .collection('Posts')
         .doc(widget.postId)
         .collection('Comments')

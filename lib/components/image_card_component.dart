@@ -6,6 +6,7 @@ import 'preview_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import '../../config.dart' show communityCode;
 
 class ImageCardComponent extends StatefulWidget {
   const ImageCardComponent({
@@ -184,7 +185,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
 
     FirebaseFirestore.instance
         .collection('Communities')
-        .doc('ATLMasjid')
+        .doc(communityCode)
         .collection('Posts')
         .doc(widget.postId)
         .delete()

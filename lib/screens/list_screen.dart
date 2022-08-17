@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:our_community/components/image_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/constants/tag_options.dart';
+import '../../config.dart' show communityCode;
 
 class ListScreen extends StatefulWidget {
   const ListScreen({
@@ -22,7 +23,7 @@ class _ListScreenState extends State<ListScreen> {
       FirebaseFirestore.instance.collection('Users').snapshots();
   final Stream<QuerySnapshot> _postsStream = FirebaseFirestore.instance
       .collection('Communities')
-      .doc('ATLMasjid')
+      .doc(communityCode)
       .collection('Posts')
       .snapshots();
   final currUserId = FirebaseAuth.instance.currentUser!.uid;

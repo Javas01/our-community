@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/components/tag_component.dart';
 import '../constants/tag_options.dart';
 import 'package:intl/intl.dart';
+import '../../config.dart' show communityCode;
 
 class PreviewCard extends StatefulWidget {
   late DocumentReference post;
@@ -27,12 +28,12 @@ class PreviewCard extends StatefulWidget {
   }) : super(key: key) {
     post = FirebaseFirestore.instance
         .collection('Communities')
-        .doc('ATLMasjid')
+        .doc(communityCode)
         .collection('Posts')
         .doc(postId);
     commentCount = FirebaseFirestore.instance
         .collection('Communities')
-        .doc('ATLMasjid')
+        .doc(communityCode)
         .collection('Posts')
         .doc(postId)
         .collection('Comments')

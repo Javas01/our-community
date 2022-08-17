@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'post_comments_component.dart';
 import 'text_field_components.dart';
+import '../../config.dart' show communityCode;
 
 class ExpandedCard extends StatefulWidget {
   late CollectionReference comments;
@@ -16,7 +17,7 @@ class ExpandedCard extends StatefulWidget {
   }) : super(key: key) {
     comments = FirebaseFirestore.instance
         .collection('Communities')
-        .doc('ATLMasjid')
+        .doc(communityCode)
         .collection('Posts')
         .doc(postId)
         .collection('Comments');

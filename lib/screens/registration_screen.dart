@@ -5,6 +5,7 @@ import 'package:our_community/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../components/registration_subtext_component.dart';
+import '../../config.dart' show communityCode;
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -99,7 +100,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   hintText: 'Community code',
                   isLast: true,
                   validator: (String? value) {
-                    if (value?.toUpperCase().trim() != 'ATLMASJID') {
+                    if (value?.toUpperCase().trim() != communityCode) {
                       return 'Incorrect community code';
                     }
                     return null;
@@ -186,7 +187,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     String password,
     String communityCode,
   ) async {
-    print('TODO: Store community code');
     if (_formKey.currentState!.validate()) {
       if (_isChecked == false) {
         ScaffoldMessenger.of(context).showSnackBar(

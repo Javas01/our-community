@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'comment_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../config.dart' show communityCode;
 
 class PostComments extends StatelessWidget {
   late Stream<QuerySnapshot> _commentsStream;
@@ -13,7 +14,7 @@ class PostComments extends StatelessWidget {
   }) : super(key: key) {
     _commentsStream = FirebaseFirestore.instance
         .collection('Communities')
-        .doc('ATLMasjid')
+        .doc(communityCode)
         .collection('Posts')
         .doc(postId)
         .collection('Comments')

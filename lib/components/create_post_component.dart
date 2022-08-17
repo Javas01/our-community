@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/components/tag_component.dart';
 import 'package:our_community/components/text_form_field_components.dart';
 import '../constants/tag_options.dart';
+import '../../config.dart' show communityCode;
 
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({
@@ -37,7 +38,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
 
   final CollectionReference posts = FirebaseFirestore.instance
       .collection('Communities')
-      .doc('ATLMasjid')
+      .doc(communityCode)
       .collection('Posts');
 
   String typeDropdownValue = 'Text';
