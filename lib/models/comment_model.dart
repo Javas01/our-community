@@ -7,7 +7,7 @@ class Comment {
     required this.text,
     required this.isReply,
     required this.timestamp,
-    this.replies,
+    required this.replies,
     required this.isDeleted,
     required this.isRemoved,
   });
@@ -15,7 +15,7 @@ class Comment {
   String id, createdBy, text;
   bool isReply;
   bool isDeleted, isRemoved;
-  List<String>? replies;
+  List<String> replies;
   Timestamp timestamp;
 }
 
@@ -27,7 +27,7 @@ Comment commentFromFirestore(DocumentSnapshot snapshot, options) {
     createdBy: data['createdBy'],
     isReply: data['isReply'],
     text: data['text'],
-    replies: data['replies']?.cast<String>(),
+    replies: data['replies']?.cast<String>() ?? [],
     timestamp: data['timestamp'],
     isDeleted: data['isDeleted'] ?? false,
     isRemoved: data['isRemoved'] ?? false,

@@ -60,10 +60,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final AppUser currUser = users.firstWhere(
                   (element) => element.id == _auth.currentUser!.uid);
 
-              final blockedUserIds = currUser.blockedUsers ?? [];
-              final blockedUsers = users.where((user) {
-                return blockedUserIds.contains(user.id);
-              }).toList();
+              final blockedUsers = users
+                  .where((user) => currUser.blockedUsers.contains(user.id))
+                  .toList();
 
               return Column(
                 children: [
@@ -208,7 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         .doc(_auth.currentUser!.uid);
     List blockedUsers = await currUser.get().then((doc) {
       final user = doc.data() as AppUser;
-      return user.blockedUsers ?? [];
+      return user.blockedUsers;
     });
     blockedUsers.remove(blockedUserId);
 

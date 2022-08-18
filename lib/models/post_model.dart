@@ -9,14 +9,13 @@ class Post {
     required this.tags,
     required this.timestamp,
     required this.type,
-    this.downVotes,
+    required this.upVotes,
+    required this.downVotes,
     this.lastEdited,
-    this.upVotes,
   });
 
   String id, createdBy, description, title, type;
-  List<String> tags;
-  List<String>? upVotes, downVotes;
+  List<String> tags, upVotes, downVotes;
   Timestamp timestamp;
   Timestamp? lastEdited;
 }
@@ -32,6 +31,9 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
     tags: data['tags'].cast<String>(),
     timestamp: data['timestamp'],
     type: data['type'],
+    upVotes: data['upVotes']?.cast<String>() ?? [],
+    downVotes: data['downVotes']?.cast<String>() ?? [],
+    lastEdited: data['lastEdited'],
   );
 }
 
@@ -42,6 +44,8 @@ Map<String, Object> postToFirestore(Post post, SetOptions? options) {
     'title': {post.title},
     'tags': {post.tags},
     'timestamp': {post.timestamp},
-    'type': {post.type}
+    'type': {post.type},
+    'upVotes': {post.upVotes},
+    'downVotes': {post.downVotes},
   };
 }

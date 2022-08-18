@@ -238,7 +238,7 @@ class _UserCommentState extends State<UserComment> {
                   );
                 }),
             ...widget.replies.map((reply) {
-              final replies = reply.replies ?? [];
+              final replies = reply.replies;
               final replyComments = widget.comments
                   .where((comment) => replies.contains(comment.id))
                   .toList();

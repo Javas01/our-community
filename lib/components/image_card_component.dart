@@ -1,36 +1,25 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:our_community/components/create_post_component.dart';
-import '../models/user_model.dart';
+import 'package:our_community/models/post_model.dart';
+import 'package:our_community/models/user_model.dart';
 import 'expanded_card_component.dart';
 import 'preview_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
-import '../../config.dart' show communityCode;
+import 'package:our_community/config.dart' show communityCode;
 
 class ImageCardComponent extends StatefulWidget {
   const ImageCardComponent({
     Key? key,
-    required this.image,
-    required this.title,
-    required this.description,
-    required this.postId,
-    required this.upVotes,
-    required this.downVotes,
-    required this.tags,
-    required this.timestamp,
-    required this.createdBy,
     required this.resetValueNotifier,
-    required this.lastEdited,
     required this.postCreator,
+    required this.post,
   }) : super(key: key);
 
-  final String image, title, description, postId, createdBy;
-  final List<dynamic> upVotes, downVotes, tags;
+  final Post post;
   final ValueNotifier<bool> resetValueNotifier;
-  final Timestamp timestamp;
-  final Timestamp? lastEdited;
   final AppUser postCreator;
 
   @override
@@ -52,7 +41,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
   }
 
   void _showCustomMenu() {
-    final isCreator = userId == widget.createdBy;
+    final isCreator = userId == widget.post.createdBy;
     final RenderBox overlay =
         Overlay.of(context)!.context.findRenderObject() as RenderBox;
 
@@ -103,10 +92,10 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
           isScrollControlled: true,
           builder: ((context) {
             return CreatePostModal(
-              tags: widget.tags,
-              title: widget.title,
-              description: widget.description,
-              postId: widget.postId,
+              tags: widget.post.tags,
+              title: widget.post.title,
+              description: widget.post.description,
+              postId: widget.post.id,
               isEdit: true,
             );
           }),
@@ -138,11 +127,10 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
       child: _isExpanded
           ? ExpandedCard(
-              description: widget.description,
-              title: widget.title,
-              image: widget.image,
+              description: widget.post.description,
+              title: widget.post.title,
               setExpanded: setExpanded,
-              postId: widget.postId,
+              postId: widget.post.id,
             )
           : GestureDetector(
               onLongPress: _showCustomMenu,
@@ -160,20 +148,11 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
                 widget.resetValueNotifier.value = false;
               },
               child: PreviewCard(
-                description: widget.description,
-                title: widget.title,
-                image: widget.image,
-                upVotes: widget.upVotes,
-                downVotes: widget.downVotes,
-                postId: widget.postId,
                 itemKey: dataKey,
+                post: widget.post,
                 postCreator: widget.postCreator,
-                tags: widget.tags,
                 isSelected: dataKey == _selectedPostKey ? true : false,
-                timestamp: widget.timestamp,
-                lastEdited: widget.lastEdited,
-                createdBy: widget.createdBy,
-                isCreator: userId == widget.createdBy,
+                isCreator: userId == widget.post.createdBy,
               ),
             ),
     );
@@ -186,7 +165,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
           .collection('Communities')
           .doc(communityCode)
           .collection('Posts')
-          .doc(widget.postId)
+          .doc(widget.post.id)
           .delete();
 
       if (!mounted) return;
@@ -209,7 +188,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
             'user_email': userEmail,
             'content_type': 'post',
             'user_id': userId,
-            'post_id': widget.postId,
+            'post_id': widget.post.id,
             'comment_id': '',
           }
         }));

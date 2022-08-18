@@ -80,11 +80,8 @@ class _ListScreenState extends State<ListScreen> {
                   .toList();
 
               // filter posts by blockedUsers
-              final notBlockedPosts = posts.where((post) {
-                List blockedUsers = currUser.blockedUsers ?? [];
-
-                return !blockedUsers.contains(post.createdBy);
-              });
+              final notBlockedPosts = posts.where(
+                  (post) => !currUser.blockedUsers.contains(post.createdBy));
 
               // filter posts by selected tag filter
               var filteredPosts = notBlockedPosts.where((post) {
@@ -96,12 +93,8 @@ class _ListScreenState extends State<ListScreen> {
               // sort posts by vote count (in ascending order)
               filteredPosts.sort((a, b) {
                 if (widget.sortValue == 'Upvotes') {
-                  List aUpVotes = a.upVotes ?? [];
-                  List bUpVotes = b.upVotes ?? [];
-                  List aDownVotes = a.downVotes ?? [];
-                  List bDownVotes = b.downVotes ?? [];
-                  int aVoteCount = aUpVotes.length - aDownVotes.length;
-                  int bVoteCount = bUpVotes.length - bDownVotes.length;
+                  int aVoteCount = a.upVotes.length - a.downVotes.length;
+                  int bVoteCount = b.upVotes.length - b.downVotes.length;
 
                   return aVoteCount.compareTo(bVoteCount);
                 } else {
@@ -133,18 +126,9 @@ class _ListScreenState extends State<ListScreen> {
                       users.firstWhere((e) => e.id == post.createdBy);
 
                   return ImageCardComponent(
-                    title: post.title,
-                    description: post.description,
-                    image: 'assets/masjid.jpeg',
-                    upVotes: post.upVotes ?? [],
-                    downVotes: post.downVotes ?? [],
-                    createdBy: post.createdBy,
-                    timestamp: post.timestamp,
-                    lastEdited: post.lastEdited,
-                    tags: post.tags,
-                    postId: post.id,
-                    resetValueNotifier: widget.resetValueNotifier,
+                    post: post,
                     postCreator: postCreator,
+                    resetValueNotifier: widget.resetValueNotifier,
                   );
                 }).toList()
               ]);

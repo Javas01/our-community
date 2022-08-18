@@ -19,7 +19,7 @@ void unBlock(
     final userDoc = await userDocRef.get();
 
     final user = userDoc.data() as AppUser;
-    final blockedUsers = user.blockedUsers ?? [];
+    final blockedUsers = user.blockedUsers;
     blockedUsers.remove(blockedUserId);
 
     await userDocRef.update({

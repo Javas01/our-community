@@ -89,7 +89,7 @@ class _PostCommentsState extends State<PostComments> {
 
                 return ListView(
                     children: filteredComments.map((comment) {
-                  final replies = comment.replies ?? [];
+                  final replies = comment.replies;
                   final replyComments = comments
                       .where((comment) => replies.contains(comment.id))
                       .toList();
@@ -101,7 +101,7 @@ class _PostCommentsState extends State<PostComments> {
                     replies: replyComments,
                     postId: widget.postId,
                     unFocus: widget.unFocus,
-                    blockedUsers: currUser.blockedUsers ?? [],
+                    blockedUsers: currUser.blockedUsers,
                   );
                 }).toList());
               },

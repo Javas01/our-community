@@ -5,12 +5,12 @@ class AppUser {
     required this.id,
     required this.firstName,
     required this.lastName,
-    this.blockedUsers,
+    required this.blockedUsers,
     this.profilePicUrl,
   });
 
   String id, firstName, lastName;
-  List<String>? blockedUsers;
+  List<String> blockedUsers;
   String? profilePicUrl;
 }
 
@@ -22,7 +22,7 @@ AppUser userFromFirestore(DocumentSnapshot snapshot, options) {
     firstName: data['firstName'],
     lastName: data['lastName'],
     profilePicUrl: data['profilePicUrl'],
-    blockedUsers: data['blockedUsers']?.cast<String>(),
+    blockedUsers: data['blockedUsers']?.cast<String>() ?? [],
   );
 }
 

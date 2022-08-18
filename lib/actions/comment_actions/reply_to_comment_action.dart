@@ -8,7 +8,7 @@ void replyToComment(
   String postId,
   String userId,
   String commentId,
-  List<String>? replies,
+  List<String> replies,
 ) async {
   if (commentController.text.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -34,7 +34,7 @@ void replyToComment(
 
     DocumentReference parentCommentRef = comments.doc(commentId);
 
-    List parentCommentReplies = replies ?? [];
+    List parentCommentReplies = replies;
     List newReplies = [...parentCommentReplies, newCommentDoc.id];
 
     parentCommentRef.update({'replies': newReplies});

@@ -19,7 +19,7 @@ void blockUser(
     final userDoc = await userDocRef.get();
 
     final user = userDoc.data() as AppUser;
-    final blockedUsers = user.blockedUsers ?? [];
+    final blockedUsers = user.blockedUsers;
     blockedUsers.add(userIdToBlock);
 
     userDocRef.update({

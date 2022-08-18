@@ -7,7 +7,6 @@ import 'text_field_components.dart';
 class ExpandedCard extends StatefulWidget {
   const ExpandedCard({
     Key? key,
-    required this.image,
     required this.title,
     required this.description,
     required this.setExpanded,
@@ -15,7 +14,7 @@ class ExpandedCard extends StatefulWidget {
   }) : super(key: key);
 
   final void Function(bool) setExpanded;
-  final String image, title, description, postId;
+  final String title, description, postId;
 
   @override
   State<ExpandedCard> createState() => _ExpandedCardState();

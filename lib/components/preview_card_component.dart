@@ -2,38 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:our_community/actions/post_actions/vote_action.dart';
 import 'package:our_community/modals/user_info_modal.dart';
-import '../components/tag_component.dart';
-import '../models/user_model.dart';
-import '../constants/tag_options.dart';
-import '../../config.dart' show communityCode;
+import 'package:our_community/models/post_model.dart';
+import 'package:our_community/components/tag_component.dart';
+import 'package:our_community/models/user_model.dart';
+import 'package:our_community/constants/tag_options.dart';
+import 'package:our_community/config.dart' show communityCode;
 
 class PreviewCard extends StatefulWidget {
   const PreviewCard({
     Key? key,
-    required this.image,
-    required this.title,
-    required this.description,
+    required this.post,
     required this.itemKey,
-    required this.upVotes,
-    required this.downVotes,
-    required this.postId,
     required this.postCreator,
-    required this.tags,
-    required this.timestamp,
-    required this.lastEdited,
     required this.isSelected,
-    required this.createdBy,
     required this.isCreator,
   }) : super(key: key);
 
-  final String image, title, description, postId, createdBy;
+  final Post post;
   final AppUser postCreator;
   final bool isSelected, isCreator;
-  final List<dynamic> upVotes, downVotes, tags;
   final GlobalKey itemKey;
-  final Timestamp timestamp;
-  final Timestamp? lastEdited;
 
   @override
   State<PreviewCard> createState() => _PreviewCardState();
@@ -43,21 +33,15 @@ class _PreviewCardState extends State<PreviewCard> {
   final _auth = FirebaseAuth.instance;
   int resetCount = 0;
 
-  late DocumentReference post;
   late Future<QuerySnapshot> commentCount;
 
   @override
   void initState() {
-    post = FirebaseFirestore.instance
-        .collection('Communities')
-        .doc(communityCode)
-        .collection('Posts')
-        .doc(widget.postId);
     commentCount = FirebaseFirestore.instance
         .collection('Communities')
         .doc(communityCode)
         .collection('Posts')
-        .doc(widget.postId)
+        .doc(widget.post.id)
         .collection('Comments')
         .get();
     super.initState();
@@ -65,23 +49,23 @@ class _PreviewCardState extends State<PreviewCard> {
 
   @override
   Widget build(BuildContext context) {
-    String voteCount =
-        (widget.upVotes.length - widget.downVotes.length).toString();
-    bool isUpVoted = widget.upVotes.contains(_auth.currentUser!.uid);
-    bool isDownVoted = widget.downVotes.contains(_auth.currentUser!.uid);
-    final String postDate = widget.lastEdited == null
+    final voteCount =
+        (widget.post.upVotes.length - widget.post.downVotes.length);
+    bool isUpVoted = widget.post.upVotes.contains(_auth.currentUser!.uid);
+    bool isDownVoted = widget.post.downVotes.contains(_auth.currentUser!.uid);
+    final String postDate = widget.post.lastEdited == null
         ? DateFormat(
             'yyyy-MM-dd (hh:mm aa)',
           ).format(
             DateTime.fromMicrosecondsSinceEpoch(
-              widget.timestamp.microsecondsSinceEpoch,
+              widget.post.timestamp.microsecondsSinceEpoch,
             ),
           )
         : 'edited on ${DateFormat(
             'yyyy-MM-dd (hh:mm aa)',
           ).format(
             DateTime.fromMicrosecondsSinceEpoch(
-              widget.lastEdited!.microsecondsSinceEpoch,
+              widget.post.lastEdited!.microsecondsSinceEpoch,
             ),
           )}';
 
@@ -131,7 +115,7 @@ class _PreviewCardState extends State<PreviewCard> {
                       fontWeight: FontWeight.w300,
                     )),
                 const Spacer(),
-                ...widget.tags.map<Widget>((tag) {
+                ...widget.post.tags.map<Widget>((tag) {
                   return Tag(
                     color: tagOptions[tag]!,
                     title: tag,
@@ -145,7 +129,7 @@ class _PreviewCardState extends State<PreviewCard> {
                       children: [
                         const SizedBox(height: 5),
                         Text(
-                          widget.title,
+                          widget.post.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
@@ -158,7 +142,7 @@ class _PreviewCardState extends State<PreviewCard> {
                           height: 10,
                         ),
                         Text(
-                          widget.description,
+                          widget.post.description,
                           maxLines: null,
                           textAlign: TextAlign.left,
                         ),
@@ -196,10 +180,18 @@ class _PreviewCardState extends State<PreviewCard> {
                   ),
                   Row(
                     children: [
-                      Text(voteCount),
+                      Text(voteCount.toString()),
                       GestureDetector(
                         onTap: () {
-                          isUpVoted ? vote('remove') : vote('up');
+                          isUpVoted
+                              ? vote(
+                                  'remove',
+                                  widget.post.id,
+                                )
+                              : vote(
+                                  'up',
+                                  widget.post.id,
+                                );
                         },
                         child: Icon(
                           Icons.keyboard_arrow_up_outlined,
@@ -209,7 +201,15 @@ class _PreviewCardState extends State<PreviewCard> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          isDownVoted ? vote('remove') : vote('down');
+                          isDownVoted
+                              ? vote(
+                                  'remove',
+                                  widget.post.id,
+                                )
+                              : vote(
+                                  'down',
+                                  widget.post.id,
+                                );
                         },
                         child: Icon(
                           Icons.keyboard_arrow_down_outlined,
@@ -226,34 +226,5 @@ class _PreviewCardState extends State<PreviewCard> {
         ),
       ),
     );
-  }
-
-  Future<void> vote(String voteType) {
-    switch (voteType) {
-      case 'up':
-        {
-          widget.upVotes.add(_auth.currentUser!.uid);
-          widget.downVotes.remove(_auth.currentUser!.uid);
-        }
-        break;
-      case 'down':
-        {
-          widget.downVotes.add(_auth.currentUser!.uid);
-          widget.upVotes.remove(_auth.currentUser!.uid);
-        }
-        break;
-      // default is remove vote
-      default:
-        {
-          widget.upVotes.remove(_auth.currentUser!.uid);
-          widget.downVotes.remove(_auth.currentUser!.uid);
-        }
-        break;
-    }
-
-    return post.update({
-      'upVotes': widget.upVotes,
-      'downVotes': widget.downVotes,
-    }).catchError((error) => Future.error(error));
   }
 }
