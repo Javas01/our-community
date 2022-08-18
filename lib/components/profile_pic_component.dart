@@ -21,7 +21,7 @@ class ProfilePic extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: onTap,
-        child: false
+        child: image != null || url != null
             ? CircleAvatar(
                 backgroundImage: (image != null
                     ? FileImage(image!)
