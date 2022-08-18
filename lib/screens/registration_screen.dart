@@ -99,7 +99,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   hintText: 'Community code',
                   isLast: true,
                   validator: (String? value) {
-                    if (value?.toUpperCase().trim() != communityCode) {
+                    if (value?.toUpperCase().trim() !=
+                        communityCode.toUpperCase()) {
                       return 'Incorrect community code';
                     }
                     return null;
