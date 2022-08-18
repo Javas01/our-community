@@ -59,7 +59,7 @@ class _PostCommentsState extends State<PostComments> {
             }
 
             if (usersSnapshot.connectionState == ConnectionState.waiting) {
-              return const Text("Loading");
+              return const Text('Loading');
             }
             final users = usersSnapshot.data!.docs
                 .map((userDoc) => userDoc.data() as AppUser)
@@ -77,7 +77,7 @@ class _PostCommentsState extends State<PostComments> {
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text("Loading");
+                  return const Text('Loading');
                 }
                 final comments = snapshot.data!.docs
                     .map((commentDoc) => commentDoc.data() as Comment)

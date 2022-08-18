@@ -164,7 +164,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
         'timestamp': Timestamp.now(),
       });
     } catch (e) {
-      Future.error("Failed to add comment: $e");
+      Future.error('Failed to add comment: $e');
     }
   }
 }

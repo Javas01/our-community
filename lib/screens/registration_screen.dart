@@ -79,7 +79,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 FormInputField(
                   controller: passwordController,
                   validator: (value) {
-                    bool passwordValid = RegExp(r"^.{6,}$").hasMatch(value!);
+                    bool passwordValid = RegExp(r'^.{6,}$').hasMatch(value!);
                     if (value.isEmpty) {
                       return ('Password cannot be empty');
                     }

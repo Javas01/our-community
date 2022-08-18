@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        title: const Text("Our Community"),
+        title: const Text('Our Community'),
         leading: null,
         actions: [
           PopupMenuButton(

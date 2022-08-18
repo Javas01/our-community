@@ -192,7 +192,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } catch (e) {
-      Future.error("Error deleting post $e");
+      Future.error('Error deleting post $e');
     }
   }
 

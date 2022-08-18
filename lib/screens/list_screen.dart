@@ -57,7 +57,7 @@ class _ListScreenState extends State<ListScreen> {
           }
 
           if (usersSnapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
+            return const Text('Loading');
           }
           final users = usersSnapshot.data!.docs
               .map((userDoc) => userDoc.data() as AppUser)
@@ -72,7 +72,7 @@ class _ListScreenState extends State<ListScreen> {
                 return const Text('Something went wrong');
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text("Loading");
+                return const Text('Loading');
               }
 
               List<Post> posts = snapshot.data!.docs

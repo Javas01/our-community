@@ -51,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text("Loading");
+                return const Text('Loading');
               }
 
               final users = snapshot.data!.docs
@@ -121,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         shrinkWrap: true,
                         children: blockedUsers.map((blockedUser) {
                           final blockedUserName =
-                              "${blockedUser.firstName} ${blockedUser.lastName}";
+                              '${blockedUser.firstName} ${blockedUser.lastName}';
 
                           return Card(
                             child: Padding(

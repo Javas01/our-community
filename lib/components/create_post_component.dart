@@ -72,7 +72,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    widget.isEdit ? "Edit Post" : "Create New Post",
+                    widget.isEdit ? 'Edit Post' : 'Create New Post',
                     style: Theme.of(context)
                         .textTheme
                         .headline5!

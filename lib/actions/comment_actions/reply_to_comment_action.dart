@@ -40,7 +40,7 @@ void replyToComment(
     parentCommentRef.update({'replies': newReplies});
     commentController.clear();
   } catch (e) {
-    Future.error("Failed to add comment: $e");
+    Future.error('Failed to add comment: $e');
     commentController.clear();
   }
 }

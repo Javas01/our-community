@@ -88,7 +88,7 @@ class _UserCommentState extends State<UserComment> {
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text("Loading");
+                    return const Text('Loading');
                   }
                   final commentCreator = snapshot.data!.data() as AppUser;
                   return Row(

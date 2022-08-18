@@ -256,26 +256,4 @@ class _PreviewCardState extends State<PreviewCard> {
       'downVotes': widget.downVotes,
     }).catchError((error) => Future.error(error));
   }
-
-  void blockUser(BuildContext context) async {
-    final currUser = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(_auth.currentUser!.uid);
-    List blockedUsers = await currUser.get().then((doc) {
-      final Map user = doc.data() as Map;
-      return user['blockedUsers'] ?? [];
-    });
-    blockedUsers.add(widget.createdBy);
-
-    currUser.update({
-      'blockedUsers': blockedUsers,
-    }).then((value) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('user blocked'),
-        ),
-      );
-    });
-  }
 }
