@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'comment_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'comment_component.dart';
+import '../models/user_model.dart';
+import '../models/comment_model.dart';
 import '../../config.dart' show communityCode;
 
 class PostComments extends StatelessWidget {
@@ -18,11 +20,20 @@ class PostComments extends StatelessWidget {
         .collection('Posts')
         .doc(postId)
         .collection('Comments')
+        .withConverter(
+          fromFirestore: commentFromFirestore,
+          toFirestore: commentToFirestore,
+        )
         .snapshots();
   }
 
-  final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('Users').snapshots();
+  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
+      .collection('Users')
+      .withConverter(
+        fromFirestore: userFromFirestore,
+        toFirestore: userToFirestore,
+      )
+      .snapshots();
   final String postId;
   final VoidCallback unFocus;
 
@@ -40,12 +51,12 @@ class PostComments extends StatelessWidget {
             if (usersSnapshot.connectionState == ConnectionState.waiting) {
               return const Text("Loading");
             }
-            final List<QueryDocumentSnapshot> users = usersSnapshot.data!.docs;
+            final users = usersSnapshot.data!.docs
+                .map((userDoc) => userDoc.data() as AppUser)
+                .toList();
 
-            final currUser = users
-                .firstWhere(
-                    (e) => e.id == FirebaseAuth.instance.currentUser!.uid)
-                .data() as Map;
+            final currUser = users.firstWhere(
+                (user) => user.id == FirebaseAuth.instance.currentUser!.uid);
 
             return StreamBuilder<QuerySnapshot>(
               stream: _commentsStream,
@@ -58,46 +69,29 @@ class PostComments extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Text("Loading");
                 }
-                final commentDocs = snapshot.data!.docs;
+                final comments = snapshot.data!.docs
+                    .map((commentDoc) => commentDoc.data() as Comment)
+                    .toList();
 
-                List<QueryDocumentSnapshot> filteredComments =
-                    commentDocs.where(
-                  (DocumentSnapshot document) {
-                    Map<String, dynamic> data =
-                        document.data()! as Map<String, dynamic>;
-
-                    return !data['isReply'];
-                  },
-                ).toList();
+                // filter comments by no parent comments
+                final filteredComments =
+                    comments.where((comment) => !comment.isReply);
 
                 return ListView(
-                    children: filteredComments.map((DocumentSnapshot document) {
-                  Map<String, dynamic> data =
-                      document.data()! as Map<String, dynamic>;
-
-                  List replies = data['replies'] ?? [];
-                  List replyComments = snapshot.data!.docs
-                      .where((doc) => replies.contains(doc.id))
-                      .map((DocumentSnapshot document) {
-                    Map<String, dynamic> replyData =
-                        document.data()! as Map<String, dynamic>;
-
-                    return {...replyData, 'commentId': document.id};
-                  }).toList();
+                    children: filteredComments.map((comment) {
+                  final replies = comment.replies ?? [];
+                  final replyComments = comments
+                      .where((comment) => replies.contains(comment.id))
+                      .toList();
 
                   return UserComment(
                     key: GlobalKey(),
-                    createdBy: data['createdBy'],
-                    isDeleted: data['isDeleted'] ?? false,
-                    isRemoved: data['isRemoved'] ?? false,
-                    timestamp: data['timestamp'] ??
-                        Timestamp.fromMicrosecondsSinceEpoch(1660312350),
-                    commentText: data['text'],
+                    comment: comment,
+                    comments: comments,
                     replies: replyComments,
                     postId: postId,
-                    commentId: document.id,
                     unFocus: unFocus,
-                    blockedUsers: currUser['blockedUsers'] ?? [],
+                    blockedUsers: currUser.blockedUsers ?? [],
                   );
                 }).toList());
               },

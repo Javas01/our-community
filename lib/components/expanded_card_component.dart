@@ -150,17 +150,16 @@ class _ExpandedCardState extends State<ExpandedCard> {
       );
       return Future.value();
     }
-    commentController.text = '';
-
-    DocumentSnapshot snapshot =
-        await FirebaseFirestore.instance.collection('Users').doc(userId).get();
-    final Map currentUser = snapshot.data() as Map;
-
-    return widget.comments.add({
-      'text': text,
-      'isReply': false,
-      'createdBy': userId,
-      'timestamp': FieldValue.serverTimestamp(),
-    }).catchError((error) => print("Failed to add comment: $error"));
+    commentController.clear();
+    try {
+      await widget.comments.add({
+        'text': text,
+        'isReply': false,
+        'createdBy': userId,
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      Future.error("Failed to add comment: $e");
+    }
   }
 }

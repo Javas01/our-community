@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:our_community/modals/user_info_modal.dart';
 import '../components/tag_component.dart';
 import '../models/user_model.dart';
 import '../constants/tag_options.dart';
@@ -98,48 +99,12 @@ class _PreviewCardState extends State<PreviewCard> {
                   onTap: () {
                     showDialog(
                       context: context,
-                      builder: ((context) {
-                        return AlertDialog(
-                          title: Column(
-                            children: [
-                              widget.postCreator.profilePicUrl != null
-                                  ? CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                        widget.postCreator.profilePicUrl!,
-                                      ),
-                                      radius: 70,
-                                    )
-                                  : const Icon(
-                                      Icons.account_circle,
-                                      size: 100,
-                                    ),
-                              Center(
-                                child: Text(
-                                  '${widget.postCreator.firstName} ${widget.postCreator.lastName}',
-                                ),
-                              ),
-                            ],
-                          ),
-                          actions: !widget.isCreator
-                              ? [
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, 'Cancel'),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () => blockUser(context),
-                                    style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all(Colors.red),
-                                    ),
-                                    child: const Text('Block'),
-                                  ),
-                                ]
-                              : [],
-                          actionsAlignment: MainAxisAlignment.center,
-                        );
-                      }),
+                      builder: ((modalContext) => UserInfoModal(
+                            context: modalContext,
+                            contentCreator: widget.postCreator,
+                            isCreator: widget.isCreator,
+                            isUserBlocked: false,
+                          )),
                     );
                   },
                   child: Padding(

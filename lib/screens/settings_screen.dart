@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../actions/user_actions/delete_account_action.dart';
+import '../components/profile_pic_component.dart';
 import '../components/text_form_field_components.dart';
 import '../screens/OnboardingScreen/onboarding_screen.dart';
 import '../models/user_model.dart';
@@ -68,32 +70,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
                     child: Center(
-                        child: image != null
-                            ? GestureDetector(
-                                onTap: pickImage,
-                                child: CircleAvatar(
-                                  backgroundImage: FileImage(image!),
-                                  radius: 100,
-                                ),
-                              )
-                            : currUser.profilePicUrl != null
-                                ? GestureDetector(
-                                    onTap: pickImage,
-                                    child: CircleAvatar(
-                                      backgroundImage:
-                                          NetworkImage(currUser.profilePicUrl!),
-                                      radius: 100,
-                                    ),
-                                  )
-                                : GestureDetector(
-                                    onTap: pickImage,
-                                    child: IconButton(
-                                      onPressed: pickImage,
-                                      icon: const Icon(
-                                          Icons.account_circle_rounded),
-                                      iconSize: 190,
-                                    ),
-                                  )),
+                      child: ProfilePic(
+                        url: currUser.profilePicUrl,
+                        image: image,
+                        onTap: pickImage,
+                        radius: 100,
+                        iconSize: 190,
+                      ),
+                    ),
                   ),
                   Row(
                     children: <Widget>[
@@ -206,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 backgroundColor: MaterialStateProperty.all(Colors.red),
               ),
               onPressed: () {
-                deleteAccount();
+                deleteAccount(context);
               },
               child: const Text('Delete Account'),
             ),
@@ -281,39 +265,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       Future.error(e);
     }
-  }
-
-  void deleteAccount() {
-    const snackBar = SnackBar(content: Text('Profile deleted'));
-
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Are you sure?'),
-        content: const Text('This action cannot be undone.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'Cancel'),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => _auth.currentUser!.delete().then((_) {
-              _auth.signOut();
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: ((context) => const OnboardingScreen())),
-                  (route) => false);
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            }),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future pickImage() async {
