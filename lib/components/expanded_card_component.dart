@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../actions/comment_actions/add_comment_action.dart';
 import 'post_comments_component.dart';
 import 'text_field_components.dart';
-import '../../config.dart' show communityCode;
 
 class ExpandedCard extends StatefulWidget {
   const ExpandedCard({
@@ -35,19 +34,6 @@ class _ExpandedCardState extends State<ExpandedCard> {
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
     );
-  }
-
-  late CollectionReference comments;
-
-  @override
-  void initState() {
-    comments = FirebaseFirestore.instance
-        .collection('Communities')
-        .doc(communityCode)
-        .collection('Posts')
-        .doc(widget.postId)
-        .collection('Comments');
-    super.initState();
   }
 
   @override
@@ -130,7 +116,12 @@ class _ExpandedCardState extends State<ExpandedCard> {
                           ),
                           onPressed: () {
                             unFocus();
-                            addComment(commentController.text);
+                            addComment(
+                              context,
+                              commentController,
+                              userId,
+                              widget.postId,
+                            );
                           },
                           child: const Icon(
                             Icons.send_rounded,
@@ -146,25 +137,5 @@ class _ExpandedCardState extends State<ExpandedCard> {
         ),
       ),
     );
-  }
-
-  addComment(String text) async {
-    if (text == '') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment cant be empty')),
-      );
-      return Future.value();
-    }
-    commentController.clear();
-    try {
-      await comments.add({
-        'text': text,
-        'isReply': false,
-        'createdBy': userId,
-        'timestamp': Timestamp.now(),
-      });
-    } catch (e) {
-      Future.error('Failed to add comment: $e');
-    }
   }
 }
