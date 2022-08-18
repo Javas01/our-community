@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/components/tag_component.dart';
 import 'package:our_community/components/text_form_field_components.dart';
+import '../actions/post_actions/create_post_action.dart';
+import '../actions/post_actions/edit_post_action.dart';
 import '../constants/tag_options.dart';
 import '../../config.dart' show communityCode;
 
@@ -176,6 +178,10 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     typeDropdownValue,
                                     tagDropdownValue,
                                     context,
+                                    widget.postId!,
+                                    posts,
+                                    _formKey,
+                                    () => Navigator.pop(context),
                                   )
                                 : createPost(
                                     titleController.text,
@@ -183,6 +189,10 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     typeDropdownValue,
                                     tagDropdownValue,
                                     context,
+                                    userId,
+                                    posts,
+                                    _formKey,
+                                    () => Navigator.pop(context),
                                   );
                           },
                           child: const Text('Submit'))
@@ -193,43 +203,5 @@ class _CreatePostModalState extends State<CreatePostModal> {
         ),
       ),
     );
-  }
-
-  Future<void> createPost(String title, String description, String type,
-      String tag, BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      return posts
-          .add({
-            'title': title,
-            'description': description,
-            'createdBy': userId,
-            'type': type,
-            'tags': [tag],
-            'timestamp': Timestamp.now(),
-          })
-          .then((value) => Navigator.pop(context))
-          .catchError((error) => print("Failed to create post: $error"));
-    } else {
-      return Future.error('Invalid post');
-    }
-  }
-
-  Future<void> editPost(String title, String description, String type,
-      String tag, BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      return posts
-          .doc(widget.postId)
-          .update({
-            'title': title,
-            'description': description,
-            'type': type,
-            'tags': [tag],
-            'lastEdited': Timestamp.now(),
-          })
-          .then((value) => Navigator.pop(context))
-          .catchError((error) => print("Failed to create post: $error"));
-    } else {
-      return Future.error('Invalid post');
-    }
   }
 }

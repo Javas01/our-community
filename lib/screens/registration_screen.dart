@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/components/text_form_field_components.dart';
-import 'package:our_community/screens/home_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../components/text_form_field_components.dart';
+import '../screens/home_screen.dart';
+import '../actions/user_actions/create_account_action.dart';
 import '../components/registration_subtext_component.dart';
 import '../../config.dart' show communityCode;
 
@@ -23,7 +23,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController communityController = TextEditingController();
 
-  final _auth = FirebaseAuth.instance;
   bool _isChecked = false;
 
   @override
@@ -110,11 +109,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 FormSubmitButton(
                   onPressed: () {
                     createAccount(
+                      context,
                       firstNameController.text,
                       lastNameController.text,
                       emailController.text,
                       passwordController.text,
                       communityController.text,
+                      _formKey,
+                      _isChecked,
+                      () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => const HomeScreen()),
+                          ),
+                          (route) => false,
+                        );
+                      },
                     );
                   },
                   text: 'Signup',
@@ -178,43 +189,5 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         )),
       ),
     );
-  }
-
-  void createAccount(
-    String firstName,
-    String lastName,
-    String email,
-    String password,
-    String communityCode,
-  ) async {
-    if (_formKey.currentState!.validate()) {
-      if (_isChecked == false) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('You must agree to terms and conditions to register.'),
-          ),
-        );
-        return;
-      }
-
-      String displayName = '$firstName $lastName';
-
-      await _auth
-          .createUserWithEmailAndPassword(email: email, password: password)
-          .then((value) => {
-                value.user!
-                    .updateDisplayName(displayName)
-                    .then((_) => {
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                  builder: ((context) => const HomeScreen())),
-                              (route) => false)
-                        })
-                    .catchError((error) => Future.error(error))
-              })
-          .catchError((error) => {Future.error(error)});
-    }
   }
 }

@@ -6,22 +6,14 @@ import 'text_field_components.dart';
 import '../../config.dart' show communityCode;
 
 class ExpandedCard extends StatefulWidget {
-  late CollectionReference comments;
-  ExpandedCard({
+  const ExpandedCard({
     Key? key,
     required this.image,
     required this.title,
     required this.description,
     required this.setExpanded,
     required this.postId,
-  }) : super(key: key) {
-    comments = FirebaseFirestore.instance
-        .collection('Communities')
-        .doc(communityCode)
-        .collection('Posts')
-        .doc(postId)
-        .collection('Comments');
-  }
+  }) : super(key: key);
 
   final void Function(bool) setExpanded;
   final String image, title, description, postId;
@@ -43,6 +35,19 @@ class _ExpandedCardState extends State<ExpandedCard> {
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
     );
+  }
+
+  late CollectionReference comments;
+
+  @override
+  void initState() {
+    comments = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc(communityCode)
+        .collection('Posts')
+        .doc(widget.postId)
+        .collection('Comments');
+    super.initState();
   }
 
   @override
@@ -152,7 +157,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
     }
     commentController.clear();
     try {
-      await widget.comments.add({
+      await comments.add({
         'text': text,
         'isReply': false,
         'createdBy': userId,

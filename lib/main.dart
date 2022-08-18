@@ -1,4 +1,4 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:our_community/screens/home_screen.dart';
 import 'package:our_community/screens/OnboardingScreen/onboarding_screen.dart';
@@ -11,8 +11,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  print(fcmToken);
+  // TODO: Implement FCM push notifications
+  // final fcmToken = await FirebaseMessaging.instance.getToken();
+  // print(fcmToken);
 
   runApp(const MyApp());
 }

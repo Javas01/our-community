@@ -9,9 +9,7 @@ import '../constants/tag_options.dart';
 import '../../config.dart' show communityCode;
 
 class PreviewCard extends StatefulWidget {
-  late DocumentReference post;
-  late Future<QuerySnapshot> commentCount;
-  PreviewCard({
+  const PreviewCard({
     Key? key,
     required this.image,
     required this.title,
@@ -27,20 +25,7 @@ class PreviewCard extends StatefulWidget {
     required this.isSelected,
     required this.createdBy,
     required this.isCreator,
-  }) : super(key: key) {
-    post = FirebaseFirestore.instance
-        .collection('Communities')
-        .doc(communityCode)
-        .collection('Posts')
-        .doc(postId);
-    commentCount = FirebaseFirestore.instance
-        .collection('Communities')
-        .doc(communityCode)
-        .collection('Posts')
-        .doc(postId)
-        .collection('Comments')
-        .get();
-  }
+  }) : super(key: key);
 
   final String image, title, description, postId, createdBy;
   final AppUser postCreator;
@@ -57,6 +42,26 @@ class PreviewCard extends StatefulWidget {
 class _PreviewCardState extends State<PreviewCard> {
   final _auth = FirebaseAuth.instance;
   int resetCount = 0;
+
+  late DocumentReference post;
+  late Future<QuerySnapshot> commentCount;
+
+  @override
+  void initState() {
+    post = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc(communityCode)
+        .collection('Posts')
+        .doc(widget.postId);
+    commentCount = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc(communityCode)
+        .collection('Posts')
+        .doc(widget.postId)
+        .collection('Comments')
+        .get();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +174,7 @@ class _PreviewCardState extends State<PreviewCard> {
                   Row(
                     children: [
                       FutureBuilder(
-                        future: widget.commentCount,
+                        future: commentCount,
                         builder: (BuildContext context,
                             AsyncSnapshot<QuerySnapshot> snapshot) {
                           if (snapshot.hasError) {
@@ -246,7 +251,7 @@ class _PreviewCardState extends State<PreviewCard> {
         break;
     }
 
-    return widget.post.update({
+    return post.update({
       'upVotes': widget.upVotes,
       'downVotes': widget.downVotes,
     }).catchError((error) => Future.error(error));

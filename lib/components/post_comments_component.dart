@@ -6,27 +6,21 @@ import '../models/user_model.dart';
 import '../models/comment_model.dart';
 import '../../config.dart' show communityCode;
 
-class PostComments extends StatelessWidget {
-  late Stream<QuerySnapshot> _commentsStream;
-
-  PostComments({
+class PostComments extends StatefulWidget {
+  const PostComments({
     Key? key,
     required this.postId,
     required this.unFocus,
-  }) : super(key: key) {
-    _commentsStream = FirebaseFirestore.instance
-        .collection('Communities')
-        .doc(communityCode)
-        .collection('Posts')
-        .doc(postId)
-        .collection('Comments')
-        .withConverter(
-          fromFirestore: commentFromFirestore,
-          toFirestore: commentToFirestore,
-        )
-        .snapshots();
-  }
+  }) : super(key: key);
 
+  final String postId;
+  final VoidCallback unFocus;
+
+  @override
+  State<PostComments> createState() => _PostCommentsState();
+}
+
+class _PostCommentsState extends State<PostComments> {
   final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
       .collection('Users')
       .withConverter(
@@ -34,8 +28,24 @@ class PostComments extends StatelessWidget {
         toFirestore: userToFirestore,
       )
       .snapshots();
-  final String postId;
-  final VoidCallback unFocus;
+
+  late Stream<QuerySnapshot> _commentsStream;
+
+  @override
+  void initState() {
+    _commentsStream = _commentsStream = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc(communityCode)
+        .collection('Posts')
+        .doc(widget.postId)
+        .collection('Comments')
+        .withConverter(
+          fromFirestore: commentFromFirestore,
+          toFirestore: commentToFirestore,
+        )
+        .snapshots();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +99,8 @@ class PostComments extends StatelessWidget {
                     comment: comment,
                     comments: comments,
                     replies: replyComments,
-                    postId: postId,
-                    unFocus: unFocus,
+                    postId: widget.postId,
+                    unFocus: widget.unFocus,
                     blockedUsers: currUser.blockedUsers ?? [],
                   );
                 }).toList());

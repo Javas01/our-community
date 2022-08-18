@@ -179,46 +179,47 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
     );
   }
 
-  void deletePost() {
+  void deletePost() async {
     const snackBar = SnackBar(content: Text('Post deleted'));
+    try {
+      await FirebaseFirestore.instance
+          .collection('Communities')
+          .doc(communityCode)
+          .collection('Posts')
+          .doc(widget.postId)
+          .delete();
 
-    FirebaseFirestore.instance
-        .collection('Communities')
-        .doc(communityCode)
-        .collection('Posts')
-        .doc(widget.postId)
-        .delete()
-        .then(
-          (doc) => ScaffoldMessenger.of(context).showSnackBar(snackBar),
-          onError: (e) => print("Error deleting post $e"),
-        );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } catch (e) {
+      Future.error("Error deleting post $e");
+    }
   }
 
   void flagPost() async {
     final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-    await http
-        .post(url,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'accessToken': 'RSpCM_xJwri5l9DjMIGAy',
-              'service_id': 'service_ydieaun',
-              'template_id': 'template_ejdq7ar',
-              'user_id': 'zycID_4Z1ijq9fgbW',
-              'template_params': {
-                'user_email': userEmail,
-                'content_type': 'post',
-                'user_id': userId,
-                'post_id': widget.postId,
-                'comment_id': '',
-              }
-            }))
-        .then(
-          (_) => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Thank you, we received your report and will make a decision after reviewing'),
-            ),
-          ),
-        );
+    await http.post(url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'accessToken': 'RSpCM_xJwri5l9DjMIGAy',
+          'service_id': 'service_ydieaun',
+          'template_id': 'template_ejdq7ar',
+          'user_id': 'zycID_4Z1ijq9fgbW',
+          'template_params': {
+            'user_email': userEmail,
+            'content_type': 'post',
+            'user_id': userId,
+            'post_id': widget.postId,
+            'comment_id': '',
+          }
+        }));
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+            'Thank you, we received your report and will make a decision after reviewing'),
+      ),
+    );
   }
 }

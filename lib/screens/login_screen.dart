@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:our_community/screens/home_screen.dart';
 import 'package:our_community/screens/registration_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../actions/user_actions/sign_in_action.dart';
 import '../components/registration_subtext_component.dart';
 import '../components/text_form_field_components.dart';
 
@@ -17,8 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  final _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +57,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
                 FormSubmitButton(
-                  text: 'Login',
                   onPressed: () {
-                    signIn(emailController.text, passwordController.text);
+                    signIn(
+                      context,
+                      emailController.text,
+                      passwordController.text,
+                      _formKey,
+                      () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => const HomeScreen()),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                    );
                   },
+                  text: 'Login',
                 ),
                 const SizedBox(height: 20),
                 const RegistrationSubtext(
@@ -76,20 +88,5 @@ class _LoginScreenState extends State<LoginScreen> {
         )),
       ),
     );
-  }
-
-  void signIn(String email, String password) async {
-    if (_formKey.currentState!.validate()) {
-      await _auth
-          .signInWithEmailAndPassword(email: email, password: password)
-          .then((value) => {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => const HomeScreen())),
-                    (route) => false)
-              })
-          .catchError((error) => {Future.error(error)});
-    }
   }
 }
