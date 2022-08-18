@@ -105,7 +105,6 @@ class _UserCommentState extends State<UserComment> {
                           ),
                         ),
                         url: commentCreator.profilePicUrl,
-                        iconSize: 10,
                         radius: 10,
                       ),
                       const SizedBox(width: 10),

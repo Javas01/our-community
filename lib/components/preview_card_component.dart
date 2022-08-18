@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/actions/post_actions/vote_action.dart';
+import 'package:our_community/components/profile_pic_component.dart';
 import 'package:our_community/modals/user_info_modal.dart';
 import 'package:our_community/models/post_model.dart';
 import 'package:our_community/components/tag_component.dart';
@@ -83,45 +84,40 @@ class _PreviewCardState extends State<PreviewCard> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                GestureDetector(
-                  onTap: () {
-                    showDialog(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ProfilePic(
+                    onTap: () => showDialog(
                       context: context,
-                      builder: ((modalContext) => UserInfoModal(
-                            context: modalContext,
-                            contentCreator: widget.postCreator,
-                            isCreator: widget.isCreator,
-                            isUserBlocked: false,
-                          )),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: widget.postCreator.profilePicUrl != null
-                        ? CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              widget.postCreator.profilePicUrl!,
-                            ),
-                            radius: 10,
-                          )
-                        : const Icon(Icons.account_circle),
+                      builder: (modalContext) => UserInfoModal(
+                        context: modalContext,
+                        contentCreator: widget.postCreator,
+                        isCreator: widget.isCreator,
+                        isUserBlocked: false,
+                      ),
+                    ),
+                    radius: 10,
                   ),
-                ),
-                Text(
+                  const SizedBox(width: 10),
+                  Text(
                     '${widget.postCreator.firstName} ${widget.postCreator.lastName} - $postDate',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,
-                    )),
-                const Spacer(),
-                ...widget.post.tags.map<Widget>((tag) {
-                  return Tag(
-                    color: tagOptions[tag]!,
-                    title: tag,
-                  );
-                }).toList()
-              ]),
+                    ),
+                  ),
+                  const Spacer(),
+                  ...widget.post.tags.map<Widget>(
+                    (tag) {
+                      return Tag(
+                        color: tagOptions[tag]!,
+                        title: tag,
+                      );
+                    },
+                  ).toList()
+                ],
+              ),
               Row(
                 children: [
                   Expanded(
