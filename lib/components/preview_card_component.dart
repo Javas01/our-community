@@ -88,6 +88,7 @@ class _PreviewCardState extends State<PreviewCard> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ProfilePic(
+                    url: widget.postCreator.profilePicUrl,
                     onTap: () => showDialog(
                       context: context,
                       builder: (modalContext) => UserInfoModal(
