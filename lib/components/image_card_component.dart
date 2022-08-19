@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:our_community/actions/flag_content_action.dart';
-import 'package:our_community/components/create_post_component.dart';
+import 'package:our_community/actions/show_popup_menu_action.dart';
 import 'package:our_community/models/post_model.dart';
 import 'package:our_community/models/user_model.dart';
 import 'package:our_community/components/expanded_card_component.dart';
 import 'package:our_community/components/preview_card_component.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:our_community/config.dart' show communityCode;
 
 class ImageCardComponent extends StatefulWidget {
   const ImageCardComponent({
@@ -39,92 +36,6 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
     });
   }
 
-  void _showCustomMenu() {
-    final isCreator = userId == widget.post.createdBy;
-    final RenderBox overlay =
-        Overlay.of(context)!.context.findRenderObject() as RenderBox;
-
-    setState(() {
-      _selectedPostKey = dataKey;
-    });
-
-    showMenu<int>(
-      context: context,
-      items: [
-        PopupMenuItem(
-          value: 1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: isCreator
-                ? const [Icon(Icons.edit), SizedBox(width: 10), Text('Edit')]
-                : const [Icon(Icons.flag), SizedBox(width: 10), Text('Flag')],
-          ),
-        ),
-        if (isCreator)
-          PopupMenuItem(
-            value: 2,
-            onTap: deletePost,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(
-                  Icons.delete,
-                  color: Colors.red,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red),
-                )
-              ],
-            ),
-          )
-      ],
-      position: RelativeRect.fromRect(
-        _tapPosition! & context.size!, // smaller rect, the touch area
-        Offset.zero & overlay.size, // Bigger rect, the entire screen
-      ),
-    ).then((value) {
-      if (value == 1 && isCreator) {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          builder: ((context) {
-            return CreatePostModal(
-              tags: widget.post.tags,
-              title: widget.post.title,
-              description: widget.post.description,
-              postId: widget.post.id,
-              isEdit: true,
-            );
-          }),
-        );
-      } else if (value == 1) {
-        flagContent(
-          userEmail,
-          userId,
-          widget.post.id,
-          null,
-          () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Thank you, we received your report and will make a decision after reviewing',
-                ),
-              ),
-            );
-          },
-        );
-      }
-    });
-
-    Future.delayed(const Duration(milliseconds: 100), () {
-      setState(() {
-        _selectedPostKey = null;
-      });
-    });
-  }
-
   void _storePosition(TapDownDetails details) {
     _tapPosition = details.globalPosition;
   }
@@ -146,7 +57,15 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
               postId: widget.post.id,
             )
           : GestureDetector(
-              onLongPress: _showCustomMenu,
+              onLongPress: () async {
+                setState(() {
+                  _selectedPostKey = dataKey;
+                });
+                await showPopupMenu(context, widget.post, _tapPosition!);
+                setState(() {
+                  _selectedPostKey = null;
+                });
+              },
               onTapDown: _storePosition,
               onTap: () {
                 setExpanded(true);
@@ -169,22 +88,5 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
               ),
             ),
     );
-  }
-
-  void deletePost() async {
-    const snackBar = SnackBar(content: Text('Post deleted'));
-    try {
-      await FirebaseFirestore.instance
-          .collection('Communities')
-          .doc(communityCode)
-          .collection('Posts')
-          .doc(widget.post.id)
-          .delete();
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    } catch (e) {
-      Future.error('Error deleting post $e');
-    }
   }
 }
