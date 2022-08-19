@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:our_community/components/onboard_content_component.dart';
 import 'package:our_community/screens/login_screen.dart';
-
-import '../../components/dot_indicator_component.dart';
-import 'onboarding_config.dart';
+import 'package:our_community/components/dot_indicator_component.dart';
+import 'package:our_community/screens/OnboardingScreen/onboarding_config.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);

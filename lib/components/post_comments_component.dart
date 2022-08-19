@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'comment_component.dart';
-import '../models/user_model.dart';
-import '../models/comment_model.dart';
-import '../../config.dart' show communityCode;
+import 'package:our_community/components/comment_component.dart';
+import 'package:our_community/models/user_model.dart';
+import 'package:our_community/models/comment_model.dart';
+import 'package:our_community/config.dart' show communityCode;
 
 class PostComments extends StatefulWidget {
   const PostComments({
@@ -21,7 +21,7 @@ class PostComments extends StatefulWidget {
 }
 
 class _PostCommentsState extends State<PostComments> {
-  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
+  final _usersStream = FirebaseFirestore.instance
       .collection('Users')
       .withConverter(
         fromFirestore: userFromFirestore,
@@ -29,11 +29,11 @@ class _PostCommentsState extends State<PostComments> {
       )
       .snapshots();
 
-  late Stream<QuerySnapshot> _commentsStream;
+  late final Stream<QuerySnapshot<Comment>> _commentsStream;
 
   @override
   void initState() {
-    _commentsStream = _commentsStream = FirebaseFirestore.instance
+    _commentsStream = FirebaseFirestore.instance
         .collection('Communities')
         .doc(communityCode)
         .collection('Posts')
@@ -50,10 +50,9 @@ class _PostCommentsState extends State<PostComments> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: StreamBuilder(
+      child: StreamBuilder<QuerySnapshot<AppUser>>(
           stream: _usersStream,
-          builder: (BuildContext context,
-              AsyncSnapshot<QuerySnapshot> usersSnapshot) {
+          builder: (context, usersSnapshot) {
             if (usersSnapshot.hasError) {
               return const Text('Something went wrong');
             }
@@ -62,16 +61,15 @@ class _PostCommentsState extends State<PostComments> {
               return const Text('Loading');
             }
             final users = usersSnapshot.data!.docs
-                .map((userDoc) => userDoc.data() as AppUser)
+                .map((userDoc) => userDoc.data())
                 .toList();
 
             final currUser = users.firstWhere(
                 (user) => user.id == FirebaseAuth.instance.currentUser!.uid);
 
-            return StreamBuilder<QuerySnapshot>(
+            return StreamBuilder<QuerySnapshot<Comment>>(
               stream: _commentsStream,
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
+              builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Text('Something went wrong');
                 }
@@ -80,7 +78,7 @@ class _PostCommentsState extends State<PostComments> {
                   return const Text('Loading');
                 }
                 final comments = snapshot.data!.docs
-                    .map((commentDoc) => commentDoc.data() as Comment)
+                    .map((commentDoc) => commentDoc.data())
                     .toList();
 
                 // filter comments by no parent comments

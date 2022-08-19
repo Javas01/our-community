@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:our_community/screens/home_screen.dart';
 import 'package:our_community/screens/registration_screen.dart';
-import '../actions/user_actions/sign_in_action.dart';
-import '../components/registration_subtext_component.dart';
-import '../components/text_form_field_components.dart';
+import 'package:our_community/actions/user_actions/sign_in_action.dart';
+import 'package:our_community/components/registration_subtext_component.dart';
+import 'package:our_community/components/text_form_field_components.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);

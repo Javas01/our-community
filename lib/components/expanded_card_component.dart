@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../actions/comment_actions/add_comment_action.dart';
-import 'post_comments_component.dart';
-import 'text_field_components.dart';
+import 'package:our_community/actions/comment_actions/add_comment_action.dart';
+import 'package:our_community/components/post_comments_component.dart';
+import 'package:our_community/components/text_field_components.dart';
 
 class ExpandedCard extends StatefulWidget {
   const ExpandedCard({

@@ -8,18 +8,18 @@ void vote(
   String postId,
 ) async {
   final auth = FirebaseAuth.instance;
-  final DocumentReference postRef = FirebaseFirestore.instance
+  final postRef = FirebaseFirestore.instance
       .collection('Communities')
       .doc(communityCode)
       .collection('Posts')
       .doc(postId)
-      .withConverter<Post>(
+      .withConverter(
         fromFirestore: postFromFirestore,
         toFirestore: postToFirestore,
       );
 
   final postDoc = await postRef.get();
-  final post = postDoc.data() as Post;
+  final post = postDoc.data()!;
 
   switch (voteType) {
     case 'up':

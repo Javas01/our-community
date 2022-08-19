@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../screens/OnboardingScreen/onboarding_screen.dart';
+import 'package:our_community/screens/OnboardingScreen/onboarding_screen.dart';
 
 void deleteAccount(BuildContext context) {
   final auth = FirebaseAuth.instance;

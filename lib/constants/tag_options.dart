@@ -9,7 +9,7 @@ final tagOptions = {
   'Other': Colors.cyanAccent,
 };
 
-final tagOptionsList = <Map>[
+final tagOptionsList = <Map<String, MaterialAccentColor>>[
   {'Events': Colors.redAccent},
   {'School': Colors.blueAccent},
   {'Masjid': Colors.deepPurpleAccent},

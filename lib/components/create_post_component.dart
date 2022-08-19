@@ -3,10 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/components/tag_component.dart';
 import 'package:our_community/components/text_form_field_components.dart';
-import '../actions/post_actions/create_post_action.dart';
-import '../actions/post_actions/edit_post_action.dart';
-import '../constants/tag_options.dart';
-import '../../config.dart' show communityCode;
+import 'package:our_community/actions/post_actions/create_post_action.dart';
+import 'package:our_community/actions/post_actions/edit_post_action.dart';
+import 'package:our_community/constants/tag_options.dart';
+import 'package:our_community/config.dart' show communityCode;
 
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({

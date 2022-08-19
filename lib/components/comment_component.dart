@@ -3,13 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:our_community/modals/user_info_modal.dart';
-import '../components/profile_pic_component.dart';
-import '../components/text_field_components.dart';
-import '../actions/comment_actions/delete_comment_action.dart';
-import '../actions/comment_actions/reply_to_comment_action.dart';
-import '../actions/flag_content_action.dart';
-import '../models/comment_model.dart';
-import '../models/user_model.dart';
+import 'package:our_community/components/profile_pic_component.dart';
+import 'package:our_community/components/text_field_components.dart';
+import 'package:our_community/actions/comment_actions/delete_comment_action.dart';
+import 'package:our_community/actions/comment_actions/reply_to_comment_action.dart';
+import 'package:our_community/actions/flag_content_action.dart';
+import 'package:our_community/models/comment_model.dart';
+import 'package:our_community/models/user_model.dart';
 
 class UserComment extends StatefulWidget {
   const UserComment({
@@ -72,7 +72,7 @@ class _UserCommentState extends State<UserComment> {
         },
         child: Column(
           children: [
-            FutureBuilder(
+            FutureBuilder<DocumentSnapshot<AppUser>>(
                 future: FirebaseFirestore.instance
                     .collection('Users')
                     .doc(widget.comment.createdBy)
@@ -81,8 +81,7 @@ class _UserCommentState extends State<UserComment> {
                       toFirestore: userToFirestore,
                     )
                     .get(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<DocumentSnapshot> snapshot) {
+                builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return const Text('Something went wrong');
                   }
@@ -90,7 +89,7 @@ class _UserCommentState extends State<UserComment> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Text('Loading');
                   }
-                  final commentCreator = snapshot.data!.data() as AppUser;
+                  final commentCreator = snapshot.data!.data()!;
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -165,22 +164,24 @@ class _UserCommentState extends State<UserComment> {
                                                 size: 30,
                                               ),
                                               onPressed: () => flagContent(
-                                                  userEmail,
-                                                  userId,
-                                                  widget.postId,
-                                                  widget.comment.id, () {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'Thank you, we received your report and will make a decision after reviewing',
+                                                userEmail,
+                                                userId,
+                                                widget.postId,
+                                                widget.comment.id,
+                                                () {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'Thank you, we received your report and will make a decision after reviewing',
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                                setState(() {
-                                                  _isSelected = false;
-                                                });
-                                              }),
+                                                  );
+                                                  setState(() {
+                                                    _isSelected = false;
+                                                  });
+                                                },
+                                              ),
                                             ),
                                       Expanded(
                                         child: Container(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/user_model.dart';
-import '../components/profile_pic_component.dart';
-import '../actions/user_actions/block_user_action.dart';
-import '../actions/user_actions/unblock_user_action.dart';
+import 'package:our_community/models/user_model.dart';
+import 'package:our_community/components/profile_pic_component.dart';
+import 'package:our_community/actions/user_actions/block_user_action.dart';
+import 'package:our_community/actions/user_actions/unblock_user_action.dart';
 
 class UserInfoModal extends StatelessWidget {
   const UserInfoModal({

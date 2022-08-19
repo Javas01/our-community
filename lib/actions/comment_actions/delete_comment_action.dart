@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../config.dart' show communityCode;
+import 'package:our_community/config.dart' show communityCode;
 
 void deleteComment(String postId, String commentId) async {
   DocumentReference comment = FirebaseFirestore.instance

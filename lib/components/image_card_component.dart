@@ -1,13 +1,12 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:our_community/actions/flag_content_action.dart';
 import 'package:our_community/components/create_post_component.dart';
 import 'package:our_community/models/post_model.dart';
 import 'package:our_community/models/user_model.dart';
-import 'expanded_card_component.dart';
-import 'preview_card_component.dart';
+import 'package:our_community/components/expanded_card_component.dart';
+import 'package:our_community/components/preview_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
 import 'package:our_community/config.dart' show communityCode;
 
 class ImageCardComponent extends StatefulWidget {
@@ -101,7 +100,21 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
           }),
         );
       } else if (value == 1) {
-        flagPost();
+        flagContent(
+          userEmail,
+          userId,
+          widget.post.id,
+          null,
+          () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Thank you, we received your report and will make a decision after reviewing',
+                ),
+              ),
+            );
+          },
+        );
       }
     });
 
@@ -173,32 +186,5 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
     } catch (e) {
       Future.error('Error deleting post $e');
     }
-  }
-
-  void flagPost() async {
-    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-    await http.post(url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'accessToken': 'RSpCM_xJwri5l9DjMIGAy',
-          'service_id': 'service_ydieaun',
-          'template_id': 'template_ejdq7ar',
-          'user_id': 'zycID_4Z1ijq9fgbW',
-          'template_params': {
-            'user_email': userEmail,
-            'content_type': 'post',
-            'user_id': userId,
-            'post_id': widget.post.id,
-            'comment_id': '',
-          }
-        }));
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-            'Thank you, we received your report and will make a decision after reviewing'),
-      ),
-    );
   }
 }

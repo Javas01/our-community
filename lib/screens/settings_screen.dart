@@ -1,15 +1,15 @@
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../actions/user_actions/delete_account_action.dart';
-import '../components/profile_pic_component.dart';
-import '../components/text_form_field_components.dart';
-import '../screens/OnboardingScreen/onboarding_screen.dart';
-import '../models/user_model.dart';
+import 'package:our_community/actions/pick_image_action.dart';
+import 'package:our_community/actions/user_actions/log_out_action.dart';
+import 'package:our_community/actions/user_actions/unblock_user_action.dart';
+import 'package:our_community/actions/user_actions/update_profile_action.dart';
+import 'package:our_community/actions/user_actions/delete_account_action.dart';
+import 'package:our_community/components/profile_pic_component.dart';
+import 'package:our_community/components/text_form_field_components.dart';
+import 'package:our_community/models/user_model.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -20,32 +20,26 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _auth = FirebaseAuth.instance;
-  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
+  final _usersStream = FirebaseFirestore.instance
       .collection('Users')
       .withConverter(
         fromFirestore: userFromFirestore,
         toFirestore: userToFirestore,
       )
       .snapshots();
-  final String currUserId = FirebaseAuth.instance.currentUser!.uid;
-  final Reference profilePicRef = FirebaseStorage.instance
-      .ref('profilePics')
-      .child(FirebaseAuth.instance.currentUser!.uid);
 
   File? image;
-
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Flexible(
-          child: StreamBuilder(
+          child: StreamBuilder<QuerySnapshot<AppUser>>(
             stream: _usersStream,
-            builder:
-                ((BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            builder: ((context, snapshot) {
               if (snapshot.hasError) {
                 return const Text('Something went wrong');
               }
@@ -54,12 +48,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 return const Text('Loading');
               }
 
-              final users = snapshot.data!.docs
-                  .map((userDoc) => userDoc.data() as AppUser)
-                  .toList();
+              final users =
+                  snapshot.data!.docs.map((userDoc) => userDoc.data()).toList();
               final AppUser currUser = users.firstWhere(
                   (element) => element.id == _auth.currentUser!.uid);
-
               final blockedUsers = users
                   .where((user) => currUser.blockedUsers.contains(user.id))
                   .toList();
@@ -72,7 +64,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: ProfilePic(
                         url: currUser.profilePicUrl,
                         image: image,
-                        onTap: pickImage,
+                        onTap: () async {
+                          final imageTemp = await pickImage(
+                            (() => ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Failed to get image',
+                                    ),
+                                  ),
+                                )),
+                          );
+                          setState(() {
+                            image = imageTemp;
+                          });
+                        },
                         radius: 100,
                         iconSize: 190,
                       ),
@@ -119,9 +124,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: ListView(
                         shrinkWrap: true,
                         children: blockedUsers.map((blockedUser) {
-                          final blockedUserName =
-                              '${blockedUser.firstName} ${blockedUser.lastName}';
-
                           return Card(
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -129,7 +131,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 children: [
                                   Center(
                                     child: Text(
-                                      blockedUserName,
+                                      '${blockedUser.firstName} ${blockedUser.lastName}',
                                       textAlign: TextAlign.center,
                                       textScaleFactor: 1.2,
                                     ),
@@ -138,7 +140,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     right: 10,
                                     top: -14,
                                     child: IconButton(
-                                      onPressed: () => unBlock(blockedUser.id),
+                                      onPressed: () => unBlock(
+                                        blockedUser.id,
+                                        context,
+                                        () {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text('User unblocked'),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                       icon: const Icon(
                                         Icons.close_rounded,
                                         size: 20,
@@ -161,26 +174,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: FormSubmitButton(
-              onPressed: () {
-                updateProfile(
-                    firstNameController.text, lastNameController.text, image,
-                    () {
+            onPressed: () {
+              updateProfile(
+                context,
+                firstNameController,
+                lastNameController,
+                image,
+                () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Profile updated successfully'),
                     ),
                   );
-                });
-              },
-              text: 'Update Profile'),
+                },
+              );
+            },
+            text: 'Update Profile',
+          ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {
-                logOut();
-              },
+              onPressed: () => logOut(context),
               child: const Text('Log out'),
             ),
             const SizedBox(width: 20),
@@ -188,92 +204,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.red),
               ),
-              onPressed: () {
-                deleteAccount(context);
-              },
+              onPressed: () => deleteAccount(context),
               child: const Text('Delete Account'),
             ),
           ],
         )
       ],
     );
-  }
-
-  void unBlock(String blockedUserId) async {
-    final currUser = FirebaseFirestore.instance
-        .collection('Users')
-        .withConverter(
-            fromFirestore: userFromFirestore, toFirestore: userToFirestore)
-        .doc(_auth.currentUser!.uid);
-    List blockedUsers = await currUser.get().then((doc) {
-      final user = doc.data() as AppUser;
-      return user.blockedUsers;
-    });
-    blockedUsers.remove(blockedUserId);
-
-    currUser.update({
-      'blockedUsers': blockedUsers,
-    }).then((value) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('user unblocked'),
-        ),
-      );
-    });
-  }
-
-  void logOut() async {
-    await _auth.signOut().then((value) => {
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                  builder: ((context) => const OnboardingScreen())),
-              (route) => false)
-        });
-  }
-
-  void updateProfile(String firstName, String lastName, File? imageSrc,
-      VoidCallback onSuccess) async {
-    if (imageSrc == null && firstName.isEmpty && lastName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You havent changed anything'),
-        ),
-      );
-      return;
-    }
-
-    firstNameController.clear();
-    lastNameController.clear();
-    try {
-      String profilePicUrl = '';
-      if (imageSrc != null) {
-        await profilePicRef.putFile(imageSrc);
-        profilePicUrl = await profilePicRef.getDownloadURL();
-      }
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(currUserId)
-          .update({
-        ...firstName.isNotEmpty ? ({'firstName': firstName}) : {},
-        ...lastName.isNotEmpty ? ({'lastName': lastName}) : {},
-        ...profilePicUrl.isNotEmpty ? ({'profilePicUrl': profilePicUrl}) : {},
-      });
-
-      onSuccess.call();
-    } catch (e) {
-      Future.error(e);
-    }
-  }
-
-  Future pickImage() async {
-    try {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image == null) return;
-      final imageTemp = File(image.path);
-      setState(() => this.image = imageTemp);
-    } on PlatformException catch (e) {
-      Future.error('Failed to pick image: $e');
-    }
   }
 }

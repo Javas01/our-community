@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:our_community/components/image_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/constants/tag_options.dart';
-import '../components/tag_filter_component.dart';
-import '../models/user_model.dart';
-import '../models/post_model.dart';
-import '../../config.dart' show communityCode;
+import 'package:our_community/components/tag_filter_component.dart';
+import 'package:our_community/models/user_model.dart';
+import 'package:our_community/models/post_model.dart';
+import 'package:our_community/config.dart' show communityCode;
 
 class ListScreen extends StatefulWidget {
   const ListScreen({
@@ -22,14 +22,14 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  final Stream<QuerySnapshot> _usersStream = FirebaseFirestore.instance
+  final _usersStream = FirebaseFirestore.instance
       .collection('Users')
       .withConverter(
         fromFirestore: userFromFirestore,
         toFirestore: userToFirestore,
       )
       .snapshots();
-  final Stream<QuerySnapshot> _postsStream = FirebaseFirestore.instance
+  final _postsStream = FirebaseFirestore.instance
       .collection('Communities')
       .doc(communityCode)
       .collection('Posts')
@@ -48,10 +48,9 @@ class _ListScreenState extends State<ListScreen> {
         _selectedTag = '';
       });
     }
-    return StreamBuilder(
+    return StreamBuilder<QuerySnapshot<AppUser>>(
         stream: _usersStream,
-        builder:
-            (BuildContext context, AsyncSnapshot<QuerySnapshot> usersSnapshot) {
+        builder: (context, usersSnapshot) {
           if (usersSnapshot.hasError) {
             return const Text('Something went wrong');
           }
@@ -60,14 +59,13 @@ class _ListScreenState extends State<ListScreen> {
             return const Text('Loading');
           }
           final users = usersSnapshot.data!.docs
-              .map((userDoc) => userDoc.data() as AppUser)
+              .map((userDoc) => userDoc.data())
               .toList();
           final currUser = users.firstWhere((user) => user.id == currUserId);
 
-          return StreamBuilder<QuerySnapshot>(
+          return StreamBuilder<QuerySnapshot<Post>>(
             stream: _postsStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Text('Something went wrong');
               }
@@ -75,9 +73,8 @@ class _ListScreenState extends State<ListScreen> {
                 return const Text('Loading');
               }
 
-              List<Post> posts = snapshot.data!.docs
-                  .map((postDoc) => postDoc.data() as Post)
-                  .toList();
+              List<Post> posts =
+                  snapshot.data!.docs.map((postDoc) => postDoc.data()).toList();
 
               // filter posts by blockedUsers
               final notBlockedPosts = posts.where(
@@ -110,12 +107,14 @@ class _ListScreenState extends State<ListScreen> {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: tagOptionsList
-                          .map<Widget>((tag) => TagFilter(
-                                name: tag.keys.first,
-                                color: tag.values.first,
-                                selectedTag: _selectedTag,
-                                selectTagFilter: selectTagFilter,
-                              ))
+                          .map<Widget>(
+                            (tag) => TagFilter(
+                              name: tag.keys.first,
+                              color: tag.values.first,
+                              selectedTag: _selectedTag,
+                              selectTagFilter: selectTagFilter,
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
