@@ -184,47 +184,32 @@ class _UserCommentState extends State<UserComment> {
                                               ),
                                             ),
                                       Expanded(
-                                        child: Container(
-                                          constraints: const BoxConstraints(
-                                              maxHeight: 300),
-                                          child: Row(
-                                            children: <Widget>[
-                                              Expanded(
-                                                child: CommentField(
-                                                  commentController:
-                                                      commentController,
-                                                  hintText: 'Reply to comment',
-                                                  unFocus: widget.unFocus,
-                                                  hasBorder: false,
-                                                  hintStyle: const TextStyle(
-                                                      height: 1.5),
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                              ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                  fixedSize: const Size(30, 30),
-                                                  shape: const CircleBorder(),
-                                                ),
-                                                onPressed: () {
-                                                  widget.unFocus();
-                                                  replyToComment(
-                                                    context,
-                                                    commentController,
-                                                    widget.postId,
-                                                    userId,
-                                                    widget.comment.id,
-                                                    widget.comment.replies,
-                                                  );
-                                                },
-                                                child: const Icon(
-                                                    Icons.reply_rounded),
-                                              ),
-                                            ],
-                                          ),
+                                        child: CommentField(
+                                          commentController: commentController,
+                                          hintText: 'Reply to comment',
+                                          unFocus: widget.unFocus,
+                                          hasBorder: false,
+                                          hintStyle:
+                                              const TextStyle(height: 1.5),
                                         ),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          fixedSize: const Size(30, 30),
+                                          shape: const CircleBorder(),
+                                        ),
+                                        onPressed: () {
+                                          widget.unFocus();
+                                          replyToComment(
+                                            context,
+                                            commentController,
+                                            widget.postId,
+                                            userId,
+                                            widget.comment.id,
+                                            widget.comment.replies,
+                                          );
+                                        },
+                                        child: const Icon(Icons.reply_rounded),
                                       ),
                                     ],
                                   ),
