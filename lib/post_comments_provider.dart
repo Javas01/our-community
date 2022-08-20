@@ -6,7 +6,17 @@ class PostCommentsModel extends ChangeNotifier {
   String _parentCommentText = '';
   List<String> _parentCommentReplies = [];
   String _parentCommentId = '';
-  // focusnode
+  FocusNode commentFocusNode = FocusNode();
+
+  void unFocus() {
+    FocusScope.of(expandedCardKey.currentContext!).requestFocus(FocusNode());
+    Scrollable.ensureVisible(
+      expandedCardKey.currentContext!,
+      alignment: 0.0,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
 
   void reply(
     String parentCommentText,

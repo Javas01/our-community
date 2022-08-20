@@ -8,13 +8,9 @@ class CommentField extends StatefulWidget {
   const CommentField({
     Key? key,
     required this.postId,
-    required this.unFocus,
-    required this.focusNode,
   }) : super(key: key);
 
   final String postId;
-  final VoidCallback unFocus;
-  final FocusNode focusNode;
 
   @override
   State<CommentField> createState() => _CommentFieldState();
@@ -27,6 +23,10 @@ class _CommentFieldState extends State<CommentField> {
   bool _showClear = false;
   @override
   Widget build(BuildContext context) {
+    final focusNode =
+        Provider.of<PostCommentsModel>(context, listen: false).commentFocusNode;
+    final unFocus =
+        Provider.of<PostCommentsModel>(context, listen: false).unFocus;
     final parentCommentId = Provider.of<PostCommentsModel>(
       context,
       listen: false,
@@ -40,15 +40,15 @@ class _CommentFieldState extends State<CommentField> {
         Expanded(
           child: Consumer<PostCommentsModel>(
             builder: (context, value, child) {
-              widget.focusNode.addListener(() {
-                if (!widget.focusNode.hasFocus) value.reset();
+              focusNode.addListener(() {
+                if (!focusNode.hasFocus) value.reset();
               });
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (value.isReply) Text(value.parentCommentText),
                   TextField(
-                    focusNode: widget.focusNode,
+                    focusNode: focusNode,
                     controller: commentController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
@@ -76,7 +76,7 @@ class _CommentFieldState extends State<CommentField> {
                           ? IconButton(
                               onPressed: () {
                                 commentController.clear();
-                                widget.unFocus();
+                                unFocus();
                                 setState(() {
                                   _showClear = false;
                                 });
@@ -102,7 +102,7 @@ class _CommentFieldState extends State<CommentField> {
             shape: const CircleBorder(),
           ),
           onPressed: () {
-            widget.unFocus();
+            unFocus();
             addComment(
               context,
               commentController,

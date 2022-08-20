@@ -20,23 +20,13 @@ class ExpandedCard extends StatefulWidget {
 }
 
 class _ExpandedCardState extends State<ExpandedCard> {
-  FocusNode commentFocusNode = FocusNode();
-
-  void unFocus() {
-    FocusScope.of(context).requestFocus(FocusNode());
-    Scrollable.ensureVisible(
-      context,
-      alignment: 0.0,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOut,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => PostCommentsModel(),
       builder: ((context, child) {
+        final unFocus =
+            Provider.of<PostCommentsModel>(context, listen: false).unFocus;
         return GestureDetector(
           onTap: unFocus,
           child: Card(
@@ -90,13 +80,9 @@ class _ExpandedCardState extends State<ExpandedCard> {
                       ),
                       PostComments(
                         postId: widget.post.id,
-                        unFocus: unFocus,
-                        commentFocusNode: commentFocusNode,
                       ),
                       CommentField(
                         postId: widget.post.id,
-                        unFocus: unFocus,
-                        focusNode: commentFocusNode,
                       )
                     ],
                   ),

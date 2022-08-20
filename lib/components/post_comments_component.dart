@@ -10,13 +10,9 @@ class PostComments extends StatefulWidget {
   const PostComments({
     Key? key,
     required this.postId,
-    required this.unFocus,
-    required this.commentFocusNode,
   }) : super(key: key);
 
   final String postId;
-  final VoidCallback unFocus;
-  final FocusNode commentFocusNode;
 
   @override
   State<PostComments> createState() => _PostCommentsState();
@@ -102,11 +98,9 @@ class _PostCommentsState extends State<PostComments> {
                     comments: comments,
                     replies: replyComments,
                     postId: widget.postId,
-                    unFocus: widget.unFocus,
                     blockedUsers: currUser.blockedUsers,
                     isUserBlocked: isUserBlocked,
                     users: users,
-                    commentFocusNode: widget.commentFocusNode,
                   );
                 }).toList());
               },

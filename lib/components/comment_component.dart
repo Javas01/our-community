@@ -15,21 +15,17 @@ class UserComment extends StatelessWidget {
     required this.comment,
     required this.replies,
     required this.postId,
-    required this.unFocus,
     required this.blockedUsers,
     required this.comments,
     required this.isUserBlocked,
     required this.users,
-    required this.commentFocusNode,
   }) : super(key: key);
   final List<AppUser> users;
   final Comment comment;
   final String postId;
   final List<String> blockedUsers;
   final List<Comment> comments, replies;
-  final VoidCallback unFocus;
   final bool isUserBlocked;
-  final FocusNode commentFocusNode;
 
   final userId = FirebaseAuth.instance.currentUser!.uid;
   final userEmail = FirebaseAuth.instance.currentUser!.email;
@@ -45,6 +41,8 @@ class UserComment extends StatelessWidget {
             comment.timestamp.microsecondsSinceEpoch));
     final expandedCardKey =
         Provider.of<PostCommentsModel>(context, listen: false).expandedCardKey;
+    final commentFocusNode =
+        Provider.of<PostCommentsModel>(context, listen: false).commentFocusNode;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -61,7 +59,6 @@ class UserComment extends StatelessWidget {
                 comment: comment,
                 userEmail: userEmail,
                 userId: userId,
-                commentFocusNode: commentFocusNode,
               );
             },
           );
@@ -148,12 +145,10 @@ class UserComment extends StatelessWidget {
                   comment: reply,
                   replies: replyComments,
                   postId: postId,
-                  unFocus: unFocus,
                   blockedUsers: blockedUsers,
                   comments: comments,
                   isUserBlocked: isUserBlocked,
                   users: users,
-                  commentFocusNode: commentFocusNode,
                 ),
               );
             })
