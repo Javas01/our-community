@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:our_community/components/create_post_component.dart';
+import 'package:our_community/modals/create_post_modal.dart';
 import 'package:our_community/screens/settings_screen.dart';
 import 'package:our_community/screens/list_screen.dart';
 

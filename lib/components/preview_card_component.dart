@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,6 +11,7 @@ import 'package:our_community/components/tag_component.dart';
 import 'package:our_community/models/user_model.dart';
 import 'package:our_community/constants/tag_options.dart';
 import 'package:our_community/config.dart' show communityCode;
+import 'package:url_launcher/url_launcher.dart';
 
 class PreviewCard extends StatefulWidget {
   const PreviewCard({
@@ -131,17 +133,28 @@ class _PreviewCardState extends State<PreviewCard> {
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(
                           height: 10,
                         ),
-                        Text(
-                          widget.post.description,
+                        Linkify(
+                          options: const LinkifyOptions(looseUrl: true),
+                          onOpen: (link) async {
+                            if (await canLaunchUrl(Uri.parse(link.url))) {
+                              await launchUrl(Uri.parse(link.url));
+                            } else {
+                              throw 'Could not launch $link';
+                            }
+                          },
                           maxLines: null,
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.center,
+                          text: widget.post.description,
+                          linkStyle: const TextStyle(
+                            color: Colors.lightBlueAccent,
+                          ),
                         ),
                         const SizedBox(height: 10),
                       ],

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:our_community/components/post_comments_component.dart';
 import 'package:our_community/components/text_field_components.dart';
 import 'package:our_community/models/post_model.dart';
 import 'package:our_community/post_comments_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ExpandedCard extends StatefulWidget {
   const ExpandedCard({
@@ -56,19 +58,35 @@ class _ExpandedCardState extends State<ExpandedCard> {
                         },
                         child: Column(
                           children: [
-                            Text(
-                              widget.post.title,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
+                            Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(25.0, 10, 25, 10),
+                              child: Text(
+                                widget.post.title,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(5.0),
-                              child: Text(
-                                widget.post.description,
+                              child: Linkify(
+                                options: const LinkifyOptions(looseUrl: true),
+                                onOpen: (link) async {
+                                  if (await canLaunchUrl(Uri.parse(link.url))) {
+                                    await launchUrl(Uri.parse(link.url));
+                                  } else {
+                                    throw 'Could not launch $link';
+                                  }
+                                },
                                 maxLines: null,
+                                textAlign: TextAlign.center,
+                                text: widget.post.description,
+                                linkStyle: const TextStyle(
+                                  color: Colors.lightBlueAccent,
+                                ),
                               ),
                             ),
                           ],
