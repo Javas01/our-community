@@ -6,7 +6,7 @@ import 'package:our_community/modals/user_info_modal.dart';
 import 'package:our_community/components/profile_pic_component.dart';
 import 'package:our_community/models/comment_model.dart';
 import 'package:our_community/models/user_model.dart';
-import 'package:our_community/provider_test.dart';
+import 'package:our_community/post_comments_provider.dart';
 import 'package:provider/provider.dart';
 
 class UserComment extends StatelessWidget {
@@ -43,6 +43,8 @@ class UserComment extends StatelessWidget {
     final commentDate = DateFormat('yyyy-MM-dd (hh:mm aa)').format(
         DateTime.fromMicrosecondsSinceEpoch(
             comment.timestamp.microsecondsSinceEpoch));
+    final expandedCardKey =
+        Provider.of<PostCommentsModel>(context, listen: false).expandedCardKey;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -63,14 +65,12 @@ class UserComment extends StatelessWidget {
               );
             },
           );
+
           if (value == 1) {
-            // ignore: use_build_context_synchronously
-            Provider.of<AddCommentModel>(context, listen: false).isReply = true;
-            Future.delayed(
-              const Duration(milliseconds: 100),
-              (() => commentFocusNode.requestFocus()),
-            );
-            // commentFocusNode.requestFocus();
+            Provider.of<PostCommentsModel>(expandedCardKey.currentContext!,
+                    listen: false)
+                .reply(comment.text, comment.replies, comment.id);
+            commentFocusNode.requestFocus();
           }
         },
         child: Column(

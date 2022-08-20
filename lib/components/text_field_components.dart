@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:our_community/provider_test.dart';
+import 'package:our_community/post_comments_provider.dart';
 import 'package:provider/provider.dart';
 
 class CommentField extends StatefulWidget {
@@ -27,47 +27,57 @@ class _CommentFieldState extends State<CommentField> {
     return AnimatedSize(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
-        child: Consumer<AddCommentModel>(
+        child: Consumer<PostCommentsModel>(
           builder: (context, value, child) {
-            return TextField(
-              focusNode: widget.focusNode,
-              controller: widget.commentController,
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              style: const TextStyle(fontSize: 12, height: 1),
-              onChanged: (content) {
-                content != ''
-                    ? setState(() {
-                        _showClear = true;
-                      })
-                    : setState(() {
-                        _showClear = false;
-                      });
-              },
-              decoration: InputDecoration(
-                prefixIcon: const Icon(
-                  Icons.chat_outlined,
-                  size: 20,
-                ),
-                hintText: value.isReply ? 'Reply to comment' : 'Reply to post',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                suffixIcon: _showClear
-                    ? IconButton(
-                        onPressed: () {
-                          widget.commentController.clear();
-                          widget.unFocus();
-                          setState(() {
+            widget.focusNode.addListener(() {
+              if (!widget.focusNode.hasFocus) value.reset();
+            });
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (value.isReply) Text(value.parentCommentText),
+                TextField(
+                  focusNode: widget.focusNode,
+                  controller: widget.commentController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  style: const TextStyle(fontSize: 12, height: 1),
+                  onChanged: (content) {
+                    content != ''
+                        ? setState(() {
+                            _showClear = true;
+                          })
+                        : setState(() {
                             _showClear = false;
                           });
-                        },
-                        icon: const Icon(
-                          Icons.clear_rounded,
-                        ),
-                      )
-                    : null,
-              ),
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(
+                      Icons.chat_outlined,
+                      size: 20,
+                    ),
+                    hintText:
+                        value.isReply ? 'Reply to comment' : 'Reply to post',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    suffixIcon: _showClear
+                        ? IconButton(
+                            onPressed: () {
+                              widget.commentController.clear();
+                              widget.unFocus();
+                              setState(() {
+                                _showClear = false;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.clear_rounded,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ],
             );
           },
         ));

@@ -51,10 +51,8 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
       child: _isExpanded
           ? ExpandedCard(
-              description: widget.post.description,
-              title: widget.post.title,
+              post: widget.post,
               setExpanded: setExpanded,
-              postId: widget.post.id,
             )
           : GestureDetector(
               onLongPress: () async {

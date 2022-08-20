@@ -1,37 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/config.dart' show communityCode;
+import 'package:our_community/models/comment_model.dart';
 
 void addComment(
   BuildContext context,
   TextEditingController commentController,
-  String userId,
   String postId,
+  String userId,
+  String parentCommentId,
+  List<String> parentCommentReplies,
 ) async {
-  if (commentController.text == '') {
+  if (commentController.text.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Comment cant be empty')),
+      const SnackBar(content: Text('Reply cant be empty')),
     );
     return;
   }
 
+  final isReply = parentCommentId.isNotEmpty;
   final comments = FirebaseFirestore.instance
       .collection('Communities')
       .doc(communityCode)
       .collection('Posts')
       .doc(postId)
       .collection('Comments');
+  // .withConverter<Comment>(fromFirestore: commentFromFirestore, toFirestore: commentToFirestore);
 
   try {
-    await comments.add({
+    final newCommentDoc = await comments.add({
       'text': commentController.text,
-      'isReply': false,
+      'isReply': isReply ? true : false,
       'createdBy': userId,
       'timestamp': Timestamp.now(),
     });
+
+    if (isReply) {
+      final newReplies = [...parentCommentReplies, newCommentDoc.id];
+
+      comments.doc(parentCommentId).update({'replies': newReplies});
+    }
+
     commentController.clear();
   } catch (e) {
-    commentController.clear();
     Future.error('Failed to add comment: $e');
+    commentController.clear();
   }
 }
