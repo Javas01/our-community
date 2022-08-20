@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:our_community/modals/comment_options_modal.dart';
 import 'package:our_community/modals/user_info_modal.dart';
 import 'package:our_community/components/profile_pic_component.dart';
-import 'package:our_community/components/text_field_components.dart';
-import 'package:our_community/actions/comment_actions/delete_comment_action.dart';
-import 'package:our_community/actions/comment_actions/reply_to_comment_action.dart';
-import 'package:our_community/actions/flag_content_action.dart';
 import 'package:our_community/models/comment_model.dart';
 import 'package:our_community/models/user_model.dart';
+import 'package:our_community/provider_test.dart';
+import 'package:provider/provider.dart';
 
-class UserComment extends StatefulWidget {
-  const UserComment({
+class UserComment extends StatelessWidget {
+  UserComment({
     Key? key,
     required this.comment,
     required this.replies,
@@ -20,211 +18,119 @@ class UserComment extends StatefulWidget {
     required this.unFocus,
     required this.blockedUsers,
     required this.comments,
+    required this.isUserBlocked,
+    required this.users,
+    required this.commentFocusNode,
   }) : super(key: key);
+  final List<AppUser> users;
   final Comment comment;
   final String postId;
   final List<String> blockedUsers;
   final List<Comment> comments, replies;
   final VoidCallback unFocus;
+  final bool isUserBlocked;
+  final FocusNode commentFocusNode;
 
-  @override
-  State<UserComment> createState() => _UserCommentState();
-}
-
-class _UserCommentState extends State<UserComment> {
   final userId = FirebaseAuth.instance.currentUser!.uid;
   final userEmail = FirebaseAuth.instance.currentUser!.email;
   final TextEditingController commentController = TextEditingController();
 
-  bool _isSelected = false;
-  late bool _isUserBlocked;
-
-  @override
-  void initState() {
-    _isUserBlocked = widget.blockedUsers.contains(widget.comment.createdBy);
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isCreator = userId == widget.comment.createdBy;
+    final commentCreator =
+        users.firstWhere((user) => user.id == comment.createdBy);
+    final isCreator = userId == comment.createdBy;
     final commentDate = DateFormat('yyyy-MM-dd (hh:mm aa)').format(
         DateTime.fromMicrosecondsSinceEpoch(
-            widget.comment.timestamp.microsecondsSinceEpoch));
+            comment.timestamp.microsecondsSinceEpoch));
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
-        onLongPress: () {
-          if (widget.comment.isDeleted || widget.comment.isRemoved) return;
-
-          setState(() {
-            _isSelected = true;
-          });
-        },
-        onTap: () {
-          if (_isSelected) {
-            widget.unFocus();
-            setState(() {
-              _isSelected = false;
-            });
+        onLongPress: () async {
+          if (comment.isDeleted || comment.isRemoved) return;
+          final value = await showModalBottomSheet<int>(
+            context: context,
+            backgroundColor: Colors.black.withOpacity(0),
+            builder: (context) {
+              return CommentOptions(
+                isCreator: isCreator,
+                postId: postId,
+                comment: comment,
+                userEmail: userEmail,
+                userId: userId,
+                commentFocusNode: commentFocusNode,
+              );
+            },
+          );
+          if (value == 1) {
+            // ignore: use_build_context_synchronously
+            Provider.of<AddCommentModel>(context, listen: false).isReply = true;
+            Future.delayed(
+              const Duration(milliseconds: 100),
+              (() => commentFocusNode.requestFocus()),
+            );
+            // commentFocusNode.requestFocus();
           }
         },
         child: Column(
           children: [
-            FutureBuilder<DocumentSnapshot<AppUser>>(
-                future: FirebaseFirestore.instance
-                    .collection('Users')
-                    .doc(widget.comment.createdBy)
-                    .withConverter(
-                      fromFirestore: userFromFirestore,
-                      toFirestore: userToFirestore,
-                    )
-                    .get(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text('Something went wrong');
-                  }
-
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text('Loading');
-                  }
-                  final commentCreator = snapshot.data!.data()!;
-                  return Row(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ProfilePic(
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (buildContext) => UserInfoModal(
+                      context: buildContext,
+                      contentCreator: commentCreator,
+                      isCreator: isCreator,
+                      isUserBlocked: isUserBlocked,
+                    ),
+                  ),
+                  url: commentCreator.profilePicUrl,
+                  radius: 10,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ProfilePic(
-                        onTap: () => showDialog(
-                          context: context,
-                          builder: (buildContext) => UserInfoModal(
-                            context: buildContext,
-                            contentCreator: commentCreator,
-                            isCreator: isCreator,
-                            isUserBlocked: _isUserBlocked,
-                          ),
-                        ),
-                        url: commentCreator.profilePicUrl,
-                        radius: 10,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            widget.comment.isDeleted ||
-                                    widget.comment.isRemoved ||
-                                    _isUserBlocked
-                                ? Text(
-                                    widget.comment.isDeleted
-                                        ? 'Comment deleted by user'
-                                        : widget.comment.isRemoved
-                                            ? 'Comment removed by moderator'
-                                            : 'You have this user blocked',
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  )
-                                : Text(
-                                    '${commentCreator.firstName} ${commentCreator.lastName} - $commentDate',
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                            const SizedBox(height: 4),
-                            if (widget.comment.isDeleted == false &&
-                                widget.comment.isRemoved == false &&
-                                _isUserBlocked == false)
-                              Text(
-                                widget.comment.text,
-                                style: const TextStyle(fontSize: 16),
+                      comment.isDeleted || comment.isRemoved || isUserBlocked
+                          ? Text(
+                              comment.isDeleted
+                                  ? 'Comment deleted by user'
+                                  : comment.isRemoved
+                                      ? 'Comment removed by moderator'
+                                      : 'You have this user blocked',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w300,
                               ),
-                            if (_isSelected) ...{
-                              Column(
-                                children: [
-                                  const SizedBox(height: 10),
-                                  Row(
-                                    children: [
-                                      isCreator
-                                          ? IconButton(
-                                              icon: Icon(
-                                                Icons.delete_rounded,
-                                                color: Colors.red[700],
-                                                size: 30,
-                                              ),
-                                              onPressed: () => deleteComment(
-                                                widget.postId,
-                                                widget.comment.id,
-                                              ),
-                                            )
-                                          : IconButton(
-                                              icon: const Icon(
-                                                Icons.flag,
-                                                size: 30,
-                                              ),
-                                              onPressed: () => flagContent(
-                                                userEmail,
-                                                userId,
-                                                widget.postId,
-                                                widget.comment.id,
-                                                () {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        'Thank you, we received your report and will make a decision after reviewing',
-                                                      ),
-                                                    ),
-                                                  );
-                                                  setState(() {
-                                                    _isSelected = false;
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                      Expanded(
-                                        child: CommentField(
-                                          commentController: commentController,
-                                          hintText: 'Reply to comment',
-                                          unFocus: widget.unFocus,
-                                          hasBorder: false,
-                                          hintStyle:
-                                              const TextStyle(height: 1.5),
-                                        ),
-                                      ),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          fixedSize: const Size(30, 30),
-                                          shape: const CircleBorder(),
-                                        ),
-                                        onPressed: () {
-                                          widget.unFocus();
-                                          replyToComment(
-                                            context,
-                                            commentController,
-                                            widget.postId,
-                                            userId,
-                                            widget.comment.id,
-                                            widget.comment.replies,
-                                          );
-                                        },
-                                        child: const Icon(Icons.reply_rounded),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )
-                            }
-                          ],
+                            )
+                          : Text(
+                              '${commentCreator.firstName} ${commentCreator.lastName} - $commentDate',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                      const SizedBox(height: 4),
+                      if (comment.isDeleted == false &&
+                          comment.isRemoved == false &&
+                          isUserBlocked == false)
+                        Text(
+                          comment.text,
+                          style: const TextStyle(fontSize: 16),
                         ),
-                      ),
                     ],
-                  );
-                }),
-            ...widget.replies.map((reply) {
+                  ),
+                ),
+              ],
+            ),
+            ...replies.map((reply) {
               final replies = reply.replies;
-              final replyComments = widget.comments
+              final replyComments = comments
                   .where((comment) => replies.contains(comment.id))
                   .toList();
 
@@ -241,10 +147,13 @@ class _UserCommentState extends State<UserComment> {
                   key: GlobalKey(),
                   comment: reply,
                   replies: replyComments,
-                  postId: widget.postId,
-                  unFocus: widget.unFocus,
-                  blockedUsers: widget.blockedUsers,
-                  comments: widget.comments,
+                  postId: postId,
+                  unFocus: unFocus,
+                  blockedUsers: blockedUsers,
+                  comments: comments,
+                  isUserBlocked: isUserBlocked,
+                  users: users,
+                  commentFocusNode: commentFocusNode,
                 ),
               );
             })

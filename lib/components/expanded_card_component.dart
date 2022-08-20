@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/actions/comment_actions/add_comment_action.dart';
 import 'package:our_community/components/post_comments_component.dart';
 import 'package:our_community/components/text_field_components.dart';
+import 'package:our_community/provider_test.dart';
+import 'package:provider/provider.dart';
 
 class ExpandedCard extends StatefulWidget {
   const ExpandedCard({
@@ -23,6 +25,7 @@ class ExpandedCard extends StatefulWidget {
 class _ExpandedCardState extends State<ExpandedCard> {
   final userId = FirebaseAuth.instance.currentUser!.uid;
 
+  FocusNode commentFocusNode = FocusNode();
   TextEditingController commentController = TextEditingController();
 
   void unFocus() {
@@ -37,93 +40,100 @@ class _ExpandedCardState extends State<ExpandedCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: unFocus,
-      child: Card(
-        elevation: 0,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-        color: Theme.of(context).colorScheme.surfaceVariant,
-        child: Stack(
-          children: [
-            Positioned(
-              top: -5,
-              right: -5,
-              child: IconButton(
-                icon: const Icon(Icons.close_rounded),
-                onPressed: () => widget.setExpanded(false),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Column(
+    return ChangeNotifierProvider(
+      create: (context) => AddCommentModel(),
+      builder: ((context, child) => GestureDetector(
+            onTap: unFocus,
+            child: Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0)),
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              child: Stack(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      widget.setExpanded(false);
-                    },
-                    child: Column(
-                      children: [
-                        Text(
-                          widget.title,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Text(
-                            widget.description,
-                            maxLines: null,
-                          ),
-                        ),
-                      ],
+                  Positioned(
+                    top: -5,
+                    right: -5,
+                    child: IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => widget.setExpanded(false),
                     ),
                   ),
-                  const Divider(
-                    height: 10,
-                    thickness: 2,
-                  ),
-                  PostComments(
-                    postId: widget.postId,
-                    unFocus: unFocus,
-                  ),
-                  Container(
-                    constraints: const BoxConstraints(maxHeight: 200),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: AnimatedSize(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeIn,
-                            child: CommentField(
-                              commentController: commentController,
-                              hintText: 'Reply to post',
-                              unFocus: unFocus,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(50, 50),
-                            shape: const CircleBorder(),
-                          ),
-                          onPressed: () {
-                            unFocus();
-                            addComment(
-                              context,
-                              commentController,
-                              userId,
-                              widget.postId,
-                            );
+                  Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            widget.setExpanded(false);
                           },
-                          child: const Icon(
-                            Icons.send_rounded,
+                          child: Column(
+                            children: [
+                              Text(
+                                widget.title,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Text(
+                                  widget.description,
+                                  maxLines: null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(
+                          height: 10,
+                          thickness: 2,
+                        ),
+                        PostComments(
+                          postId: widget.postId,
+                          unFocus: unFocus,
+                          commentFocusNode: commentFocusNode,
+                        ),
+                        Container(
+                          constraints: const BoxConstraints(maxHeight: 200),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: AnimatedSize(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeIn,
+                                  child: CommentField(
+                                    commentController: commentController,
+                                    hintText: 'Reply to post',
+                                    unFocus: unFocus,
+                                    focusNode: commentFocusNode,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size(50, 50),
+                                  shape: const CircleBorder(),
+                                ),
+                                onPressed: () {
+                                  unFocus();
+                                  addComment(
+                                    context,
+                                    commentController,
+                                    userId,
+                                    widget.postId,
+                                  );
+                                },
+                                child: const Icon(
+                                  Icons.send_rounded,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -132,9 +142,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+          )),
     );
   }
 }

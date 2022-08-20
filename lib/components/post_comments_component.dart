@@ -11,10 +11,12 @@ class PostComments extends StatefulWidget {
     Key? key,
     required this.postId,
     required this.unFocus,
+    required this.commentFocusNode,
   }) : super(key: key);
 
   final String postId;
   final VoidCallback unFocus;
+  final FocusNode commentFocusNode;
 
   @override
   State<PostComments> createState() => _PostCommentsState();
@@ -87,6 +89,8 @@ class _PostCommentsState extends State<PostComments> {
 
                 return ListView(
                     children: filteredComments.map((comment) {
+                  final isUserBlocked =
+                      currUser.blockedUsers.contains(comment.createdBy);
                   final replies = comment.replies;
                   final replyComments = comments
                       .where((comment) => replies.contains(comment.id))
@@ -100,6 +104,9 @@ class _PostCommentsState extends State<PostComments> {
                     postId: widget.postId,
                     unFocus: widget.unFocus,
                     blockedUsers: currUser.blockedUsers,
+                    isUserBlocked: isUserBlocked,
+                    users: users,
+                    commentFocusNode: widget.commentFocusNode,
                   );
                 }).toList());
               },
