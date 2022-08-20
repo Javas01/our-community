@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_community/components/tag_component.dart';
 import 'package:our_community/components/text_form_field_components.dart';
 import 'package:our_community/actions/post_actions/create_post_action.dart';
 import 'package:our_community/actions/post_actions/edit_post_action.dart';
 import 'package:our_community/constants/tag_options.dart';
-import 'package:our_community/config.dart' show communityCode;
 
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({
@@ -37,11 +35,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-
-  final CollectionReference posts = FirebaseFirestore.instance
-      .collection('Communities')
-      .doc(communityCode)
-      .collection('Posts');
 
   String typeDropdownValue = 'Text';
   late String tagDropdownValue;
@@ -179,7 +172,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     tagDropdownValue,
                                     context,
                                     widget.postId!,
-                                    posts,
                                     _formKey,
                                     () => Navigator.pop(context),
                                   )
@@ -190,7 +182,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     tagDropdownValue,
                                     context,
                                     userId,
-                                    posts,
                                     _formKey,
                                     () => Navigator.pop(context),
                                   );

@@ -2,15 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post {
   Post({
-    required this.id,
+    this.id = '',
     required this.createdBy,
-    required this.description,
     required this.title,
+    required this.description,
     required this.tags,
-    required this.timestamp,
     required this.type,
-    required this.upVotes,
-    required this.downVotes,
+    required this.timestamp,
+    this.upVotes = const [],
+    this.downVotes = const [],
     this.lastEdited,
   });
 
@@ -18,6 +18,11 @@ class Post {
   List<String> tags, upVotes, downVotes;
   Timestamp timestamp;
   Timestamp? lastEdited;
+
+  @override
+  String toString() {
+    return 'Post(\n createdBy: $createdBy\n title: $title\n description: $description\n tags: $tags\n type: $type\n timestamp: $timestamp\n)';
+  }
 }
 
 Post postFromFirestore(DocumentSnapshot snapshot, options) {
@@ -39,13 +44,11 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
 
 Map<String, Object> postToFirestore(Post post, SetOptions? options) {
   return {
-    'createdBy': {post.createdBy},
-    'description': {post.description},
-    'title': {post.title},
-    'tags': {post.tags},
-    'timestamp': {post.timestamp},
-    'type': {post.type},
-    'upVotes': {post.upVotes},
-    'downVotes': {post.downVotes},
+    'createdBy': post.createdBy,
+    'title': post.title,
+    'description': post.description,
+    'tags': post.tags,
+    'type': post.type,
+    'timestamp': post.timestamp,
   };
 }

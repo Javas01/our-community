@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:our_community/config.dart';
+import 'package:our_community/models/post_model.dart';
 
 void createPost(
   String title,
@@ -8,20 +10,29 @@ void createPost(
   String tag,
   BuildContext context,
   String userId,
-  CollectionReference posts,
   GlobalKey<FormState> formKey,
   VoidCallback onSuccess,
 ) async {
   if (formKey.currentState!.validate()) {
+    final posts = FirebaseFirestore.instance
+        .collection('Communities')
+        .doc(communityCode)
+        .collection('Posts')
+        .withConverter(
+          fromFirestore: postFromFirestore,
+          toFirestore: postToFirestore,
+        );
+
     try {
-      await posts.add({
-        'title': title,
-        'description': description,
-        'createdBy': userId,
-        'type': type,
-        'tags': [tag],
-        'timestamp': Timestamp.now(),
-      });
+      final newPost = Post(
+        createdBy: userId,
+        title: title,
+        description: description,
+        tags: [tag],
+        type: type,
+        timestamp: Timestamp.now(),
+      );
+      await posts.add(newPost);
       onSuccess.call();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -2,14 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Comment {
   Comment({
-    required this.id,
+    this.id = '',
     required this.createdBy,
     required this.text,
     required this.isReply,
     required this.timestamp,
-    required this.replies,
-    required this.isDeleted,
-    required this.isRemoved,
+    this.replies = const [],
+    this.isDeleted = false,
+    this.isRemoved = false,
   });
 
   String id, createdBy, text;
@@ -17,6 +17,11 @@ class Comment {
   bool isDeleted, isRemoved;
   List<String> replies;
   Timestamp timestamp;
+
+  @override
+  String toString() {
+    return 'Comment(\n createdBy: $createdBy\n text: $text\n isReply: $isReply\n timestamp: $timestamp\n)';
+  }
 }
 
 Comment commentFromFirestore(DocumentSnapshot snapshot, options) {
@@ -36,10 +41,9 @@ Comment commentFromFirestore(DocumentSnapshot snapshot, options) {
 
 Map<String, Object> commentToFirestore(Comment comment, SetOptions? options) {
   return {
-    'createdBy': {comment.createdBy},
-    'text': {comment.text},
-    'isReply': {comment.isReply},
-    'replies': {comment.replies},
-    'timestamp': {comment.timestamp},
+    'createdBy': comment.createdBy,
+    'text': comment.text,
+    'isReply': comment.isReply,
+    'timestamp': comment.timestamp,
   };
 }

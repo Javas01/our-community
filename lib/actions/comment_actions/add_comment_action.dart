@@ -24,16 +24,20 @@ void addComment(
       .doc(communityCode)
       .collection('Posts')
       .doc(postId)
-      .collection('Comments');
-  // .withConverter<Comment>(fromFirestore: commentFromFirestore, toFirestore: commentToFirestore);
+      .collection('Comments')
+      .withConverter(
+        fromFirestore: commentFromFirestore,
+        toFirestore: commentToFirestore,
+      );
 
   try {
-    final newCommentDoc = await comments.add({
-      'text': commentController.text,
-      'isReply': isReply ? true : false,
-      'createdBy': userId,
-      'timestamp': Timestamp.now(),
-    });
+    final newComment = Comment(
+      createdBy: userId,
+      text: commentController.text,
+      isReply: isReply,
+      timestamp: Timestamp.now(),
+    );
+    final newCommentDoc = await comments.add(newComment);
 
     if (isReply) {
       final newReplies = [...parentCommentReplies, newCommentDoc.id];

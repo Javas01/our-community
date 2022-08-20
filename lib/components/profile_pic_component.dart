@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 class ProfilePic extends StatelessWidget {
   const ProfilePic({
     Key? key,
-    this.url,
+    required this.url,
     this.image,
     required this.onTap,
     required this.radius,
     this.iconSize,
   }) : super(key: key);
 
-  final String? url;
+  final String url;
   final File? image;
   final void Function() onTap;
   final double radius;
@@ -21,11 +21,11 @@ class ProfilePic extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: onTap,
-        child: image != null || url != null
+        child: image != null || url.isNotEmpty
             ? CircleAvatar(
                 backgroundImage: (image != null
                     ? FileImage(image!)
-                    : NetworkImage(url!)) as ImageProvider,
+                    : NetworkImage(url)) as ImageProvider,
                 radius: radius,
               )
             : Icon(
