@@ -51,7 +51,7 @@ class _PostCommentsState extends State<PostComments> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Flexible(
       child: StreamBuilder<QuerySnapshot<AppUser>>(
           stream: _usersStream,
           builder: (context, usersSnapshot) {
