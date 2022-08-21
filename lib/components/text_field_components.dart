@@ -35,18 +35,51 @@ class _CommentFieldState extends State<CommentField> {
       context,
       listen: false,
     ).parentCommentReplies;
-    return Row(
-      children: [
-        Expanded(
-          child: Consumer<PostCommentsModel>(
-            builder: (context, value, child) {
-              focusNode.addListener(() {
-                if (!focusNode.hasFocus) value.reset();
-              });
-              return Column(
+    return Consumer<PostCommentsModel>(builder: (context, value, child) {
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus) value.reset();
+      });
+      return Column(
+        children: [
+          if (value.isReply)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Container(
+                width: double.infinity,
+                height: 75,
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        value.parentCommentCreator,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        value.parentCommentText,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          Row(
+            children: [
+              Expanded(
+                  child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (value.isReply) Text(value.parentCommentText),
                   TextField(
                     focusNode: focusNode,
                     controller: commentController,
@@ -89,34 +122,34 @@ class _CommentFieldState extends State<CommentField> {
                     ),
                   ),
                 ],
-              );
-            },
+              )),
+              const SizedBox(
+                width: 5,
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(50, 50),
+                  shape: const CircleBorder(),
+                ),
+                onPressed: () {
+                  unFocus();
+                  addComment(
+                    context,
+                    commentController,
+                    widget.postId,
+                    userId,
+                    parentCommentId,
+                    parentCommentReplies,
+                  );
+                },
+                child: const Icon(
+                  Icons.send_rounded,
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(
-          width: 5,
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(50, 50),
-            shape: const CircleBorder(),
-          ),
-          onPressed: () {
-            unFocus();
-            addComment(
-              context,
-              commentController,
-              widget.postId,
-              userId,
-              parentCommentId,
-              parentCommentReplies,
-            );
-          },
-          child: const Icon(
-            Icons.send_rounded,
-          ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }

@@ -66,7 +66,12 @@ class UserComment extends StatelessWidget {
           if (value == 1) {
             Provider.of<PostCommentsModel>(expandedCardKey.currentContext!,
                     listen: false)
-                .reply(comment.text, comment.replies, comment.id);
+                .reply(
+              '${commentCreator.firstName} ${commentCreator.lastName}',
+              comment.text,
+              comment.replies,
+              comment.id,
+            );
             commentFocusNode.requestFocus();
           }
         },

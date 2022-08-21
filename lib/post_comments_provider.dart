@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class PostCommentsModel extends ChangeNotifier {
   final expandedCardKey = GlobalKey<ScaffoldState>();
   bool _isReply = false;
+  String _parentCommentCreator = '';
   String _parentCommentText = '';
   List<String> _parentCommentReplies = [];
   String _parentCommentId = '';
@@ -19,11 +20,13 @@ class PostCommentsModel extends ChangeNotifier {
   }
 
   void reply(
+    String parentCommentCreator,
     String parentCommentText,
     List<String> parentCommentReplies,
     String parentCommentId,
   ) {
     _isReply = true;
+    _parentCommentCreator = parentCommentCreator;
     _parentCommentText = parentCommentText;
     _parentCommentReplies = parentCommentReplies;
     _parentCommentId = parentCommentId;
@@ -32,6 +35,7 @@ class PostCommentsModel extends ChangeNotifier {
 
   void reset() {
     _isReply = false;
+    _parentCommentCreator = '';
     _parentCommentText = '';
     _parentCommentReplies = [];
     _parentCommentId = '';
@@ -39,6 +43,7 @@ class PostCommentsModel extends ChangeNotifier {
   }
 
   bool get isReply => _isReply;
+  String get parentCommentCreator => _parentCommentCreator;
   String get parentCommentText => _parentCommentText;
   List<String> get parentCommentReplies => _parentCommentReplies;
   String get parentCommentId => _parentCommentId;
