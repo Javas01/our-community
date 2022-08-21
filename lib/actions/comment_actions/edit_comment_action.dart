@@ -19,7 +19,7 @@ Future<void> editComment(
       .collection('Comments')
       .doc(commentId);
   try {
-    await comment.update(({
+    comment.update(({
       'text': controller.text,
       'lastEdited': Timestamp.now(),
     }));

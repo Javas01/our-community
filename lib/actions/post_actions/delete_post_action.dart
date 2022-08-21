@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:our_community/config.dart';
 
-void deletePost(String postId, VoidCallback onSuccess) async {
+void deletePost(
+    BuildContext context, String postId, VoidCallback onSuccess) async {
   try {
-    await FirebaseFirestore.instance
+    FirebaseFirestore.instance
         .collection('Communities')
         .doc(communityCode)
         .collection('Posts')
@@ -13,6 +14,10 @@ void deletePost(String postId, VoidCallback onSuccess) async {
 
     onSuccess.call();
   } catch (e) {
-    Future.error('Error deleting post $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error deleting post $e'),
+      ),
+    );
   }
 }

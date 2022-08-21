@@ -173,7 +173,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     context,
                                     widget.postId!,
                                     _formKey,
-                                    () => Navigator.pop(context),
                                   )
                                 : createPost(
                                     titleController.text,
@@ -183,8 +182,8 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     context,
                                     userId,
                                     _formKey,
-                                    () => Navigator.pop(context),
                                   );
+                            Navigator.pop(context);
                           },
                           child: const Text('Submit'))
                     ],

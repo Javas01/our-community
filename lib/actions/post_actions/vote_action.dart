@@ -43,7 +43,7 @@ void vote(
       break;
   }
   try {
-    await postRef.update({
+    postRef.update({
       'upVotes': post.upVotes,
       'downVotes': post.downVotes,
     });

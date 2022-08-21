@@ -10,7 +10,7 @@ void deleteComment(String postId, String commentId) async {
       .collection('Comments')
       .doc(commentId);
   try {
-    await comment.update(({
+    comment.update(({
       'isDeleted': true,
     }));
   } catch (e) {

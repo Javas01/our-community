@@ -47,19 +47,17 @@ void addComment(
       isReply: isReply,
       timestamp: Timestamp.now(),
     );
-    final newCommentDoc = await commentsRef.add(newComment);
 
     if (isReply) {
+      final newCommentDoc = await commentsRef.add(newComment);
       final newReplies = [...parentCommentReplies, newCommentDoc.id];
-
       commentsRef.doc(parentCommentId).update({'replies': newReplies});
+    } else {
+      commentsRef.add(newComment);
     }
 
-    await postsRef.update({'hasSeen': []});
-
-    commentController.clear();
+    postsRef.update({'hasSeen': []});
   } catch (e) {
     Future.error('Failed to add comment: $e');
-    commentController.clear();
   }
 }

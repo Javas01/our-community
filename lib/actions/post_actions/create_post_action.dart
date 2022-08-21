@@ -11,7 +11,6 @@ void createPost(
   BuildContext context,
   String userId,
   GlobalKey<FormState> formKey,
-  VoidCallback onSuccess,
 ) async {
   if (formKey.currentState!.validate()) {
     final posts = FirebaseFirestore.instance
@@ -32,15 +31,13 @@ void createPost(
         type: type,
         timestamp: Timestamp.now(),
       );
-      await posts.add(newPost);
-      onSuccess.call();
+      posts.add(newPost);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to create post'),
+        SnackBar(
+          content: Text('Failed to create post: $e'),
         ),
       );
-      Future.error(e);
     }
   }
 }

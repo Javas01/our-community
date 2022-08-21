@@ -28,6 +28,7 @@ Future showPopupMenu(
         PopupMenuItem(
           value: 2,
           onTap: () => deletePost(
+            context,
             post.id,
             () => ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

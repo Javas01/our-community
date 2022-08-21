@@ -11,7 +11,6 @@ void editPost(
   BuildContext context,
   String postId,
   GlobalKey<FormState> formKey,
-  VoidCallback onSuccess,
 ) async {
   if (formKey.currentState!.validate()) {
     final posts = FirebaseFirestore.instance
@@ -24,22 +23,19 @@ void editPost(
         );
 
     try {
-      await posts.doc(postId).update({
+      posts.doc(postId).update({
         'title': title,
         'description': description,
         'type': type,
         'tags': [tag],
         'lastEdited': Timestamp.now(),
       });
-
-      onSuccess.call();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to create post'),
+        SnackBar(
+          content: Text('Failed to edit post: $e'),
         ),
       );
-      Future.error(e);
     }
   }
 }
