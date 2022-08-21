@@ -10,6 +10,7 @@ class Comment {
     this.replies = const [],
     this.isDeleted = false,
     this.isRemoved = false,
+    this.lastEdited,
   });
 
   String id, createdBy, text;
@@ -17,6 +18,7 @@ class Comment {
   bool isDeleted, isRemoved;
   List<String> replies;
   Timestamp timestamp;
+  Timestamp? lastEdited;
 
   @override
   String toString() {
@@ -36,6 +38,7 @@ Comment commentFromFirestore(DocumentSnapshot snapshot, options) {
     timestamp: data['timestamp'],
     isDeleted: data['isDeleted'] ?? false,
     isRemoved: data['isRemoved'] ?? false,
+    lastEdited: data['lastEdited'],
   );
 }
 

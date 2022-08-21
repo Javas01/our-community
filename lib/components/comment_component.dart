@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:our_community/modals/comment_options_modal.dart';
 import 'package:our_community/modals/user_info_modal.dart';
 import 'package:our_community/components/profile_pic_component.dart';
@@ -36,9 +36,15 @@ class UserComment extends StatelessWidget {
     final commentCreator =
         users.firstWhere((user) => user.id == comment.createdBy);
     final isCreator = userId == comment.createdBy;
-    final commentDate = DateFormat('yyyy-MM-dd (hh:mm aa)').format(
-        DateTime.fromMicrosecondsSinceEpoch(
-            comment.timestamp.microsecondsSinceEpoch));
+    final commentDate = comment.lastEdited == null
+        ? 'Created ${timeago.format(
+            DateTime.fromMicrosecondsSinceEpoch(
+              comment.timestamp.microsecondsSinceEpoch,
+            ),
+          )}'
+        : 'Edited ${timeago.format(DateTime.fromMicrosecondsSinceEpoch(
+            comment.lastEdited!.microsecondsSinceEpoch,
+          ))}';
     final expandedCardKey =
         Provider.of<PostCommentsModel>(context, listen: false).expandedCardKey;
     final commentFocusNode =
@@ -63,16 +69,31 @@ class UserComment extends StatelessWidget {
             },
           );
 
-          if (value == 1) {
-            Provider.of<PostCommentsModel>(expandedCardKey.currentContext!,
-                    listen: false)
-                .reply(
-              '${commentCreator.firstName} ${commentCreator.lastName}',
-              comment.text,
-              comment.replies,
-              comment.id,
-            );
+          if (value == 1 || value == 2) {
+            value == 1
+                ? Provider.of<PostCommentsModel>(
+                    expandedCardKey.currentContext!,
+                    listen: false,
+                  ).reply(
+                    '${commentCreator.firstName} ${commentCreator.lastName}',
+                    comment.text,
+                    comment.replies,
+                    comment.id,
+                  )
+                : Provider.of<PostCommentsModel>(
+                    expandedCardKey.currentContext!,
+                    listen: false,
+                  ).edit(comment.text, comment.id);
             commentFocusNode.requestFocus();
+          }
+          if (value == 3) {
+            ScaffoldMessenger.of(expandedCardKey.currentContext!).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Thank you, we received your report and will make a decision after reviewing',
+                ),
+              ),
+            );
           }
         },
         child: Column(

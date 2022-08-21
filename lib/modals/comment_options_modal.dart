@@ -42,52 +42,54 @@ class CommentOptions extends StatelessWidget {
                 'Reply',
                 textScaleFactor: 1.5,
               ),
-              onPressed: () {
-                Navigator.pop(context, 1);
-              },
+              onPressed: () => Navigator.pop(context, 1),
             ),
             const Divider(thickness: 1),
-            isCreator
-                ? TextButton(
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                    ),
-                    child: const Text(
-                      'Delete',
-                      textScaleFactor: 1.5,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    onPressed: () {
-                      deleteComment(postId, comment.id);
-                      Navigator.pop(context);
-                    },
-                  )
-                : TextButton(
-                    style: TextButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50)),
-                    child: const Text(
-                      'Report',
-                      textScaleFactor: 1.5,
-                    ),
-                    onPressed: () {
-                      flagContent(
-                        userEmail,
-                        userId,
-                        postId,
-                        comment.id,
-                        () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Thank you, we received your report and will make a decision after reviewing',
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                      Navigator.pop(context);
-                    },
-                  ),
+            if (isCreator) ...[
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                child: const Text(
+                  'Edit',
+                  textScaleFactor: 1.5,
+                ),
+                onPressed: () => Navigator.pop(context, 2),
+              ),
+              const Divider(thickness: 1),
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                child: const Text(
+                  'Delete',
+                  textScaleFactor: 1.5,
+                  style: TextStyle(color: Colors.red),
+                ),
+                onPressed: () {
+                  deleteComment(postId, comment.id);
+                  Navigator.pop(context);
+                },
+              )
+            ] else
+              TextButton(
+                style: TextButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50)),
+                child: const Text(
+                  'Report',
+                  textScaleFactor: 1.5,
+                ),
+                onPressed: () {
+                  flagContent(
+                    userEmail,
+                    userId,
+                    postId,
+                    comment.id,
+                    () {},
+                  );
+                  Navigator.pop(context, 3);
+                },
+              ),
           ],
         ),
       ),

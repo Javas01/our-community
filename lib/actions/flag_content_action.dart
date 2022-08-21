@@ -20,7 +20,7 @@ void flagContent(
           'user_id': 'zycID_4Z1ijq9fgbW',
           'template_params': {
             'user_email': userEmail,
-            'content_type': 'comment',
+            'content_type': commentId != null ? 'comment' : 'post',
             'user_id': userId,
             'post_id': postId,
             'comment_id': commentId,

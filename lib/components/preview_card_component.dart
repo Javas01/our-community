@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/actions/post_actions/vote_action.dart';
@@ -13,6 +12,7 @@ import 'package:our_community/components/tag_component.dart';
 import 'package:our_community/models/user_model.dart';
 import 'package:our_community/constants/tag_options.dart';
 import 'package:our_community/config.dart' show communityCode;
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
 class PreviewCard extends StatefulWidget {
@@ -63,16 +63,12 @@ class _PreviewCardState extends State<PreviewCard> {
     bool isUpVoted = widget.post.upVotes.contains(_auth.currentUser!.uid);
     bool isDownVoted = widget.post.downVotes.contains(_auth.currentUser!.uid);
     final String postDate = widget.post.lastEdited == null
-        ? DateFormat(
-            'yyyy-MM-dd (hh:mm aa)',
-          ).format(
+        ? 'Created ${timeago.format(
             DateTime.fromMicrosecondsSinceEpoch(
               widget.post.timestamp.microsecondsSinceEpoch,
             ),
-          )
-        : 'edited on ${DateFormat(
-            'yyyy-MM-dd (hh:mm aa)',
-          ).format(
+          )}'
+        : 'Edited ${timeago.format(
             DateTime.fromMicrosecondsSinceEpoch(
               widget.post.lastEdited!.microsecondsSinceEpoch,
             ),
