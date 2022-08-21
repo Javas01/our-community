@@ -9,9 +9,11 @@ import 'package:our_community/config.dart' show communityCode;
 class PostComments extends StatefulWidget {
   const PostComments({
     Key? key,
+    required this.users,
     required this.postId,
   }) : super(key: key);
 
+  final List<AppUser> users;
   final String postId;
 
   @override
@@ -19,14 +21,6 @@ class PostComments extends StatefulWidget {
 }
 
 class _PostCommentsState extends State<PostComments> {
-  final _usersStream = FirebaseFirestore.instance
-      .collection('Users')
-      .withConverter(
-        fromFirestore: userFromFirestore,
-        toFirestore: userToFirestore,
-      )
-      .snapshots();
-
   late final Stream<QuerySnapshot<Comment>> _commentsStream;
 
   @override
@@ -47,65 +41,46 @@ class _PostCommentsState extends State<PostComments> {
 
   @override
   Widget build(BuildContext context) {
+    final currUser = widget.users.firstWhere(
+        (user) => user.id == FirebaseAuth.instance.currentUser!.uid);
     return Flexible(
-      child: StreamBuilder<QuerySnapshot<AppUser>>(
-          stream: _usersStream,
-          builder: (context, usersSnapshot) {
-            if (usersSnapshot.hasError) {
-              return const Text('Something went wrong');
-            }
-            if (usersSnapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
+        child: StreamBuilder<QuerySnapshot<Comment>>(
+      stream: _commentsStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Text('Something went wrong');
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
 
-            final users = usersSnapshot.data!.docs
-                .map((userDoc) => userDoc.data())
-                .toList();
+        final comments =
+            snapshot.data!.docs.map((commentDoc) => commentDoc.data()).toList();
 
-            final currUser = users.firstWhere(
-                (user) => user.id == FirebaseAuth.instance.currentUser!.uid);
+        // filter comments by no parent comments
+        final filteredComments = comments.where((comment) => !comment.isReply);
 
-            return StreamBuilder<QuerySnapshot<Comment>>(
-              stream: _commentsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Text('Something went wrong');
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
+        return ListView(
+            children: filteredComments.map((comment) {
+          final isUserBlocked =
+              currUser.blockedUsers.contains(comment.createdBy);
+          final replies = comment.replies;
+          final replyComments = comments
+              .where((comment) => replies.contains(comment.id))
+              .toList();
 
-                final comments = snapshot.data!.docs
-                    .map((commentDoc) => commentDoc.data())
-                    .toList();
-
-                // filter comments by no parent comments
-                final filteredComments =
-                    comments.where((comment) => !comment.isReply);
-
-                return ListView(
-                    children: filteredComments.map((comment) {
-                  final isUserBlocked =
-                      currUser.blockedUsers.contains(comment.createdBy);
-                  final replies = comment.replies;
-                  final replyComments = comments
-                      .where((comment) => replies.contains(comment.id))
-                      .toList();
-
-                  return UserComment(
-                    key: GlobalKey(),
-                    comment: comment,
-                    comments: comments,
-                    replies: replyComments,
-                    postId: widget.postId,
-                    blockedUsers: currUser.blockedUsers,
-                    isUserBlocked: isUserBlocked,
-                    users: users,
-                  );
-                }).toList());
-              },
-            );
-          }),
-    );
+          return UserComment(
+            key: GlobalKey(),
+            comment: comment,
+            comments: comments,
+            replies: replyComments,
+            postId: widget.postId,
+            blockedUsers: currUser.blockedUsers,
+            isUserBlocked: isUserBlocked,
+            users: widget.users,
+          );
+        }).toList());
+      },
+    ));
   }
 }

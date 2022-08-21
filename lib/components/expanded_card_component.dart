@@ -3,6 +3,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:our_community/components/post_comments_component.dart';
 import 'package:our_community/components/comment_field_component.dart';
 import 'package:our_community/models/post_model.dart';
+import 'package:our_community/models/user_model.dart';
 import 'package:our_community/post_comments_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -12,9 +13,12 @@ class ExpandedCard extends StatefulWidget {
     Key? key,
     required this.post,
     required this.setExpanded,
+    required this.users,
   }) : super(key: key);
 
   final Post post;
+  final List<AppUser> users;
+
   final void Function(bool) setExpanded;
 
   @override
@@ -97,6 +101,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
                         thickness: 2,
                       ),
                       PostComments(
+                        users: widget.users,
                         postId: widget.post.id,
                       ),
                       CommentField(

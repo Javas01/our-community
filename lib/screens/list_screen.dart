@@ -125,6 +125,7 @@ class _ListScreenState extends State<ListScreen> {
                       users.firstWhere((e) => e.id == post.createdBy);
 
                   return ImageCardComponent(
+                    users: users,
                     post: post,
                     postCreator: postCreator,
                     resetValueNotifier: widget.resetValueNotifier,

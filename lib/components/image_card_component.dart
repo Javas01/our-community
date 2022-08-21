@@ -14,11 +14,13 @@ class ImageCardComponent extends StatefulWidget {
     required this.resetValueNotifier,
     required this.postCreator,
     required this.post,
+    required this.users,
   }) : super(key: key);
 
   final Post post;
   final ValueNotifier<bool> resetValueNotifier;
   final AppUser postCreator;
+  final List<AppUser> users;
 
   @override
   State<ImageCardComponent> createState() => _ImageCardComponentState();
@@ -68,6 +70,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
       child: _isExpanded
           ? ExpandedCard(
+              users: widget.users,
               post: widget.post,
               setExpanded: setExpanded,
             )
