@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:our_community/modals/comment_options_modal.dart';
 import 'package:our_community/modals/user_info_modal.dart';
@@ -8,6 +9,7 @@ import 'package:our_community/models/comment_model.dart';
 import 'package:our_community/models/user_model.dart';
 import 'package:our_community/post_comments_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserComment extends StatelessWidget {
   UserComment({
@@ -142,8 +144,16 @@ class UserComment extends StatelessWidget {
                       if (comment.isDeleted == false &&
                           comment.isRemoved == false &&
                           isUserBlocked == false)
-                        Text(
-                          comment.text,
+                        Linkify(
+                          options: const LinkifyOptions(looseUrl: true),
+                          onOpen: (link) async {
+                            if (await canLaunchUrl(Uri.parse(link.url))) {
+                              await launchUrl(Uri.parse(link.url));
+                            } else {
+                              throw 'Could not launch $link';
+                            }
+                          },
+                          text: comment.text,
                           style: const TextStyle(fontSize: 16),
                         ),
                     ],
