@@ -36,13 +36,10 @@ class PreviewCard extends StatefulWidget {
 
 class _PreviewCardState extends State<PreviewCard> {
   final _auth = FirebaseAuth.instance;
-  int resetCount = 0;
-
-  late Future<QuerySnapshot<Comment>> commentCount;
 
   @override
-  void initState() {
-    commentCount = FirebaseFirestore.instance
+  Widget build(BuildContext context) {
+    final commentCount = FirebaseFirestore.instance
         .collection('Communities')
         .doc(communityCode)
         .collection('Posts')
@@ -52,12 +49,8 @@ class _PreviewCardState extends State<PreviewCard> {
           fromFirestore: commentFromFirestore,
           toFirestore: commentToFirestore,
         )
-        .get();
-    super.initState();
-  }
+        .snapshots();
 
-  @override
-  Widget build(BuildContext context) {
     final voteCount =
         (widget.post.upVotes.length - widget.post.downVotes.length);
     bool isUpVoted = widget.post.upVotes.contains(_auth.currentUser!.uid);
@@ -169,8 +162,8 @@ class _PreviewCardState extends State<PreviewCard> {
                 children: [
                   Row(
                     children: [
-                      FutureBuilder<QuerySnapshot<Comment>>(
-                        future: commentCount,
+                      StreamBuilder<QuerySnapshot<Comment>>(
+                        stream: commentCount,
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return const CommentCount();
