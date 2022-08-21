@@ -9,19 +9,20 @@ class Post {
     required this.tags,
     required this.type,
     required this.timestamp,
+    this.hasSeen = const [],
     this.upVotes = const [],
     this.downVotes = const [],
     this.lastEdited,
   });
 
   String id, createdBy, description, title, type;
-  List<String> tags, upVotes, downVotes;
+  List<String> tags, upVotes, downVotes, hasSeen;
   Timestamp timestamp;
   Timestamp? lastEdited;
 
   @override
   String toString() {
-    return 'Post(\n createdBy: $createdBy\n title: $title\n description: $description\n tags: $tags\n type: $type\n timestamp: $timestamp\n)';
+    return 'Post(\n createdBy: $createdBy\n title: $title\n description: $description\n tags: $tags\n type: $type\n hasSeen: $hasSeen\n $timestamp\n)';
   }
 }
 
@@ -39,6 +40,7 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
     upVotes: data['upVotes']?.cast<String>() ?? [],
     downVotes: data['downVotes']?.cast<String>() ?? [],
     lastEdited: data['lastEdited'],
+    hasSeen: data['hasSeen']?.cast<String>() ?? [],
   );
 }
 

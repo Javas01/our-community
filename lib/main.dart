@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
 Widget _getLandingPage() {
   return StreamBuilder(
     stream: FirebaseAuth.instance.authStateChanges(),
-    builder: (BuildContext context, snapshot) {
+    builder: (context, snapshot) {
       if (snapshot.hasData) {
         return const HomeScreen();
       } else {

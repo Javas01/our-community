@@ -41,11 +41,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             stream: _usersStream,
             builder: ((context, snapshot) {
               if (snapshot.hasError) {
-                return const Text('Something went wrong');
+                return const Text('Failed to load profile');
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading');
+                return const CircularProgressIndicator();
               }
 
               final users =

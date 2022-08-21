@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/config.dart' show communityCode;
 import 'package:our_community/models/comment_model.dart';
+import 'package:our_community/models/post_model.dart';
 
 void addComment(
   BuildContext context,
@@ -19,7 +20,7 @@ void addComment(
   }
 
   final isReply = parentCommentId.isNotEmpty;
-  final comments = FirebaseFirestore.instance
+  final commentsRef = FirebaseFirestore.instance
       .collection('Communities')
       .doc(communityCode)
       .collection('Posts')
@@ -29,6 +30,15 @@ void addComment(
         fromFirestore: commentFromFirestore,
         toFirestore: commentToFirestore,
       );
+  final postsRef = FirebaseFirestore.instance
+      .collection('Communities')
+      .doc(communityCode)
+      .collection('Posts')
+      .doc(postId)
+      .withConverter(
+        fromFirestore: postFromFirestore,
+        toFirestore: postToFirestore,
+      );
 
   try {
     final newComment = Comment(
@@ -37,13 +47,15 @@ void addComment(
       isReply: isReply,
       timestamp: Timestamp.now(),
     );
-    final newCommentDoc = await comments.add(newComment);
+    final newCommentDoc = await commentsRef.add(newComment);
 
     if (isReply) {
       final newReplies = [...parentCommentReplies, newCommentDoc.id];
 
-      comments.doc(parentCommentId).update({'replies': newReplies});
+      commentsRef.doc(parentCommentId).update({'replies': newReplies});
     }
+
+    await postsRef.update({'hasSeen': []});
 
     commentController.clear();
   } catch (e) {

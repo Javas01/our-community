@@ -54,10 +54,10 @@ class _PostCommentsState extends State<PostComments> {
             if (usersSnapshot.hasError) {
               return const Text('Something went wrong');
             }
-
             if (usersSnapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading');
+              return const CircularProgressIndicator();
             }
+
             final users = usersSnapshot.data!.docs
                 .map((userDoc) => userDoc.data())
                 .toList();
@@ -71,10 +71,10 @@ class _PostCommentsState extends State<PostComments> {
                 if (snapshot.hasError) {
                   return const Text('Something went wrong');
                 }
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading');
+                  return const CircularProgressIndicator();
                 }
+
                 final comments = snapshot.data!.docs
                     .map((commentDoc) => commentDoc.data())
                     .toList();

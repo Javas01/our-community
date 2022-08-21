@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_community/actions/post_actions/vote_action.dart';
+import 'package:our_community/components/comments_count_component.dart';
 import 'package:our_community/components/profile_pic_component.dart';
 import 'package:our_community/modals/user_info_modal.dart';
+import 'package:our_community/models/comment_model.dart';
 import 'package:our_community/models/post_model.dart';
 import 'package:our_community/components/tag_component.dart';
 import 'package:our_community/models/user_model.dart';
@@ -36,7 +38,7 @@ class _PreviewCardState extends State<PreviewCard> {
   final _auth = FirebaseAuth.instance;
   int resetCount = 0;
 
-  late Future<QuerySnapshot> commentCount;
+  late Future<QuerySnapshot<Comment>> commentCount;
 
   @override
   void initState() {
@@ -46,6 +48,10 @@ class _PreviewCardState extends State<PreviewCard> {
         .collection('Posts')
         .doc(widget.post.id)
         .collection('Comments')
+        .withConverter(
+          fromFirestore: commentFromFirestore,
+          toFirestore: commentToFirestore,
+        )
         .get();
     super.initState();
   }
@@ -167,24 +173,25 @@ class _PreviewCardState extends State<PreviewCard> {
                 children: [
                   Row(
                     children: [
-                      FutureBuilder(
+                      FutureBuilder<QuerySnapshot<Comment>>(
                         future: commentCount,
-                        builder: (BuildContext context,
-                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                        builder: (context, snapshot) {
                           if (snapshot.hasError) {
-                            return const Text('0');
+                            return const CommentCount();
                           }
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const Text('0');
+                            return const CommentCount();
                           }
-                          return Text(snapshot.data!.docs.length.toString());
+                          final userHasSeen = snapshot.data!.docs.isEmpty ||
+                              widget.post.hasSeen.contains(
+                                _auth.currentUser!.uid,
+                              );
+                          return CommentCount(
+                            docs: snapshot.data!.docs,
+                            hasSeen: userHasSeen,
+                          );
                         },
-                      ),
-                      const SizedBox(width: 5),
-                      const Icon(
-                        Icons.chat_outlined,
-                        size: 20,
                       ),
                     ],
                   ),

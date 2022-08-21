@@ -83,8 +83,8 @@ class UserComment extends StatelessWidget {
                 ProfilePic(
                   onTap: () => showDialog(
                     context: context,
-                    builder: (buildContext) => UserInfoModal(
-                      context: buildContext,
+                    builder: (modalContext) => UserInfoModal(
+                      context: modalContext,
                       contentCreator: commentCreator,
                       isCreator: isCreator,
                       isUserBlocked: isUserBlocked,

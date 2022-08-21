@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:our_community/actions/show_popup_menu_action.dart';
+import 'package:our_community/config.dart';
 import 'package:our_community/models/post_model.dart';
 import 'package:our_community/models/user_model.dart';
 import 'package:our_community/components/expanded_card_component.dart';
@@ -34,6 +36,21 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
     setState(() {
       _isExpanded = isExpanded;
     });
+
+    if (!widget.post.hasSeen.contains(userId)) {
+      final hasSeen = widget.post.hasSeen;
+      hasSeen.add(userId);
+      FirebaseFirestore.instance
+          .collection('Communities')
+          .doc(communityCode)
+          .collection('Posts')
+          .doc(widget.post.id)
+          .withConverter(
+            fromFirestore: postFromFirestore,
+            toFirestore: postToFirestore,
+          )
+          .update({'hasSeen': hasSeen});
+    }
   }
 
   void _storePosition(TapDownDetails details) {

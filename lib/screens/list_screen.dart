@@ -67,10 +67,10 @@ class _ListScreenState extends State<ListScreen> {
             stream: _postsStream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Text('Something went wrong');
+                return const Text('Failed to load posts');
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Text('Loading');
+                return const CircularProgressIndicator();
               }
 
               List<Post> posts =

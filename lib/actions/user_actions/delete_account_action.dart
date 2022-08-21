@@ -6,7 +6,7 @@ void deleteAccount(BuildContext context) {
   final auth = FirebaseAuth.instance;
   showDialog<String>(
     context: context,
-    builder: (BuildContext context) => AlertDialog(
+    builder: (context) => AlertDialog(
       title: const Text('Are you sure?'),
       content: const Text('This action cannot be undone.'),
       actions: <Widget>[
