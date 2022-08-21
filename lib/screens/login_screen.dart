@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:our_community/screens/home_screen.dart';
 import 'package:our_community/screens/registration_screen.dart';
@@ -81,6 +82,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   text: 'Dont have an Account? ',
                   linkText: 'Signup',
                   screen: RegistrationScreen(),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (emailController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Enter an email'),
+                        ),
+                      );
+                      return;
+                    }
+                    FirebaseAuth.instance
+                        .sendPasswordResetEmail(email: emailController.text)
+                        .catchError((error, stackTrace) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('$error'),
+                        ),
+                      );
+                    });
+                  },
+                  child: const Text('Reset password'),
                 )
               ],
             ),
