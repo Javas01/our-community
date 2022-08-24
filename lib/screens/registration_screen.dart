@@ -149,37 +149,44 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                     Expanded(
                       child: RichText(
-                        text: TextSpan(text: 'Agree to ', children: [
-                          TextSpan(
-                            text: 'Terms and Conditions ',
-                            style: const TextStyle(color: Colors.blue),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () async {
-                                final url = Uri.parse(
-                                    'https://privacyterms.io/view/1nbUFdsr-KOxNJ8F0-zaIOkv/');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(url);
-                                } else {
-                                  throw 'Could not launch $url';
-                                }
-                              },
-                          ),
-                          const TextSpan(text: 'and '),
-                          TextSpan(
-                            text: 'Privacy Policy ',
-                            style: const TextStyle(color: Colors.blue),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () async {
-                                final url = Uri.parse(
-                                    'https://privacyterms.io/view/VMK9NY83-GNckF1Jn-2e3RSD/');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(url);
-                                } else {
-                                  throw 'Could not launch $url';
-                                }
-                              },
-                          ),
-                        ]),
+                        text: TextSpan(
+                            text: 'Agree to ',
+                            style: TextStyle(
+                              color: Theme.of(context).brightness.name == 'dark'
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Terms and Conditions ',
+                                style: const TextStyle(color: Colors.blue),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    final url = Uri.parse(
+                                        'https://privacyterms.io/view/1nbUFdsr-KOxNJ8F0-zaIOkv/');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    } else {
+                                      throw 'Could not launch $url';
+                                    }
+                                  },
+                              ),
+                              const TextSpan(text: 'and '),
+                              TextSpan(
+                                text: 'Privacy Policy ',
+                                style: const TextStyle(color: Colors.blue),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    final url = Uri.parse(
+                                        'https://privacyterms.io/view/VMK9NY83-GNckF1Jn-2e3RSD/');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    } else {
+                                      throw 'Could not launch $url';
+                                    }
+                                  },
+                              ),
+                            ]),
                       ),
                     )
                   ],

@@ -24,8 +24,6 @@ void updateProfile(
   final profilePicRef =
       FirebaseStorage.instance.ref('profilePics').child(currUserId);
 
-  firstName.clear();
-  lastName.clear();
   try {
     String profilePicUrl = '';
     if (imageSrc != null) {
@@ -41,6 +39,8 @@ void updateProfile(
       ...profilePicUrl.isNotEmpty ? ({'profilePicUrl': profilePicUrl}) : {},
     });
 
+    firstName.clear();
+    lastName.clear();
     onSuccess.call();
   } catch (e) {
     Future.error(e);

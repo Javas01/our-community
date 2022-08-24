@@ -4,5 +4,5 @@ String get communityCode {
     return 'ATLMasjid';
   }
 
-  return 'Test';
+  return 'Test Community';
 }

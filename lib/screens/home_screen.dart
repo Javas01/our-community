@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:our_community/config.dart';
 import 'package:our_community/modals/create_post_modal.dart';
 import 'package:our_community/screens/settings_screen.dart';
 import 'package:our_community/screens/list_screen.dart';
@@ -31,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        title: const Text('Our Community'),
+        title: Text(communityCode),
         leading: null,
         actions: [
           PopupMenuButton(
