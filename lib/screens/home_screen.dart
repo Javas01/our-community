@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:our_community/config.dart';
 import 'package:our_community/modals/create_post_modal.dart';
@@ -32,7 +33,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
-        title: Text(communityCode),
+        title: FutureBuilder<DocumentSnapshot<Map>>(
+            future: FirebaseFirestore.instance
+                .collection('Communities')
+                .doc(communityCode)
+                .get(),
+            builder: (context, snapshot) => snapshot.hasData
+                ? Text(snapshot.data!.data()?['name'])
+                : const Text('')),
         leading: null,
         actions: [
           PopupMenuButton(
