@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:our_community/actions/comment_actions/delete_comment_action.dart';
-import 'package:our_community/actions/flag_content_action.dart';
-import 'package:our_community/models/comment_model.dart';
+import 'package:our_ummah/actions/comment_actions/delete_comment_action.dart';
+import 'package:our_ummah/actions/flag_content_action.dart';
+import 'package:our_ummah/models/comment_model.dart';
 
 class CommentOptions extends StatelessWidget {
   const CommentOptions({

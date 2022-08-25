@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/config.dart';
-import 'package:our_community/models/post_model.dart';
+import 'package:our_ummah/config.dart';
+import 'package:our_ummah/models/post_model.dart';
 
 void editPost(
   String title,

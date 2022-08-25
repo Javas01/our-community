@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/components/image_card_component.dart';
+import 'package:our_ummah/components/image_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:our_community/constants/tag_options.dart';
-import 'package:our_community/components/tag_filter_component.dart';
-import 'package:our_community/models/user_model.dart';
-import 'package:our_community/models/post_model.dart';
-import 'package:our_community/config.dart' show communityCode;
+import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/components/tag_filter_component.dart';
+import 'package:our_ummah/models/user_model.dart';
+import 'package:our_ummah/models/post_model.dart';
+import 'package:our_ummah/config.dart' show communityCode;
 
 class ListScreen extends StatefulWidget {
   const ListScreen({

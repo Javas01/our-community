@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:our_community/modals/comment_options_modal.dart';
-import 'package:our_community/modals/user_info_modal.dart';
-import 'package:our_community/components/profile_pic_component.dart';
-import 'package:our_community/models/comment_model.dart';
-import 'package:our_community/models/user_model.dart';
-import 'package:our_community/post_comments_provider.dart';
+import 'package:our_ummah/modals/comment_options_modal.dart';
+import 'package:our_ummah/modals/user_info_modal.dart';
+import 'package:our_ummah/components/profile_pic_component.dart';
+import 'package:our_ummah/models/comment_model.dart';
+import 'package:our_ummah/models/user_model.dart';
+import 'package:our_ummah/post_comments_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 

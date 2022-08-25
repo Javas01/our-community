@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/config.dart' show communityCode;
+import 'package:our_ummah/config.dart' show communityCode;
 
 Future<void> editComment(
   BuildContext context,

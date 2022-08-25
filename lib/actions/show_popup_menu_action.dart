@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/actions/flag_content_action.dart';
-import 'package:our_community/modals/create_post_modal.dart';
-import 'package:our_community/models/post_model.dart';
-import 'package:our_community/actions/post_actions/delete_post_action.dart';
+import 'package:our_ummah/actions/flag_content_action.dart';
+import 'package:our_ummah/modals/create_post_modal.dart';
+import 'package:our_ummah/models/post_model.dart';
+import 'package:our_ummah/actions/post_actions/delete_post_action.dart';
 
 Future showPopupMenu(
     BuildContext context, Post post, Offset tapPosition) async {

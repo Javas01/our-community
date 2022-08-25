@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/models/comment_model.dart';
+import 'package:our_ummah/models/comment_model.dart';
 
 class CommentCount extends StatelessWidget {
   const CommentCount({Key? key, this.docs = const [], this.hasSeen = true})

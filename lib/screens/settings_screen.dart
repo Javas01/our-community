@@ -2,14 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:our_community/actions/pick_image_action.dart';
-import 'package:our_community/actions/user_actions/log_out_action.dart';
-import 'package:our_community/actions/user_actions/unblock_user_action.dart';
-import 'package:our_community/actions/user_actions/update_profile_action.dart';
-import 'package:our_community/actions/user_actions/delete_account_action.dart';
-import 'package:our_community/components/profile_pic_component.dart';
-import 'package:our_community/components/text_form_field_components.dart';
-import 'package:our_community/models/user_model.dart';
+import 'package:our_ummah/actions/pick_image_action.dart';
+import 'package:our_ummah/actions/user_actions/log_out_action.dart';
+import 'package:our_ummah/actions/user_actions/unblock_user_action.dart';
+import 'package:our_ummah/actions/user_actions/update_profile_action.dart';
+import 'package:our_ummah/actions/user_actions/delete_account_action.dart';
+import 'package:our_ummah/components/profile_pic_component.dart';
+import 'package:our_ummah/components/text_form_field_components.dart';
+import 'package:our_ummah/models/user_model.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);

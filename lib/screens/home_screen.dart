@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/config.dart';
-import 'package:our_community/modals/create_post_modal.dart';
-import 'package:our_community/screens/settings_screen.dart';
-import 'package:our_community/screens/list_screen.dart';
+import 'package:our_ummah/config.dart';
+import 'package:our_ummah/modals/create_post_modal.dart';
+import 'package:our_ummah/screens/settings_screen.dart';
+import 'package:our_ummah/screens/list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:our_community/components/text_form_field_components.dart';
-import 'package:our_community/screens/home_screen.dart';
-import 'package:our_community/actions/user_actions/create_account_action.dart';
-import 'package:our_community/components/registration_subtext_component.dart';
-import 'package:our_community/config.dart' show communityCode;
+import 'package:our_ummah/components/text_form_field_components.dart';
+import 'package:our_ummah/screens/home_screen.dart';
+import 'package:our_ummah/actions/user_actions/create_account_action.dart';
+import 'package:our_ummah/components/registration_subtext_component.dart';
+import 'package:our_ummah/config.dart' show communityCode;
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);

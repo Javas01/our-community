@@ -1,10 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:our_community/components/tag_component.dart';
-import 'package:our_community/components/text_form_field_components.dart';
-import 'package:our_community/actions/post_actions/create_post_action.dart';
-import 'package:our_community/actions/post_actions/edit_post_action.dart';
-import 'package:our_community/constants/tag_options.dart';
+import 'package:our_ummah/actions/pick_image_action.dart';
+import 'package:our_ummah/components/tag_component.dart';
+import 'package:our_ummah/components/text_form_field_components.dart';
+import 'package:our_ummah/actions/post_actions/create_post_action.dart';
+import 'package:our_ummah/actions/post_actions/edit_post_action.dart';
+import 'package:our_ummah/constants/tag_options.dart';
 
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({
@@ -35,6 +37,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  File? image;
 
   String typeDropdownValue = 'Text';
   late String tagDropdownValue;
@@ -86,7 +89,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                             typeDropdownValue = newValue!;
                           });
                         },
-                        items: <String>['Text']
+                        items: <String>['Text', 'Image']
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
@@ -130,28 +133,67 @@ class _CreatePostModalState extends State<CreatePostModal> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  FormInputField(
-                    maxLength: 30,
-                    icon: const Icon(Icons.title_outlined),
-                    hintText: 'Title',
-                    controller: titleController,
-                    isLast: false,
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom),
-                    child: FormInputField(
-                      maxLength: 500,
-                      icon: const Icon(Icons.description_outlined),
-                      controller: descriptionController,
-                      isLast: true,
-                      hintText: 'Description',
-                      keyboardType: TextInputType.multiline,
-                      maxLines: 8,
-                      minLines: 8,
-                    ),
-                  ),
+                  typeDropdownValue == 'Text'
+                      ? Column(
+                          children: [
+                            FormInputField(
+                              maxLength: 30,
+                              icon: const Icon(Icons.title_outlined),
+                              hintText: 'Title',
+                              controller: titleController,
+                              isLast: false,
+                            ),
+                            const SizedBox(height: 10),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom),
+                              child: FormInputField(
+                                maxLength: 500,
+                                icon: const Icon(Icons.description_rounded),
+                                controller: descriptionController,
+                                isLast: true,
+                                hintText: 'Description',
+                                keyboardType: TextInputType.multiline,
+                                maxLines: 8,
+                                minLines: 8,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            image == null
+                                ? ElevatedButton(
+                                    child: const Text('Pick an Image'),
+                                    onPressed: () async {
+                                      final imageTemp = await pickImage(
+                                        (() => ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Failed to get image',
+                                                ),
+                                              ),
+                                            )),
+                                      );
+                                      setState(() {
+                                        image = imageTemp;
+                                      });
+                                    },
+                                  )
+                                : Image(image: FileImage(image!)),
+                            const SizedBox(height: 10),
+                            FormInputField(
+                              maxLength: 50,
+                              icon: const Icon(Icons.description_rounded),
+                              hintText: 'Caption',
+                              controller: titleController,
+                              isLast: true,
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

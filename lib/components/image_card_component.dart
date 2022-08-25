@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/actions/show_popup_menu_action.dart';
-import 'package:our_community/config.dart';
-import 'package:our_community/models/post_model.dart';
-import 'package:our_community/models/user_model.dart';
-import 'package:our_community/components/expanded_card_component.dart';
-import 'package:our_community/components/preview_card_component.dart';
+import 'package:our_ummah/actions/show_popup_menu_action.dart';
+import 'package:our_ummah/config.dart';
+import 'package:our_ummah/models/post_model.dart';
+import 'package:our_ummah/models/user_model.dart';
+import 'package:our_ummah/components/expanded_card_component.dart';
+import 'package:our_ummah/components/preview_card_component.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ImageCardComponent extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:our_community/config.dart';
+import 'package:our_ummah/config.dart';
 
 void deletePost(
     BuildContext context, String postId, VoidCallback onSuccess) async {
