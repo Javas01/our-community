@@ -7,11 +7,12 @@ import 'package:our_ummah/components/comments_count_component.dart';
 import 'package:our_ummah/components/profile_pic_component.dart';
 import 'package:our_ummah/modals/user_info_modal.dart';
 import 'package:our_ummah/models/comment_model.dart';
+import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/components/tag_component.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/constants/tag_options.dart';
-import 'package:our_ummah/config.dart' show communityCode;
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -34,7 +35,7 @@ class PreviewTextCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final commentCount = FirebaseFirestore.instance
         .collection('Communities')
-        .doc(communityCode)
+        .doc(Provider.of<Community>(context, listen: false).id)
         .collection('Posts')
         .doc(post.id)
         .collection('Comments')
@@ -186,10 +187,12 @@ class PreviewTextCard extends StatelessWidget {
                               ? vote(
                                   'remove',
                                   post.id,
+                                  context,
                                 )
                               : vote(
                                   'up',
                                   post.id,
+                                  context,
                                 );
                         },
                         child: Icon(
@@ -204,10 +207,12 @@ class PreviewTextCard extends StatelessWidget {
                               ? vote(
                                   'remove',
                                   post.id,
+                                  context,
                                 )
                               : vote(
                                   'down',
                                   post.id,
+                                  context,
                                 );
                         },
                         child: Icon(

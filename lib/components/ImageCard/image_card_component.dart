@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/show_popup_menu_action.dart';
 import 'package:our_ummah/components/ImageCard/expanded_image_card_component.dart';
 import 'package:our_ummah/components/ImageCard/preview_image_card_component.dart';
-import 'package:our_ummah/config.dart';
+import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class ImageCardComponent extends StatefulWidget {
   const ImageCardComponent({
@@ -44,7 +45,7 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
       hasSeen.add(userId);
       FirebaseFirestore.instance
           .collection('Communities')
-          .doc(communityCode)
+          .doc(Provider.of<Community>(context, listen: false).id)
           .collection('Posts')
           .doc(widget.post.id)
           .withConverter(

@@ -2,9 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_ummah/components/comment_component.dart';
+import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/models/comment_model.dart';
-import 'package:our_ummah/config.dart' show communityCode;
+import 'package:provider/provider.dart';
 
 class PostComments extends StatefulWidget {
   const PostComments({
@@ -27,7 +28,7 @@ class _PostCommentsState extends State<PostComments> {
   void initState() {
     _commentsStream = FirebaseFirestore.instance
         .collection('Communities')
-        .doc(communityCode)
+        .doc(Provider.of<Community>(context, listen: false).id)
         .collection('Posts')
         .doc(widget.postId)
         .collection('Comments')

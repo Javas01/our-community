@@ -67,7 +67,7 @@ class CommentOptions extends StatelessWidget {
                   style: TextStyle(color: Colors.red),
                 ),
                 onPressed: () {
-                  deleteComment(postId, comment.id);
+                  deleteComment(postId, comment.id, context);
                   Navigator.pop(context);
                 },
               )

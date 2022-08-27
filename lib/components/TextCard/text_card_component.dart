@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/show_popup_menu_action.dart';
-import 'package:our_ummah/config.dart';
+import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/components/TextCard/expanded_text_card_component.dart';
 import 'package:our_ummah/components/TextCard/preview_text_card_component.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class TextCardComponent extends StatefulWidget {
   const TextCardComponent({
@@ -44,7 +45,7 @@ class _TextCardComponentState extends State<TextCardComponent> {
       hasSeen.add(userId);
       FirebaseFirestore.instance
           .collection('Communities')
-          .doc(communityCode)
+          .doc(Provider.of<Community>(context, listen: false).id)
           .collection('Posts')
           .doc(widget.post.id)
           .withConverter(

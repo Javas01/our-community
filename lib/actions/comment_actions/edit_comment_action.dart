@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:our_ummah/config.dart' show communityCode;
+import 'package:our_ummah/models/community_model.dart';
+import 'package:provider/provider.dart';
 
 Future<void> editComment(
   BuildContext context,
@@ -13,7 +14,7 @@ Future<void> editComment(
 
   DocumentReference comment = FirebaseFirestore.instance
       .collection('Communities')
-      .doc(communityCode)
+      .doc(Provider.of<Community>(context, listen: false).id)
       .collection('Posts')
       .doc(postId)
       .collection('Comments')

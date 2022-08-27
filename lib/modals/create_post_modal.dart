@@ -10,8 +10,8 @@ import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/models/post_model.dart';
 
 class CreatePostModal extends StatefulWidget {
-  CreatePostModal({Key? key, this.post}) : super(key: key);
-  Post? post;
+  const CreatePostModal({Key? key, this.post}) : super(key: key);
+  final Post? post;
 
   @override
   State<CreatePostModal> createState() => _CreatePostModalState();

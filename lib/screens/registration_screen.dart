@@ -5,7 +5,6 @@ import 'package:our_ummah/components/text_form_field_components.dart';
 import 'package:our_ummah/screens/home_screen.dart';
 import 'package:our_ummah/actions/user_actions/create_account_action.dart';
 import 'package:our_ummah/components/registration_subtext_component.dart';
-import 'package:our_ummah/config.dart' show communityCode;
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -99,8 +98,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   hintText: 'Community code',
                   isLast: true,
                   validator: (String? value) {
-                    if (value?.toUpperCase().trim() !=
-                        communityCode.toUpperCase()) {
+                    if (value?.toUpperCase().trim() != ''.toUpperCase()) {
                       return 'Incorrect community code';
                     }
                     return null;
