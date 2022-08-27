@@ -31,7 +31,7 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    late final _postsStream = FirebaseFirestore.instance
+    final postsStream = FirebaseFirestore.instance
         .collection('Communities')
         .doc(Provider.of<Community>(context, listen: false).id)
         .collection('Posts')
@@ -47,7 +47,7 @@ class _ListScreenState extends State<ListScreen> {
       });
     }
     return StreamBuilder<QuerySnapshot<Post>>(
-      stream: _postsStream,
+      stream: postsStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Text('Failed to load posts');
@@ -57,7 +57,6 @@ class _ListScreenState extends State<ListScreen> {
         }
         List<Post> posts =
             snapshot.data!.docs.map((postDoc) => postDoc.data()).toList();
-        print(posts);
 
         // filter posts by blockedUsers
         final notBlockedPosts = posts

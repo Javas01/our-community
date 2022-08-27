@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               context: context,
                               isScrollControlled: true,
                               builder: (BuildContext context) {
-                                return CreatePostModal();
+                                return const CreatePostModal();
                               });
                         } else {
                           setState(() {
@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 });
           } else {
-            return Text('');
+            return const Text('');
           }
         });
   }

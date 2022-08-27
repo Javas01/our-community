@@ -187,10 +187,12 @@ class PreviewTextCard extends StatelessWidget {
                               ? vote(
                                   'remove',
                                   post.id,
+                                  context,
                                 )
                               : vote(
                                   'up',
                                   post.id,
+                                  context,
                                 );
                         },
                         child: Icon(
@@ -205,10 +207,12 @@ class PreviewTextCard extends StatelessWidget {
                               ? vote(
                                   'remove',
                                   post.id,
+                                  context,
                                 )
                               : vote(
                                   'down',
                                   post.id,
+                                  context,
                                 );
                         },
                         child: Icon(

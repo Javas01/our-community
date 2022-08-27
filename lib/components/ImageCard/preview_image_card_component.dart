@@ -35,7 +35,7 @@ class PreviewImageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final commentCount = FirebaseFirestore.instance
         .collection('Communities')
-        .doc(Provider.of<Community>(context, listen: false).name)
+        .doc(Provider.of<Community>(context, listen: false).id)
         .collection('Posts')
         .doc(post.id)
         .collection('Comments')
@@ -196,10 +196,12 @@ class PreviewImageCard extends StatelessWidget {
                               ? vote(
                                   'remove',
                                   post.id,
+                                  context,
                                 )
                               : vote(
                                   'up',
                                   post.id,
+                                  context,
                                 );
                         },
                         child: Icon(
@@ -214,10 +216,12 @@ class PreviewImageCard extends StatelessWidget {
                               ? vote(
                                   'remove',
                                   post.id,
+                                  context,
                                 )
                               : vote(
                                   'down',
                                   post.id,
+                                  context,
                                 );
                         },
                         child: Icon(
