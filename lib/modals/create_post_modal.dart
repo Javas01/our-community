@@ -11,15 +11,17 @@ import 'package:our_ummah/constants/tag_options.dart';
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({
     Key? key,
+    this.type,
     this.tags,
     this.title,
     this.description,
     this.postId,
+    this.imageUrl,
     required this.isEdit,
   }) : super(key: key);
 
   final List<dynamic>? tags;
-  final String? title, description, postId;
+  final String? title, description, postId, type, imageUrl;
   final bool isEdit;
 
   @override
@@ -28,28 +30,25 @@ class CreatePostModal extends StatefulWidget {
 
 class _CreatePostModalState extends State<CreatePostModal> {
   final _formKey = GlobalKey<FormState>();
-
   final firstName =
       FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
   final lastName =
       FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
   final userId = FirebaseAuth.instance.currentUser!.uid;
-
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   File? image;
-
+  final typeOptions = ['Text', 'Image'];
   String typeDropdownValue = 'Text';
-  late String tagDropdownValue;
+  String tagDropdownValue = 'Other';
 
   @override
   void initState() {
     if (widget.isEdit) {
+      typeDropdownValue = widget.type!;
       tagDropdownValue = widget.tags!.first;
       titleController.text = widget.title!;
       descriptionController.text = widget.description!;
-    } else {
-      tagDropdownValue = 'Other';
     }
     super.initState();
   }
@@ -79,6 +78,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                     children: [
                       const SizedBox(width: 5),
                       DropdownButton<String>(
+                        disabledHint: widget.isEdit ? Text(widget.type!) : null,
                         borderRadius: BorderRadius.circular(15),
                         hint: const Text('Type'),
                         value: typeDropdownValue,
@@ -89,13 +89,14 @@ class _CreatePostModalState extends State<CreatePostModal> {
                             typeDropdownValue = newValue!;
                           });
                         },
-                        items: <String>['Text', 'Image']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                        items: widget.isEdit
+                            ? null // items null disables dropdown button
+                            : typeOptions.map((value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
                       ),
                       const Spacer(),
                       DropdownButton<String>(
@@ -109,8 +110,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                             tagDropdownValue = newValue!;
                           });
                         },
-                        items: tagOptionsList
-                            .map<DropdownMenuItem<String>>((value) {
+                        items: tagOptionsList.map((value) {
                           return DropdownMenuItem<String>(
                             value: value.keys.first,
                             child: Row(
@@ -129,7 +129,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
                           );
                         }).toList(),
                       ),
-                      const SizedBox(width: 5),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -163,9 +162,9 @@ class _CreatePostModalState extends State<CreatePostModal> {
                         )
                       : Column(
                           children: [
-                            image == null
-                                ? ElevatedButton(
-                                    child: const Text('Pick an Image'),
+                            image == null && widget.imageUrl == null
+                                ? IconButton(
+                                    iconSize: 250,
                                     onPressed: () async {
                                       final imageTemp = await pickImage(
                                         (() => ScaffoldMessenger.of(context)
@@ -181,14 +180,40 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                         image = imageTemp;
                                       });
                                     },
+                                    icon: const Icon(Icons.image),
                                   )
-                                : Image(image: FileImage(image!)),
-                            const SizedBox(height: 10),
+                                : GestureDetector(
+                                    onTap: () async {
+                                      final imageTemp = await pickImage(
+                                        (() => ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Failed to get image',
+                                                ),
+                                              ),
+                                            )),
+                                      );
+                                      setState(() {
+                                        image = imageTemp;
+                                      });
+                                    },
+                                    child: image != null
+                                        ? Image.file(
+                                            image!,
+                                            height: 300,
+                                          )
+                                        : Image.network(
+                                            widget.imageUrl!,
+                                            height: 300,
+                                          ),
+                                  ),
+                            // const SizedBox(height: 10),
                             FormInputField(
                               maxLength: 50,
                               icon: const Icon(Icons.description_rounded),
                               hintText: 'Caption',
-                              controller: titleController,
+                              controller: descriptionController,
                               isLast: true,
                               maxLines: 1,
                             ),
@@ -206,26 +231,28 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       const SizedBox(width: 20),
                       ElevatedButton(
                           onPressed: () {
-                            widget.isEdit
-                                ? editPost(
-                                    titleController.text,
-                                    descriptionController.text,
-                                    typeDropdownValue,
-                                    tagDropdownValue,
-                                    context,
-                                    widget.postId!,
-                                    _formKey,
-                                  )
-                                : createPost(
-                                    titleController.text,
-                                    descriptionController.text,
-                                    typeDropdownValue,
-                                    tagDropdownValue,
-                                    context,
-                                    userId,
-                                    _formKey,
-                                  );
-                            Navigator.pop(context);
+                            if (_formKey.currentState!.validate()) {
+                              widget.isEdit
+                                  ? editPost(
+                                      titleController.text,
+                                      descriptionController.text,
+                                      typeDropdownValue,
+                                      tagDropdownValue,
+                                      image,
+                                      context,
+                                      widget.postId!,
+                                    )
+                                  : createPost(
+                                      titleController.text,
+                                      descriptionController.text,
+                                      typeDropdownValue,
+                                      tagDropdownValue,
+                                      image,
+                                      context,
+                                      userId,
+                                    );
+                              Navigator.pop(context);
+                            }
                           },
                           child: const Text('Submit'))
                     ],

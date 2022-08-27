@@ -63,6 +63,8 @@ Future showPopupMenu(
       isScrollControlled: true,
       builder: ((context) {
         return CreatePostModal(
+          imageUrl: post.imageUrl,
+          type: post.type,
           tags: post.tags,
           title: post.title,
           description: post.description,

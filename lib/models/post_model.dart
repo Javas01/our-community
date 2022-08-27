@@ -9,6 +9,7 @@ class Post {
     required this.tags,
     required this.type,
     required this.timestamp,
+    this.imageUrl,
     this.hasSeen = const [],
     this.upVotes = const [],
     this.downVotes = const [],
@@ -16,6 +17,7 @@ class Post {
   });
 
   String id, createdBy, description, title, type;
+  String? imageUrl;
   List<String> tags, upVotes, downVotes, hasSeen;
   Timestamp timestamp;
   Timestamp? lastEdited;
@@ -41,6 +43,7 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
     downVotes: data['downVotes']?.cast<String>() ?? [],
     lastEdited: data['lastEdited'],
     hasSeen: data['hasSeen']?.cast<String>() ?? [],
+    imageUrl: data['imageUrl'],
   );
 }
 

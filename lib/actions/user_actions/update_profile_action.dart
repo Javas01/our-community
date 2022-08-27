@@ -9,10 +9,10 @@ void updateProfile(
   BuildContext context,
   TextEditingController firstName,
   TextEditingController lastName,
-  File? imageSrc,
+  File? imageUrl,
   VoidCallback onSuccess,
 ) async {
-  if (imageSrc == null && firstName.text.isEmpty && lastName.text.isEmpty) {
+  if (imageUrl == null && firstName.text.isEmpty && lastName.text.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('You havent changed anything'),
@@ -26,8 +26,8 @@ void updateProfile(
 
   try {
     String profilePicUrl = '';
-    if (imageSrc != null) {
-      await profilePicRef.putFile(imageSrc);
+    if (imageUrl != null) {
+      await profilePicRef.putFile(imageUrl);
       profilePicUrl = await profilePicRef.getDownloadURL();
     }
     await FirebaseFirestore.instance
