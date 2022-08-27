@@ -30,6 +30,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
   PostType typeDropdownValue = PostType.text;
   String tagDropdownValue = 'Other';
   bool isEdit = false;
+  bool isInvalidImage = false;
 
   @override
   void initState() {
@@ -156,24 +157,44 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       : Column(
                           children: [
                             image == null && !isEdit
-                                ? IconButton(
-                                    iconSize: 250,
-                                    onPressed: () async {
-                                      final imageTemp = await pickImage(
-                                        (() => ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Failed to get image',
-                                                ),
-                                              ),
-                                            )),
-                                      );
-                                      setState(() {
-                                        image = imageTemp;
-                                      });
-                                    },
-                                    icon: const Icon(Icons.image),
+                                ? Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        IconButton(
+                                          iconSize: 250,
+                                          padding: const EdgeInsets.all(0),
+                                          onPressed: () async {
+                                            final imageTemp = await pickImage(
+                                              (() =>
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'Failed to get image',
+                                                      ),
+                                                    ),
+                                                  )),
+                                            );
+                                            setState(() {
+                                              image = imageTemp;
+                                            });
+                                          },
+                                          icon: const Icon(Icons.image),
+                                          color: isInvalidImage
+                                              ? Colors.red
+                                              : null,
+                                        ),
+                                        if (isInvalidImage)
+                                          const Text(
+                                            'Image cannot be empty',
+                                            style: TextStyle(
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   )
                                 : GestureDetector(
                                     onTap: () async {
@@ -225,6 +246,19 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
+                              if (typeDropdownValue == PostType.image &&
+                                  image == null &&
+                                  !isEdit) {
+                                setState(() {
+                                  isInvalidImage = true;
+                                });
+
+                                return;
+                              } else if (isInvalidImage) {
+                                setState(() {
+                                  isInvalidImage = false;
+                                });
+                              }
                               isEdit
                                   ? editPost(
                                       titleController.text,

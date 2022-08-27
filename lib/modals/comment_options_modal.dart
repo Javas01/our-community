@@ -11,6 +11,7 @@ class CommentOptions extends StatelessWidget {
     required this.comment,
     required this.userEmail,
     required this.userId,
+    required this.parentContext,
   }) : super(key: key);
 
   final bool isCreator;
@@ -18,6 +19,7 @@ class CommentOptions extends StatelessWidget {
   final Comment comment;
   final String? userEmail;
   final String userId;
+  final BuildContext parentContext;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +69,7 @@ class CommentOptions extends StatelessWidget {
                   style: TextStyle(color: Colors.red),
                 ),
                 onPressed: () {
-                  deleteComment(postId, comment.id, context);
+                  deleteComment(postId, comment.id, parentContext);
                   Navigator.pop(context);
                 },
               )

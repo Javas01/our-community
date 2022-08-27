@@ -42,7 +42,9 @@ void createPost(
             timestamp: Timestamp.now(),
             title: title,
           );
+    print(newPost);
     final postDocRef = await posts.add(newPost);
+    print(postDocRef);
     if (image != null) {
       await FirebaseStorage.instance
           .ref('postPics')

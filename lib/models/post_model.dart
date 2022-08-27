@@ -100,25 +100,21 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
         );
 }
 
-Map<String, Object> postToFirestore(Post post, SetOptions? options) {
-  final textPost = post as TextPost;
-  final imagePost = post as ImagePost;
-
-  return post.type == PostType.text
-      ? {
-          'createdBy': textPost.createdBy,
-          'title': textPost.title,
-          'description': textPost.description,
-          'tags': textPost.tags,
-          'type': textPost.type.name,
-          'timestamp': textPost.timestamp,
-        }
-      : {
-          'createdBy': imagePost.createdBy,
-          'imageUrl': imagePost.imageUrl,
-          'description': imagePost.description,
-          'tags': imagePost.tags,
-          'type': imagePost.type.name,
-          'timestamp': imagePost.timestamp,
-        };
-}
+Map<String, Object> postToFirestore(Post post, SetOptions? options) =>
+    post.type == PostType.text
+        ? {
+            'createdBy': post.createdBy,
+            'title': (post as TextPost).title,
+            'description': post.description,
+            'tags': post.tags,
+            'type': post.type.name,
+            'timestamp': post.timestamp,
+          }
+        : {
+            'createdBy': post.createdBy,
+            'imageUrl': (post as ImagePost).imageUrl,
+            'description': post.description,
+            'tags': post.tags,
+            'type': post.type.name,
+            'timestamp': post.timestamp,
+          };

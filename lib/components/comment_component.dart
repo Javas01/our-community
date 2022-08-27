@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:our_ummah/models/community_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:our_ummah/modals/comment_options_modal.dart';
 import 'package:our_ummah/modals/user_info_modal.dart';
@@ -35,6 +36,7 @@ class UserComment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(Provider.of<Community>(context).id);
     final commentCreator =
         users.firstWhere((user) => user.id == comment.createdBy);
     final isCreator = userId == comment.createdBy;
@@ -60,13 +62,17 @@ class UserComment extends StatelessWidget {
           final value = await showModalBottomSheet<int>(
             context: context,
             backgroundColor: Colors.black.withOpacity(0),
-            builder: (context) {
-              return CommentOptions(
-                isCreator: isCreator,
-                postId: postId,
-                comment: comment,
-                userEmail: userEmail,
-                userId: userId,
+            builder: (_) {
+              return Provider.value(
+                value: Provider.of<Community>(context).id,
+                child: CommentOptions(
+                  isCreator: isCreator,
+                  postId: postId,
+                  comment: comment,
+                  userEmail: userEmail,
+                  userId: userId,
+                  parentContext: context,
+                ),
               );
             },
           );

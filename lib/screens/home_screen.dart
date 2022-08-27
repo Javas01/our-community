@@ -75,102 +75,106 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SettingsScreen()
                   ];
 
-                  return Scaffold(
-                    appBar: AppBar(
-                      elevation: 1,
-                      title: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          alignment: Alignment.center,
-                          underline: null,
-                          borderRadius: BorderRadius.circular(15),
-                          hint: Text(selectedCommunity!.name),
-                          value: selectedCommunity!.id,
-                          icon: const Icon(Icons.arrow_drop_down),
-                          elevation: 16,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedCommunity = userCommunities.firstWhere(
-                                  (element) => element.id == newValue);
-                            });
-                          },
-                          items: userCommunities.map((community) {
-                            return DropdownMenuItem<String>(
-                              value: community.id,
-                              child: Text(community.name),
-                            );
-                          }).toList(),
+                  return Provider.value(
+                    value: selectedCommunity,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        elevation: 1,
+                        title: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            alignment: Alignment.center,
+                            underline: null,
+                            borderRadius: BorderRadius.circular(15),
+                            hint: Text(selectedCommunity!.name),
+                            value: selectedCommunity!.id,
+                            icon: const Icon(Icons.arrow_drop_down),
+                            elevation: 16,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedCommunity = userCommunities.firstWhere(
+                                    (element) => element.id == newValue);
+                              });
+                            },
+                            items: userCommunities.map((community) {
+                              return DropdownMenuItem<String>(
+                                value: community.id,
+                                child: Text(community.name),
+                              );
+                            }).toList(),
+                          ),
                         ),
+                        leading: null,
+                        actions: [
+                          PopupMenuButton(
+                            icon: _sortValue == 'Upvotes'
+                                ? const Icon(Icons.arrow_circle_up_rounded)
+                                : const Icon(Icons.access_time_rounded),
+                            initialValue: _sortValue,
+                            onSelected: (value) => setState(() {
+                              setState(() {
+                                _sortValue = value.toString();
+                              });
+                            }),
+                            itemBuilder: (BuildContext context) =>
+                                <PopupMenuEntry>[
+                              const PopupMenuItem(
+                                value: 'Upvotes',
+                                child: Text('Upvotes'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'Recent',
+                                child: Text('Recent'),
+                              ),
+                            ],
+                          )
+                        ],
                       ),
-                      leading: null,
-                      actions: [
-                        PopupMenuButton(
-                          icon: _sortValue == 'Upvotes'
-                              ? const Icon(Icons.arrow_circle_up_rounded)
-                              : const Icon(Icons.access_time_rounded),
-                          initialValue: _sortValue,
-                          onSelected: (value) => setState(() {
+                      body: screens[currentIndex],
+                      bottomNavigationBar: BottomNavigationBar(
+                        items: const <BottomNavigationBarItem>[
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.list),
+                            label: 'List',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.add),
+                            label: 'Create',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.settings),
+                            label: 'Settings',
+                          ),
+                        ],
+                        currentIndex: currentIndex,
+                        onTap: (value) {
+                          if (value == 0 &&
+                              currentIndex == 0 &&
+                              resetValueNotifier.value == false) {
+                            resetValueNotifier.value = true;
+                          }
+                          if (value == 1) {
+                            if (currentIndex == 2) {
+                              setState(() {
+                                currentIndex = 0;
+                              });
+                            }
+
+                            showModalBottomSheet<void>(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext c) {
+                                  return Provider.value(
+                                    value: selectedCommunity,
+                                    child: const CreatePostModal(),
+                                  );
+                                });
+                          } else {
                             setState(() {
-                              _sortValue = value.toString();
-                            });
-                          }),
-                          itemBuilder: (BuildContext context) =>
-                              <PopupMenuEntry>[
-                            const PopupMenuItem(
-                              value: 'Upvotes',
-                              child: Text('Upvotes'),
-                            ),
-                            const PopupMenuItem(
-                              value: 'Recent',
-                              child: Text('Recent'),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    body: Provider.value(
-                      value: selectedCommunity,
-                      child: screens[currentIndex],
-                    ),
-                    bottomNavigationBar: BottomNavigationBar(
-                      items: const <BottomNavigationBarItem>[
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.list),
-                          label: 'List',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.add),
-                          label: 'Create',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.settings),
-                          label: 'Settings',
-                        ),
-                      ],
-                      currentIndex: currentIndex,
-                      onTap: (value) {
-                        if (value == 0 &&
-                            currentIndex == 0 &&
-                            resetValueNotifier.value == false) {
-                          resetValueNotifier.value = true;
-                        }
-                        if (value == 1) {
-                          if (currentIndex == 2) {
-                            setState(() {
-                              currentIndex = 0;
+                              currentIndex = value;
                             });
                           }
-                          showModalBottomSheet<void>(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (BuildContext context) {
-                                return const CreatePostModal();
-                              });
-                        } else {
-                          setState(() {
-                            currentIndex = value;
-                          });
-                        }
-                      },
+                        },
+                      ),
                     ),
                   );
                 });
