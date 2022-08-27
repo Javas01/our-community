@@ -7,7 +7,7 @@ import 'package:our_ummah/modals/user_info_modal.dart';
 import 'package:our_ummah/components/profile_pic_component.dart';
 import 'package:our_ummah/models/comment_model.dart';
 import 'package:our_ummah/models/user_model.dart';
-import 'package:our_ummah/post_comments_provider.dart';
+import 'package:our_ummah/providers/post_comments_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 

@@ -8,7 +8,7 @@ import 'package:our_ummah/models/post_model.dart';
 void createPost(
   String title,
   String description,
-  String type,
+  PostType type,
   String tag,
   File? image,
   BuildContext context,
@@ -24,14 +24,23 @@ void createPost(
       );
 
   try {
-    final newPost = Post(
-      createdBy: userId,
-      title: title,
-      description: description,
-      tags: [tag],
-      type: type,
-      timestamp: Timestamp.now(),
-    );
+    final newPost = type == PostType.image
+        ? ImagePost(
+            createdBy: userId,
+            description: description,
+            tags: [tag],
+            type: type,
+            timestamp: Timestamp.now(),
+            imageUrl: '',
+          )
+        : TextPost(
+            createdBy: userId,
+            description: description,
+            tags: [tag],
+            type: type,
+            timestamp: Timestamp.now(),
+            title: title,
+          );
     final postDocRef = await posts.add(newPost);
     if (image != null) {
       await FirebaseStorage.instance

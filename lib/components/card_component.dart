@@ -8,8 +8,8 @@ import 'package:our_ummah/components/expanded_card_component.dart';
 import 'package:our_ummah/components/preview_card_component.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ImageCardComponent extends StatefulWidget {
-  const ImageCardComponent({
+class CardComponent extends StatefulWidget {
+  const CardComponent({
     Key? key,
     required this.resetValueNotifier,
     required this.postCreator,
@@ -23,10 +23,10 @@ class ImageCardComponent extends StatefulWidget {
   final List<AppUser> users;
 
   @override
-  State<ImageCardComponent> createState() => _ImageCardComponentState();
+  State<CardComponent> createState() => _CardComponentState();
 }
 
-class _ImageCardComponentState extends State<ImageCardComponent> {
+class _CardComponentState extends State<CardComponent> {
   final dataKey = GlobalKey();
   final userId = FirebaseAuth.instance.currentUser!.uid;
   final userEmail = FirebaseAuth.instance.currentUser!.email;

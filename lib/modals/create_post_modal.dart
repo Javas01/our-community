@@ -7,6 +7,7 @@ import 'package:our_ummah/components/text_form_field_components.dart';
 import 'package:our_ummah/actions/post_actions/create_post_action.dart';
 import 'package:our_ummah/actions/post_actions/edit_post_action.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/models/post_model.dart';
 
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({
@@ -21,7 +22,8 @@ class CreatePostModal extends StatefulWidget {
   }) : super(key: key);
 
   final List<dynamic>? tags;
-  final String? title, description, postId, type, imageUrl;
+  final String? title, description, postId, imageUrl;
+  final PostType? type;
   final bool isEdit;
 
   @override
@@ -38,8 +40,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   File? image;
-  final typeOptions = ['Text', 'Image'];
-  String typeDropdownValue = 'Text';
+  PostType typeDropdownValue = PostType.text;
   String tagDropdownValue = 'Other';
 
   @override
@@ -77,24 +78,25 @@ class _CreatePostModalState extends State<CreatePostModal> {
                   Row(
                     children: [
                       const SizedBox(width: 5),
-                      DropdownButton<String>(
-                        disabledHint: widget.isEdit ? Text(widget.type!) : null,
+                      DropdownButton<PostType>(
+                        disabledHint:
+                            widget.isEdit ? Text(widget.type!.name) : null,
                         borderRadius: BorderRadius.circular(15),
                         hint: const Text('Type'),
                         value: typeDropdownValue,
                         icon: const Icon(Icons.arrow_drop_down),
                         elevation: 16,
-                        onChanged: (String? newValue) {
+                        onChanged: (newValue) {
                           setState(() {
                             typeDropdownValue = newValue!;
                           });
                         },
                         items: widget.isEdit
                             ? null // items null disables dropdown button
-                            : typeOptions.map((value) {
-                                return DropdownMenuItem<String>(
+                            : PostType.values.map((value) {
+                                return DropdownMenuItem<PostType>(
                                   value: value,
-                                  child: Text(value),
+                                  child: Text(value.name),
                                 );
                               }).toList(),
                       ),
@@ -132,7 +134,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  typeDropdownValue == 'Text'
+                  typeDropdownValue == PostType.text
                       ? Column(
                           children: [
                             FormInputField(

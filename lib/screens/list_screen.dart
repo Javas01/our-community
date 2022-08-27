@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:our_ummah/components/image_card_component.dart';
+import 'package:our_ummah/components/card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/components/tag_filter_component.dart';
@@ -124,7 +124,7 @@ class _ListScreenState extends State<ListScreen> {
                   final AppUser postCreator =
                       users.firstWhere((e) => e.id == post.createdBy);
 
-                  return ImageCardComponent(
+                  return CardComponent(
                     users: users,
                     post: post,
                     postCreator: postCreator,

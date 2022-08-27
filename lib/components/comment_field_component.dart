@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/comment_actions/add_comment_action.dart';
 import 'package:our_ummah/actions/comment_actions/edit_comment_action.dart';
-import 'package:our_ummah/post_comments_provider.dart';
+import 'package:our_ummah/providers/post_comments_provider.dart';
 import 'package:provider/provider.dart';
 
 class CommentField extends StatefulWidget {

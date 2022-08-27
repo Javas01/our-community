@@ -8,7 +8,7 @@ import 'package:our_ummah/models/post_model.dart';
 void editPost(
   String title,
   String description,
-  String type,
+  PostType type,
   String tag,
   File? image,
   BuildContext context,

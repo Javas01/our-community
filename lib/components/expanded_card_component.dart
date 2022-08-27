@@ -4,7 +4,7 @@ import 'package:our_ummah/components/post_comments_component.dart';
 import 'package:our_ummah/components/comment_field_component.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
-import 'package:our_ummah/post_comments_provider.dart';
+import 'package:our_ummah/providers/post_comments_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -65,7 +65,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
                             Padding(
                               padding:
                                   const EdgeInsets.fromLTRB(25.0, 10, 25, 10),
-                              child: widget.post.imageUrl == null
+                              child: widget.post.type == PostType.text
                                   ? Text(
                                       widget.post.title,
                                       maxLines: 1,
@@ -79,7 +79,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
                                   : ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
                                       child: Image.network(
-                                        widget.post.imageUrl!,
+                                        widget.post.imageUrl,
                                         loadingBuilder:
                                             (context, child, loadingProgress) {
                                           if (loadingProgress == null) {

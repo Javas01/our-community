@@ -122,7 +122,7 @@ class _PreviewCardState extends State<PreviewCard> {
                     child: Column(
                       children: [
                         const SizedBox(height: 5),
-                        widget.post.imageUrl == null
+                        widget.post.type == PostType.text
                             ? Text(
                                 widget.post.title,
                                 maxLines: 1,
@@ -136,7 +136,7 @@ class _PreviewCardState extends State<PreviewCard> {
                             : ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
                                 child: Image.network(
-                                  widget.post.imageUrl!,
+                                  widget.post.imageUrl,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
