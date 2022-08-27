@@ -4,12 +4,12 @@ import 'package:our_ummah/actions/show_popup_menu_action.dart';
 import 'package:our_ummah/config.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
-import 'package:our_ummah/components/expanded_card_component.dart';
-import 'package:our_ummah/components/preview_card_component.dart';
+import 'package:our_ummah/components/TextCard/expanded_text_card_component.dart';
+import 'package:our_ummah/components/TextCard/preview_text_card_component.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class CardComponent extends StatefulWidget {
-  const CardComponent({
+class TextCardComponent extends StatefulWidget {
+  const TextCardComponent({
     Key? key,
     required this.resetValueNotifier,
     required this.postCreator,
@@ -17,16 +17,16 @@ class CardComponent extends StatefulWidget {
     required this.users,
   }) : super(key: key);
 
-  final Post post;
+  final TextPost post;
   final ValueNotifier<bool> resetValueNotifier;
   final AppUser postCreator;
   final List<AppUser> users;
 
   @override
-  State<CardComponent> createState() => _CardComponentState();
+  State<TextCardComponent> createState() => _TextCardComponentState();
 }
 
-class _CardComponentState extends State<CardComponent> {
+class _TextCardComponentState extends State<TextCardComponent> {
   final dataKey = GlobalKey();
   final userId = FirebaseAuth.instance.currentUser!.uid;
   final userEmail = FirebaseAuth.instance.currentUser!.email;
@@ -69,7 +69,7 @@ class _CardComponentState extends State<CardComponent> {
       key: dataKey,
       height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
       child: _isExpanded
-          ? ExpandedCard(
+          ? ExpandedTextCard(
               users: widget.users,
               post: widget.post,
               setExpanded: setExpanded,
@@ -97,7 +97,7 @@ class _CardComponentState extends State<CardComponent> {
                 });
                 widget.resetValueNotifier.value = false;
               },
-              child: PreviewCard(
+              child: PreviewTextCard(
                 itemKey: dataKey,
                 post: widget.post,
                 postCreator: widget.postCreator,

@@ -15,8 +15,8 @@ import 'package:our_ummah/config.dart' show communityCode;
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
-class PreviewCard extends StatefulWidget {
-  const PreviewCard({
+class PreviewTextCard extends StatelessWidget {
+  const PreviewTextCard({
     Key? key,
     required this.post,
     required this.itemKey,
@@ -25,17 +25,10 @@ class PreviewCard extends StatefulWidget {
     required this.isCreator,
   }) : super(key: key);
 
-  final Post post;
+  final TextPost post;
   final AppUser postCreator;
   final bool isSelected, isCreator;
   final GlobalKey itemKey;
-
-  @override
-  State<PreviewCard> createState() => _PreviewCardState();
-}
-
-class _PreviewCardState extends State<PreviewCard> {
-  final _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +36,7 @@ class _PreviewCardState extends State<PreviewCard> {
         .collection('Communities')
         .doc(communityCode)
         .collection('Posts')
-        .doc(widget.post.id)
+        .doc(post.id)
         .collection('Comments')
         .withConverter(
           fromFirestore: commentFromFirestore,
@@ -51,26 +44,26 @@ class _PreviewCardState extends State<PreviewCard> {
         )
         .snapshots();
 
-    final voteCount =
-        (widget.post.upVotes.length - widget.post.downVotes.length);
-    bool isUpVoted = widget.post.upVotes.contains(_auth.currentUser!.uid);
-    bool isDownVoted = widget.post.downVotes.contains(_auth.currentUser!.uid);
-    final String postDate = widget.post.lastEdited == null
+    final voteCount = (post.upVotes.length - post.downVotes.length);
+    bool isUpVoted =
+        post.upVotes.contains(FirebaseAuth.instance.currentUser!.uid);
+    bool isDownVoted =
+        post.downVotes.contains(FirebaseAuth.instance.currentUser!.uid);
+    final String postDate = post.lastEdited == null
         ? 'Created ${timeago.format(
             DateTime.fromMicrosecondsSinceEpoch(
-              widget.post.timestamp.microsecondsSinceEpoch,
+              post.timestamp.microsecondsSinceEpoch,
             ),
           )}'
         : 'Edited ${timeago.format(
             DateTime.fromMicrosecondsSinceEpoch(
-              widget.post.lastEdited!.microsecondsSinceEpoch,
+              post.lastEdited!.microsecondsSinceEpoch,
             ),
           )}';
 
     return Card(
-      elevation: widget.isSelected ? 10 : 0,
-      margin:
-          widget.isSelected ? const EdgeInsets.fromLTRB(0, 10, 0, 10) : null,
+      elevation: isSelected ? 10 : 0,
+      margin: isSelected ? const EdgeInsets.fromLTRB(0, 10, 0, 10) : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
@@ -85,13 +78,13 @@ class _PreviewCardState extends State<PreviewCard> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ProfilePic(
-                    url: widget.postCreator.profilePicUrl,
+                    url: postCreator.profilePicUrl,
                     onTap: () => showDialog(
                       context: context,
                       builder: (modalContext) => UserInfoModal(
                         context: modalContext,
-                        contentCreator: widget.postCreator,
-                        isCreator: widget.isCreator,
+                        contentCreator: postCreator,
+                        isCreator: isCreator,
                         isUserBlocked: false,
                       ),
                     ),
@@ -99,14 +92,14 @@ class _PreviewCardState extends State<PreviewCard> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    '${widget.postCreator.firstName} ${widget.postCreator.lastName} - $postDate',
+                    '${postCreator.firstName} ${postCreator.lastName} - $postDate',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,
                     ),
                   ),
                   const Spacer(),
-                  ...widget.post.tags.map<Widget>(
+                  ...post.tags.map<Widget>(
                     (tag) {
                       return Tag(
                         color: tagOptions[tag]!,
@@ -122,39 +115,16 @@ class _PreviewCardState extends State<PreviewCard> {
                     child: Column(
                       children: [
                         const SizedBox(height: 5),
-                        widget.post.type == PostType.text
-                            ? Text(
-                                widget.post.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: Image.network(
-                                  widget.post.imageUrl,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                    .cumulativeBytesLoaded /
-                                                loadingProgress
-                                                    .expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
+                        Text(
+                          post.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -169,7 +139,7 @@ class _PreviewCardState extends State<PreviewCard> {
                           },
                           maxLines: null,
                           textAlign: TextAlign.center,
-                          text: widget.post.description,
+                          text: post.description,
                           linkStyle: const TextStyle(
                             color: Colors.lightBlueAccent,
                           ),
@@ -196,8 +166,8 @@ class _PreviewCardState extends State<PreviewCard> {
                             return const CommentCount();
                           }
                           final userHasSeen = snapshot.data!.docs.isEmpty ||
-                              widget.post.hasSeen.contains(
-                                _auth.currentUser!.uid,
+                              post.hasSeen.contains(
+                                FirebaseAuth.instance.currentUser!.uid,
                               );
                           return CommentCount(
                             docs: snapshot.data!.docs,
@@ -215,11 +185,11 @@ class _PreviewCardState extends State<PreviewCard> {
                           isUpVoted
                               ? vote(
                                   'remove',
-                                  widget.post.id,
+                                  post.id,
                                 )
                               : vote(
                                   'up',
-                                  widget.post.id,
+                                  post.id,
                                 );
                         },
                         child: Icon(
@@ -233,11 +203,11 @@ class _PreviewCardState extends State<PreviewCard> {
                           isDownVoted
                               ? vote(
                                   'remove',
-                                  widget.post.id,
+                                  post.id,
                                 )
                               : vote(
                                   'down',
-                                  widget.post.id,
+                                  post.id,
                                 );
                         },
                         child: Icon(

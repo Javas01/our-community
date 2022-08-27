@@ -22,9 +22,6 @@ abstract class Post {
   Timestamp timestamp;
   Timestamp? lastEdited;
 
-  String get title => '';
-  String get imageUrl => '';
-
   @override
   String toString() {
     return 'Post(\n createdBy: $createdBy\n description: $description\n tags: $tags\n type: $type\n hasSeen: $hasSeen\n $timestamp\n)';
@@ -46,7 +43,6 @@ class ImagePost extends Post {
     super.upVotes,
   });
 
-  @override
   String imageUrl;
 }
 
@@ -65,14 +61,15 @@ class TextPost extends Post {
     super.upVotes,
   });
 
-  @override
   String title;
 }
 
 Post postFromFirestore(DocumentSnapshot snapshot, options) {
   Map data = snapshot.data() as Map;
   final PostType postType =
-      data['type'] == PostType.text.name ? PostType.text : PostType.image;
+      (data['type'] as String).toLowerCase() == PostType.text.name.toLowerCase()
+          ? PostType.text
+          : PostType.image;
 
   return postType == PostType.text
       ? TextPost(
@@ -104,21 +101,24 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
 }
 
 Map<String, Object> postToFirestore(Post post, SetOptions? options) {
+  final textPost = post as TextPost;
+  final imagePost = post as ImagePost;
+
   return post.type == PostType.text
       ? {
-          'createdBy': post.createdBy,
-          'title': post.title,
-          'description': post.description,
-          'tags': post.tags,
-          'type': post.type.name,
-          'timestamp': post.timestamp,
+          'createdBy': textPost.createdBy,
+          'title': textPost.title,
+          'description': textPost.description,
+          'tags': textPost.tags,
+          'type': textPost.type.name,
+          'timestamp': textPost.timestamp,
         }
       : {
-          'createdBy': post.createdBy,
-          'imageUrl': post.imageUrl,
-          'description': post.description,
-          'tags': post.tags,
-          'type': post.type.name,
-          'timestamp': post.timestamp,
+          'createdBy': imagePost.createdBy,
+          'imageUrl': imagePost.imageUrl,
+          'description': imagePost.description,
+          'tags': imagePost.tags,
+          'type': imagePost.type.name,
+          'timestamp': imagePost.timestamp,
         };
 }

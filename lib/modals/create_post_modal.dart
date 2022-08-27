@@ -10,21 +10,8 @@ import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/models/post_model.dart';
 
 class CreatePostModal extends StatefulWidget {
-  const CreatePostModal({
-    Key? key,
-    this.type,
-    this.tags,
-    this.title,
-    this.description,
-    this.postId,
-    this.imageUrl,
-    required this.isEdit,
-  }) : super(key: key);
-
-  final List<dynamic>? tags;
-  final String? title, description, postId, imageUrl;
-  final PostType? type;
-  final bool isEdit;
+  CreatePostModal({Key? key, this.post}) : super(key: key);
+  Post? post;
 
   @override
   State<CreatePostModal> createState() => _CreatePostModalState();
@@ -42,14 +29,18 @@ class _CreatePostModalState extends State<CreatePostModal> {
   File? image;
   PostType typeDropdownValue = PostType.text;
   String tagDropdownValue = 'Other';
+  bool isEdit = false;
 
   @override
   void initState() {
-    if (widget.isEdit) {
-      typeDropdownValue = widget.type!;
-      tagDropdownValue = widget.tags!.first;
-      titleController.text = widget.title!;
-      descriptionController.text = widget.description!;
+    if (widget.post != null) {
+      isEdit = true;
+      typeDropdownValue = widget.post!.type;
+      tagDropdownValue = widget.post!.tags.first;
+      titleController.text = widget.post!.type == PostType.text
+          ? (widget.post as TextPost).title
+          : '';
+      descriptionController.text = widget.post!.description;
     }
     super.initState();
   }
@@ -68,7 +59,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    widget.isEdit ? 'Edit Post' : 'Create New Post',
+                    isEdit ? 'Edit Post' : 'Create New Post',
                     style: Theme.of(context)
                         .textTheme
                         .headline5!
@@ -80,7 +71,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       const SizedBox(width: 5),
                       DropdownButton<PostType>(
                         disabledHint:
-                            widget.isEdit ? Text(widget.type!.name) : null,
+                            isEdit ? Text(widget.post!.type.name) : null,
                         borderRadius: BorderRadius.circular(15),
                         hint: const Text('Type'),
                         value: typeDropdownValue,
@@ -91,7 +82,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                             typeDropdownValue = newValue!;
                           });
                         },
-                        items: widget.isEdit
+                        items: isEdit
                             ? null // items null disables dropdown button
                             : PostType.values.map((value) {
                                 return DropdownMenuItem<PostType>(
@@ -164,7 +155,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                         )
                       : Column(
                           children: [
-                            image == null && widget.imageUrl == null
+                            image == null && !isEdit
                                 ? IconButton(
                                     iconSize: 250,
                                     onPressed: () async {
@@ -206,7 +197,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                             height: 300,
                                           )
                                         : Image.network(
-                                            widget.imageUrl!,
+                                            (widget.post as ImagePost).imageUrl,
                                             height: 300,
                                           ),
                                   ),
@@ -234,7 +225,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              widget.isEdit
+                              isEdit
                                   ? editPost(
                                       titleController.text,
                                       descriptionController.text,
@@ -242,7 +233,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                       tagDropdownValue,
                                       image,
                                       context,
-                                      widget.postId!,
+                                      widget.post!.id,
                                     )
                                   : createPost(
                                       titleController.text,

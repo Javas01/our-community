@@ -39,7 +39,7 @@ void editPost(
     posts.doc(postId).update({
       'title': title,
       'description': description,
-      'type': type,
+      'type': type.name,
       'tags': [tag],
       'lastEdited': Timestamp.now(),
       ...imageUrl != null ? {'imageUrl': imageUrl} : {}

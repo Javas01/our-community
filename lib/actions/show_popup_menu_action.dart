@@ -62,15 +62,7 @@ Future showPopupMenu(
       context: context,
       isScrollControlled: true,
       builder: ((context) {
-        return CreatePostModal(
-          imageUrl: post.imageUrl,
-          type: post.type,
-          tags: post.tags,
-          title: post.title,
-          description: post.description,
-          postId: post.id,
-          isEdit: true,
-        );
+        return CreatePostModal(post: post);
       }),
     );
   } else if (value == 1) {
