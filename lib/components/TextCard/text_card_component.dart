@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/show_popup_menu_action.dart';
-import 'package:our_ummah/config.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/components/TextCard/expanded_text_card_component.dart';
@@ -44,7 +43,7 @@ class _TextCardComponentState extends State<TextCardComponent> {
       hasSeen.add(userId);
       FirebaseFirestore.instance
           .collection('Communities')
-          .doc(communityCode)
+          .doc('')
           .collection('Posts')
           .doc(widget.post.id)
           .withConverter(

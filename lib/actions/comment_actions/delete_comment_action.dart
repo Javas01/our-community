@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:our_ummah/config.dart' show communityCode;
 
 void deleteComment(String postId, String commentId) async {
   DocumentReference comment = FirebaseFirestore.instance
       .collection('Communities')
-      .doc(communityCode)
+      .doc('')
       .collection('Posts')
       .doc(postId)
       .collection('Comments')

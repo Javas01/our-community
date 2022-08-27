@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:our_ummah/config.dart';
 import 'package:our_ummah/models/post_model.dart';
 
 void editPost(
@@ -16,7 +15,7 @@ void editPost(
 ) async {
   final posts = FirebaseFirestore.instance
       .collection('Communities')
-      .doc(communityCode)
+      .doc('')
       .collection('Posts')
       .withConverter(
         fromFirestore: postFromFirestore,

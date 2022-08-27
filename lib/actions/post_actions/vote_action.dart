@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:our_ummah/config.dart' show communityCode;
 import 'package:our_ummah/models/post_model.dart';
 
 void vote(
@@ -10,7 +9,7 @@ void vote(
   final auth = FirebaseAuth.instance;
   final postRef = FirebaseFirestore.instance
       .collection('Communities')
-      .doc(communityCode)
+      .doc('')
       .collection('Posts')
       .doc(postId)
       .withConverter(

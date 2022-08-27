@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:our_ummah/config.dart' show communityCode;
 import 'package:our_ummah/models/comment_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 
@@ -22,7 +21,7 @@ void addComment(
   final isReply = parentCommentId.isNotEmpty;
   final commentsRef = FirebaseFirestore.instance
       .collection('Communities')
-      .doc(communityCode)
+      .doc('')
       .collection('Posts')
       .doc(postId)
       .collection('Comments')
@@ -32,7 +31,7 @@ void addComment(
       );
   final postsRef = FirebaseFirestore.instance
       .collection('Communities')
-      .doc(communityCode)
+      .doc('')
       .collection('Posts')
       .doc(postId)
       .withConverter(
