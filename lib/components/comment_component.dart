@@ -36,7 +36,6 @@ class UserComment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(Provider.of<Community>(context).id);
     final commentCreator =
         users.firstWhere((user) => user.id == comment.createdBy);
     final isCreator = userId == comment.createdBy;
