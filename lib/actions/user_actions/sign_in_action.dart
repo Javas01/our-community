@@ -15,7 +15,12 @@ void signIn(
 
       onSuccess.call();
     } catch (e) {
-      Future.error('failed to sign in $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

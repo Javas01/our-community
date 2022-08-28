@@ -34,6 +34,5 @@ void unBlock(
         backgroundColor: Colors.red,
       ),
     );
-    Future.error(e);
   }
 }

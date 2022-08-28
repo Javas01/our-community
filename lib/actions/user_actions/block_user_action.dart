@@ -34,6 +34,5 @@ void blockUser(
         backgroundColor: Colors.red,
       ),
     );
-    Future.error(e);
   }
 }

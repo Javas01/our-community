@@ -95,13 +95,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                     FirebaseAuth.instance
                         .sendPasswordResetEmail(email: emailController.text)
-                        .catchError((error, stackTrace) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('$error'),
-                        ),
-                      );
-                    });
+                        .then((_) => ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Reset email sent'),
+                              ),
+                            ))
+                        .catchError((error, stackTrace) =>
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('$error'),
+                                backgroundColor: Colors.red,
+                              ),
+                            ));
                   },
                   child: const Text('Reset password'),
                 )
