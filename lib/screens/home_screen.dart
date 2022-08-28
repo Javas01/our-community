@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Prevent unnecessary rebuilds
     return FutureBuilder<QuerySnapshot<Community>>(
         future: FirebaseFirestore.instance
             .collection('Communities')
