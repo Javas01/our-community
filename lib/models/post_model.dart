@@ -21,11 +21,6 @@ abstract class Post {
   List<String> tags, upVotes, downVotes, hasSeen;
   Timestamp timestamp;
   Timestamp? lastEdited;
-
-  @override
-  String toString() {
-    return 'Post(\n createdBy: $createdBy\n description: $description\n tags: $tags\n type: $type\n hasSeen: $hasSeen\n $timestamp\n)';
-  }
 }
 
 class ImagePost extends Post {
@@ -44,6 +39,10 @@ class ImagePost extends Post {
   });
 
   String imageUrl;
+
+  @override
+  String toString() =>
+      'ImagePost(\n createdBy: $createdBy\n description: $description\n imageUrl: $imageUrl\n tags: $tags\n type: $type\n hasSeen: $hasSeen\n $timestamp\n)';
 }
 
 class TextPost extends Post {
@@ -62,6 +61,10 @@ class TextPost extends Post {
   });
 
   String title;
+
+  @override
+  String toString() =>
+      'TextPost(\n createdBy: $createdBy\n title: $title\n description: $description\n tags: $tags\n type: $type\n hasSeen: $hasSeen\n $timestamp\n)';
 }
 
 Post postFromFirestore(DocumentSnapshot snapshot, options) {

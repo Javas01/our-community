@@ -1,29 +1,28 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
-import 'package:provider/provider.dart';
 
-void createPost(
+Future<void> createPost(
   String title,
   String description,
   PostType type,
   String tag,
   File? image,
-  BuildContext context,
+  String communityCode,
   String userId,
-) async {
-  final posts = FirebaseFirestore.instance
-      .collection('Communities')
-      .doc(Provider.of<Community>(context, listen: false).id)
-      .collection('Posts')
-      .withConverter(
-        fromFirestore: postFromFirestore,
-        toFirestore: postToFirestore,
-      );
-
+  void Function(Object)? onError, [
+  CollectionReference<Post>? testCollection,
+]) async {
+  final posts = testCollection ??
+      FirebaseFirestore.instance
+          .collection('Communities')
+          .doc(communityCode)
+          .collection('Posts')
+          .withConverter(
+            fromFirestore: postFromFirestore,
+            toFirestore: postToFirestore,
+          );
   try {
     final newPost = type == PostType.image
         ? ImagePost(
@@ -57,10 +56,7 @@ void createPost(
       postDocRef.update({'imageUrl': imageUrl});
     }
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Failed to create post: $e'),
-      ),
-    );
+    // ignore: avoid_print
+    onError != null ? onError(e) : print(e);
   }
 }

@@ -7,7 +7,9 @@ import 'package:our_ummah/components/text_form_field_components.dart';
 import 'package:our_ummah/actions/post_actions/create_post_action.dart';
 import 'package:our_ummah/actions/post_actions/edit_post_action.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
+import 'package:provider/provider.dart';
 
 class CreatePostModal extends StatefulWidget {
   const CreatePostModal({Key? key, this.post}) : super(key: key);
@@ -275,9 +277,18 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                       typeDropdownValue,
                                       tagDropdownValue,
                                       image,
-                                      context,
+                                      Provider.of<Community>(
+                                        context,
+                                        listen: false,
+                                      ).id,
                                       userId,
-                                    );
+                                      (e) => ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'Failed to create post: $e'),
+                                            ),
+                                          ));
                               Navigator.pop(context);
                             }
                           },
