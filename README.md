@@ -4,5 +4,5 @@ An app to make sure our voices are heard in our community.
 
 ## Tests
 
-<a href="https://github.com/[USER_NAME]/[REPO_NAME]/actions"><img src="https://github.com/[USER_NAME]/[REPO_NAME]/workflows/test-my-app/badge.svg" alt="Build Status"></a>
+<a href="https://github.com/Javas01/our-community/actions"><img src="https://github.com/Javas01/our-community/workflows/Flutter/badge.svg" alt="Build Status"></a>
 
