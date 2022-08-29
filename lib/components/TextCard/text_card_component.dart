@@ -7,19 +7,18 @@ import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/components/TextCard/expanded_text_card_component.dart';
 import 'package:our_ummah/components/TextCard/preview_text_card_component.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:our_ummah/providers/community_provider.dart';
 import 'package:provider/provider.dart';
 
 class TextCardComponent extends StatefulWidget {
   const TextCardComponent({
     Key? key,
-    required this.resetValueNotifier,
     required this.postCreator,
     required this.post,
     required this.users,
   }) : super(key: key);
 
   final TextPost post;
-  final ValueNotifier<bool> resetValueNotifier;
   final AppUser postCreator;
   final List<AppUser> users;
 
@@ -62,7 +61,7 @@ class _TextCardComponentState extends State<TextCardComponent> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.resetValueNotifier.value) {
+    if (Provider.of<ResetCardModel>(context).shouldReset) {
       setExpanded(false);
     }
 
@@ -96,7 +95,8 @@ class _TextCardComponentState extends State<TextCardComponent> {
                     curve: Curves.easeInOut,
                   );
                 });
-                widget.resetValueNotifier.value = false;
+                Provider.of<ResetCardModel>(context, listen: false)
+                    .reset(false);
               },
               child: PreviewTextCard(
                 itemKey: dataKey,

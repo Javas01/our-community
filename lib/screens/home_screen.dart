@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:our_ummah/modals/create_post_modal.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
+import 'package:our_ummah/providers/community_provider.dart';
 import 'package:our_ummah/screens/settings_screen.dart';
 import 'package:our_ummah/screens/list_screen.dart';
 import 'package:provider/provider.dart';
@@ -23,23 +24,23 @@ class _HomeScreenState extends State<HomeScreen> {
         toFirestore: userToFirestore,
       )
       .snapshots();
+  final _getCommunities = FirebaseFirestore.instance
+      .collection('Communities')
+      .withConverter(
+          fromFirestore: communityFromFirestore,
+          toFirestore: communityToFirestore)
+      .get();
 
   int currentIndex = 0;
   String _sortValue = 'Upvotes';
   late List screens;
-  ValueNotifier<bool> resetValueNotifier = ValueNotifier(false);
   Community? selectedCommunity;
+  final resetNotifier = ResetCardModel();
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Prevent unnecessary rebuilds (maybe pass users down in provider)
     return FutureBuilder<QuerySnapshot<Community>>(
-        future: FirebaseFirestore.instance
-            .collection('Communities')
-            .withConverter(
-                fromFirestore: communityFromFirestore,
-                toFirestore: communityToFirestore)
-            .get(),
+        future: _getCommunities,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final communities =
@@ -68,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   screens = [
                     ListScreen(
-                      resetValueNotifier: resetValueNotifier,
                       sortValue: _sortValue,
                       users: users,
                     ),
@@ -90,10 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             value: selectedCommunity!.id,
                             icon: const Icon(Icons.arrow_drop_down),
                             elevation: 16,
-                            onChanged: (newValue) {
+                            onChanged: (newCommunity) {
+                              if (newCommunity == selectedCommunity?.id) return;
                               setState(() {
                                 selectedCommunity = userCommunities.firstWhere(
-                                    (element) => element.id == newValue);
+                                  (community) => community.id == newCommunity,
+                                );
                               });
                             },
                             items: userCommunities.map((community) {
@@ -111,11 +113,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? const Icon(Icons.arrow_circle_up_rounded)
                                 : const Icon(Icons.access_time_rounded),
                             initialValue: _sortValue,
-                            onSelected: (value) => setState(() {
+                            onSelected: (value) {
+                              if (_sortValue == value.toString()) return;
                               setState(() {
                                 _sortValue = value.toString();
                               });
-                            }),
+                            },
                             itemBuilder: (BuildContext context) =>
                                 <PopupMenuEntry>[
                               const PopupMenuItem(
@@ -130,7 +133,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           )
                         ],
                       ),
-                      body: screens[currentIndex],
+                      body: ChangeNotifierProvider(
+                        create: (context) => resetNotifier,
+                        child: screens[currentIndex],
+                      ),
                       bottomNavigationBar: BottomNavigationBar(
                         items: const <BottomNavigationBarItem>[
                           BottomNavigationBarItem(
@@ -148,31 +154,39 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                         currentIndex: currentIndex,
                         onTap: (value) {
-                          if (value == 0 &&
-                              currentIndex == 0 &&
-                              resetValueNotifier.value == false) {
-                            resetValueNotifier.value = true;
-                          }
-                          if (value == 1) {
-                            if (currentIndex == 2) {
-                              setState(() {
-                                currentIndex = 0;
-                              });
-                            }
-
-                            showModalBottomSheet<void>(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (BuildContext c) {
-                                  return Provider.value(
-                                    value: selectedCommunity,
-                                    child: const CreatePostModal(),
-                                  );
+                          switch (value) {
+                            case 0:
+                              if (currentIndex == 0) {
+                                if (resetNotifier.shouldReset == false) {
+                                  resetNotifier.reset(true);
+                                }
+                              } else {
+                                setState(() {
+                                  currentIndex = value;
                                 });
-                          } else {
-                            setState(() {
-                              currentIndex = value;
-                            });
+                              }
+                              break;
+                            case 1:
+                              if (currentIndex == 2) {
+                                setState(() {
+                                  currentIndex = 0;
+                                });
+                              }
+
+                              showModalBottomSheet<void>(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (BuildContext c) {
+                                    return Provider.value(
+                                      value: selectedCommunity,
+                                      child: const CreatePostModal(),
+                                    );
+                                  });
+                              break;
+                            default:
+                              setState(() {
+                                currentIndex = value;
+                              });
                           }
                         },
                       ),

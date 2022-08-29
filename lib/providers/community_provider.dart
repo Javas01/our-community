@@ -1,6 +1,12 @@
-// import 'package:flutter/material.dart';
-// import 'package:our_ummah/models/community_model.dart';
+import 'package:flutter/material.dart';
 
-// class PostCommentsModel extends ChangeNotifier {
-//   late Community community;
-// }
+class ResetCardModel extends ChangeNotifier {
+  bool _shouldReset = false;
+
+  void reset(bool shouldReset) {
+    _shouldReset = shouldReset;
+    notifyListeners();
+  }
+
+  bool get shouldReset => _shouldReset;
+}

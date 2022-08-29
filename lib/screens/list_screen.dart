@@ -8,16 +8,15 @@ import 'package:our_ummah/components/tag_filter_component.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/models/post_model.dart';
+import 'package:our_ummah/providers/community_provider.dart';
 import 'package:provider/provider.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({
     Key? key,
-    required this.resetValueNotifier,
     required this.sortValue,
     required this.users,
   }) : super(key: key);
-  final ValueNotifier<bool> resetValueNotifier;
   final String sortValue;
   final List<AppUser> users;
 
@@ -41,7 +40,7 @@ class _ListScreenState extends State<ListScreen> {
         )
         .snapshots();
     final currUser = widget.users.firstWhere((user) => user.id == currUserId);
-    if (widget.resetValueNotifier.value) {
+    if (Provider.of<ResetCardModel>(context).shouldReset) {
       setState(() {
         _selectedTag = '';
       });
@@ -111,13 +110,11 @@ class _ListScreenState extends State<ListScreen> {
                     users: widget.users,
                     post: post as TextPost,
                     postCreator: postCreator,
-                    resetValueNotifier: widget.resetValueNotifier,
                   )
                 : ImageCardComponent(
                     users: widget.users,
                     post: post as ImagePost,
                     postCreator: postCreator,
-                    resetValueNotifier: widget.resetValueNotifier,
                   );
           }).toList()
         ]);
@@ -129,6 +126,6 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {
       _selectedTag = _selectedTag == tagName ? '' : tagName;
     });
-    widget.resetValueNotifier.value = false;
+    Provider.of<ResetCardModel>(context, listen: false).reset(false);
   }
 }
