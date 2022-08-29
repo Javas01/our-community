@@ -40,7 +40,7 @@ class UserComment extends StatelessWidget {
         users.firstWhere((user) => user.id == comment.createdBy);
     final isCreator = userId == comment.createdBy;
     final commentDate = comment.lastEdited == null
-        ? 'Created ${timeago.format(
+        ? 'Commented ${timeago.format(
             DateTime.fromMicrosecondsSinceEpoch(
               comment.timestamp.microsecondsSinceEpoch,
             ),

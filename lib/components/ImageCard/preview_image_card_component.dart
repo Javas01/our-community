@@ -51,7 +51,7 @@ class PreviewImageCard extends StatelessWidget {
     bool isDownVoted =
         post.downVotes.contains(FirebaseAuth.instance.currentUser!.uid);
     final String postDate = post.lastEdited == null
-        ? 'Created ${timeago.format(
+        ? 'Posted ${timeago.format(
             DateTime.fromMicrosecondsSinceEpoch(
               post.timestamp.microsecondsSinceEpoch,
             ),
