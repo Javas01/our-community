@@ -7,7 +7,6 @@ import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/components/TextCard/expanded_text_card_component.dart';
 import 'package:our_ummah/components/TextCard/preview_text_card_component.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:our_ummah/providers/community_provider.dart';
 import 'package:provider/provider.dart';
 
 class TextCardComponent extends StatefulWidget {
@@ -61,10 +60,6 @@ class _TextCardComponentState extends State<TextCardComponent> {
 
   @override
   Widget build(BuildContext context) {
-    if (Provider.of<ResetCardModel>(context).shouldReset) {
-      setExpanded(false);
-    }
-
     return SizedBox(
       key: dataKey,
       height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
@@ -95,8 +90,6 @@ class _TextCardComponentState extends State<TextCardComponent> {
                     curve: Curves.easeInOut,
                   );
                 });
-                Provider.of<ResetCardModel>(context, listen: false)
-                    .reset(false);
               },
               child: PreviewTextCard(
                 itemKey: dataKey,

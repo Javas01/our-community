@@ -8,7 +8,6 @@ import 'package:our_ummah/components/tag_filter_component.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/models/post_model.dart';
-import 'package:our_ummah/providers/community_provider.dart';
 import 'package:provider/provider.dart';
 
 class ListScreen extends StatefulWidget {
@@ -40,11 +39,6 @@ class _ListScreenState extends State<ListScreen> {
         )
         .snapshots();
     final currUser = widget.users.firstWhere((user) => user.id == currUserId);
-    if (Provider.of<ResetCardModel>(context).shouldReset) {
-      setState(() {
-        _selectedTag = '';
-      });
-    }
     return StreamBuilder<QuerySnapshot<Post>>(
       stream: postsStream,
       builder: (context, snapshot) {
@@ -126,6 +120,5 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {
       _selectedTag = _selectedTag == tagName ? '' : tagName;
     });
-    Provider.of<ResetCardModel>(context, listen: false).reset(false);
   }
 }

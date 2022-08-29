@@ -155,17 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         currentIndex: currentIndex,
                         onTap: (value) {
                           switch (value) {
-                            case 0:
-                              if (currentIndex == 0) {
-                                if (resetNotifier.shouldReset == false) {
-                                  resetNotifier.reset(true);
-                                }
-                              } else {
-                                setState(() {
-                                  currentIndex = value;
-                                });
-                              }
-                              break;
                             case 1:
                               if (currentIndex == 2) {
                                 setState(() {
