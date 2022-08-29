@@ -67,7 +67,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '962590288743',
     projectId: 'our-community-eda3c',
     storageBucket: 'our-community-eda3c.appspot.com',
-    iosClientId: '962590288743-5538evk4lf0qcs213jeid4ivd7gi6knh.apps.googleusercontent.com',
+    iosClientId:
+        '962590288743-5538evk4lf0qcs213jeid4ivd7gi6knh.apps.googleusercontent.com',
     iosBundleId: 'com.example.ourCommunity',
   );
 
@@ -77,7 +78,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '962590288743',
     projectId: 'our-community-eda3c',
     storageBucket: 'our-community-eda3c.appspot.com',
-    iosClientId: '962590288743-5538evk4lf0qcs213jeid4ivd7gi6knh.apps.googleusercontent.com',
+    iosClientId:
+        '962590288743-5538evk4lf0qcs213jeid4ivd7gi6knh.apps.googleusercontent.com',
     iosBundleId: 'com.example.ourCommunity',
   );
 }
