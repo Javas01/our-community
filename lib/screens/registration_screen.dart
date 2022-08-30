@@ -6,6 +6,8 @@ import 'package:our_ummah/screens/home_screen.dart';
 import 'package:our_ummah/actions/user_actions/create_account_action.dart';
 import 'package:our_ummah/components/registration_subtext_component.dart';
 
+const communityCode = 'atlmasjid';
+
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
 
@@ -98,7 +100,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   hintText: 'Community code',
                   isLast: true,
                   validator: (String? value) {
-                    if (value?.toUpperCase().trim() != ''.toUpperCase()) {
+                    if (value?.toUpperCase().trim() !=
+                        communityCode.toUpperCase()) {
                       return 'Incorrect community code';
                     }
                     return null;
