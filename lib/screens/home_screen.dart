@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:our_ummah/modals/create_post_modal.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
-import 'package:our_ummah/providers/community_provider.dart';
 import 'package:our_ummah/screens/settings_screen.dart';
 import 'package:our_ummah/screens/list_screen.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _sortValue = 'Upvotes';
   late List screens;
   Community? selectedCommunity;
-  final resetNotifier = ResetCardModel();
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             icon: const Icon(Icons.arrow_drop_down),
                             elevation: 16,
                             onChanged: (newCommunity) {
-                              if (newCommunity == selectedCommunity?.id) return;
+                              if (newCommunity == selectedCommunity?.id) {
+                                return;
+                              }
                               setState(() {
                                 selectedCommunity = userCommunities.firstWhere(
                                   (community) => community.id == newCommunity,
@@ -133,9 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           )
                         ],
                       ),
-                      body: ChangeNotifierProvider(
-                        create: (context) => resetNotifier,
-                        child: screens[currentIndex],
+                      body: Builder(
+                        builder: ((context) => screens[currentIndex]),
                       ),
                       bottomNavigationBar: BottomNavigationBar(
                         items: const <BottomNavigationBarItem>[

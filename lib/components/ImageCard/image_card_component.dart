@@ -62,7 +62,10 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
   Widget build(BuildContext context) {
     return SizedBox(
       key: dataKey,
-      height: _isExpanded ? MediaQuery.of(context).size.height - 200 : null,
+      height: _isExpanded
+          ? MediaQuery.of(context).size.height -
+              (Scaffold.of(context).appBarMaxHeight! * 2)
+          : null,
       child: _isExpanded
           ? ExpandedImageCard(
               users: widget.users,

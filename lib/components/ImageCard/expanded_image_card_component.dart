@@ -63,7 +63,7 @@ class ExpandedImageCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(15),
                                 child: Image.network(
                                   post.imageUrl,
-                                  height: 300,
+                                  height: 100,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
                                     if (loadingProgress == null) {
