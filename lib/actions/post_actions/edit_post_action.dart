@@ -48,7 +48,8 @@ void editPost(
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Failed to edit post: $e'),
+        content: Text(
+            'Failed to edit post: ${e.toString().replaceAll(RegExp(r'\[.*?\]'), '').trim()}'),
       ),
     );
   }

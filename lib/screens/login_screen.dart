@@ -104,8 +104,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         .catchError((error, stackTrace) =>
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('$error'),
-                                backgroundColor: Colors.red,
+                                content: Text(
+                                  error
+                                      .toString()
+                                      .replaceAll(RegExp(r'\[.*?\]'), '')
+                                      .trim(),
+                                ),
                               ),
                             ));
                   },

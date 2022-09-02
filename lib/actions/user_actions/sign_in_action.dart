@@ -17,8 +17,7 @@ void signIn(
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
+          content: Text(e.toString().replaceAll(RegExp(r'\[.*?\]'), '').trim()),
         ),
       );
     }

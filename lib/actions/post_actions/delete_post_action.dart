@@ -17,7 +17,8 @@ void deletePost(
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Error deleting post $e'),
+        content: Text(
+            'Error deleting post ${e.toString().replaceAll(RegExp(r'\[.*?\]'), '').trim()}'),
       ),
     );
   }
