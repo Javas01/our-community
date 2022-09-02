@@ -39,6 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Form(
             key: _formKey,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
                 const RegistrationSubtext(
-                  text: 'Dont have an Account? ',
+                  text: "Don't have an Account? ",
                   linkText: 'Signup',
                   screen: RegistrationScreen(),
                 ),
