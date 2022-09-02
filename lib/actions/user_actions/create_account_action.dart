@@ -33,7 +33,7 @@ void createAccount(
       final newUser = AppUser(
         firstName: firstName,
         lastName: lastName,
-        communityCodes: [communityCode],
+        communityCodes: [communityCode.trim()],
       );
       await FirebaseFirestore.instance
           .collection('Users')
