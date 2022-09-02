@@ -96,12 +96,10 @@ class _FormInputFieldState extends State<FormInputField> {
           suffixIcon: widget.isPassword != null
               ? IconButton(
                   icon: Icon(
-                    // Based on passwordVisible state choose the icon
                     _passwordVisible ? Icons.visibility : Icons.visibility_off,
                     color: Theme.of(context).primaryColorDark,
                   ),
                   onPressed: () {
-                    // Update the state i.e. toogle the state of passwordVisible variable
                     setState(() {
                       _passwordVisible = !_passwordVisible;
                     });
@@ -127,14 +125,13 @@ class FormSubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          elevation: 5,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          fixedSize: const Size(500, 70)),
-
-      // minWidth: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        fixedSize: const Size(500, 70),
+      ),
       onPressed: () => onPressed(),
       child: Text(
         text,

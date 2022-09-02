@@ -224,7 +224,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                             height: 300,
                                           ),
                                   ),
-                            // const SizedBox(height: 10),
                             FormInputField(
                               maxLength: 50,
                               icon: const Icon(Icons.description_rounded),
@@ -232,6 +231,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                               controller: descriptionController,
                               isLast: true,
                               maxLines: 1,
+                              validator: (_) => null,
                             ),
                           ],
                         ),
@@ -246,53 +246,55 @@ class _CreatePostModalState extends State<CreatePostModal> {
                           child: const Text('Cancel')),
                       const SizedBox(width: 20),
                       ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              if (typeDropdownValue == PostType.image &&
-                                  image == null &&
-                                  !isEdit) {
-                                setState(() {
-                                  isInvalidImage = true;
-                                });
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (typeDropdownValue == PostType.image &&
+                                image == null &&
+                                !isEdit) {
+                              setState(() {
+                                isInvalidImage = true;
+                              });
 
-                                return;
-                              } else if (isInvalidImage) {
-                                setState(() {
-                                  isInvalidImage = false;
-                                });
-                              }
-                              isEdit
-                                  ? editPost(
-                                      titleController.text,
-                                      descriptionController.text,
-                                      typeDropdownValue,
-                                      tagDropdownValue,
-                                      image,
-                                      context,
-                                      widget.post!.id,
-                                    )
-                                  : createPost(
-                                      titleController.text,
-                                      descriptionController.text,
-                                      typeDropdownValue,
-                                      tagDropdownValue,
-                                      image,
-                                      Provider.of<Community>(
-                                        context,
-                                        listen: false,
-                                      ).id,
-                                      userId,
-                                      (e) => ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'Failed to create post: $e'),
-                                            ),
-                                          ));
-                              Navigator.pop(context);
+                              return;
+                            } else if (isInvalidImage) {
+                              setState(() {
+                                isInvalidImage = false;
+                              });
                             }
-                          },
-                          child: const Text('Submit'))
+                            isEdit
+                                ? editPost(
+                                    titleController.text,
+                                    descriptionController.text,
+                                    typeDropdownValue,
+                                    tagDropdownValue,
+                                    image,
+                                    context,
+                                    widget.post!.id,
+                                  )
+                                : createPost(
+                                    titleController.text,
+                                    descriptionController.text,
+                                    typeDropdownValue,
+                                    tagDropdownValue,
+                                    image,
+                                    Provider.of<Community>(
+                                      context,
+                                      listen: false,
+                                    ).id,
+                                    userId,
+                                    (e) => ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Failed to create post: $e',
+                                            ),
+                                          ),
+                                        ));
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: const Text('Submit'),
+                      )
                     ],
                   )
                 ],
