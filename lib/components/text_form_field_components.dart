@@ -39,7 +39,7 @@ class EmailField extends StatelessWidget {
   }
 }
 
-class FormInputField extends StatelessWidget {
+class FormInputField extends StatefulWidget {
   const FormInputField({
     Key? key,
     required this.controller,
@@ -51,42 +51,65 @@ class FormInputField extends StatelessWidget {
     this.keyboardType,
     this.minLines,
     this.maxLines,
-    this.obscureText,
+    this.isPassword,
   }) : super(key: key);
 
   final TextEditingController controller;
   final Icon icon;
   final String hintText;
   final bool isLast;
-  final bool? obscureText;
+  final bool? isPassword;
   final String? Function(String?)? validator;
   final int? maxLength, minLines, maxLines;
   final TextInputType? keyboardType;
 
   @override
+  State<FormInputField> createState() => _FormInputFieldState();
+}
+
+class _FormInputFieldState extends State<FormInputField> {
+  bool _passwordVisible = false;
+
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-        keyboardType: keyboardType,
-        minLines: minLines,
-        maxLines: maxLines ?? 1,
-        maxLength: maxLength,
-        controller: controller,
-        obscureText: obscureText ?? false,
-        validator: validator ??
+        keyboardType: widget.keyboardType,
+        minLines: widget.minLines,
+        maxLines: widget.maxLines ?? 1,
+        maxLength: widget.maxLength,
+        controller: widget.controller,
+        obscureText: widget.isPassword != null ? !_passwordVisible : false,
+        validator: widget.validator ??
             (value) {
               if (value!.isEmpty) {
-                return ('$hintText cannot be empty');
+                return ('${widget.hintText} cannot be empty');
               }
               return null;
             },
         onSaved: (value) {
-          controller.text = value!;
+          widget.controller.text = value!;
         },
-        textInputAction: isLast ? TextInputAction.done : TextInputAction.next,
+        textInputAction:
+            widget.isLast ? TextInputAction.done : TextInputAction.next,
         decoration: InputDecoration(
-          prefixIcon: icon,
+          prefixIcon: widget.icon,
+          suffixIcon: widget.isPassword != null
+              ? IconButton(
+                  icon: Icon(
+                    // Based on passwordVisible state choose the icon
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Theme.of(context).primaryColorDark,
+                  ),
+                  onPressed: () {
+                    // Update the state i.e. toogle the state of passwordVisible variable
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
+                )
+              : null,
           contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          hintText: hintText,
+          hintText: widget.hintText,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ));
   }

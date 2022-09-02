@@ -92,6 +92,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   icon: const Icon(Icons.password_rounded),
                   hintText: 'Password',
                   isLast: false,
+                  isPassword: true,
                 ),
                 const SizedBox(height: 20),
                 FormInputField(
