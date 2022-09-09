@@ -32,6 +32,7 @@ class _PostCommentsState extends State<PostComments> {
         .collection('Posts')
         .doc(widget.postId)
         .collection('Comments')
+        .orderBy('timestamp', descending: true)
         .withConverter(
           fromFirestore: commentFromFirestore,
           toFirestore: commentToFirestore,
