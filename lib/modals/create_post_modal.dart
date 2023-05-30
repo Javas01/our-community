@@ -106,7 +106,12 @@ class _CreatePostModalState extends State<CreatePostModal> {
                             tagDropdownValue = newValue!;
                           });
                         },
-                        items: tagOptionsList.map((value) {
+                        items: (Provider.of<Community>(context, listen: false)
+                                        .id !=
+                                    'Lwdm-2023'
+                                ? tagOptionsList
+                                : conferenceTagOptionsList)
+                            .map((value) {
                           return DropdownMenuItem<String>(
                             value: value.keys.first,
                             child: Row(
