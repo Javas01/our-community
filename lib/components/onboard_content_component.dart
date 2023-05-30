@@ -27,7 +27,7 @@ class OnboardContent extends StatelessWidget {
             textAlign: TextAlign.center,
             style: Theme.of(context)
                 .textTheme
-                .headline5!
+                .headlineSmall!
                 .copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(

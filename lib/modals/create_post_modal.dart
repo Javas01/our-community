@@ -65,7 +65,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
                     isEdit ? 'Edit Post' : 'Create New Post',
                     style: Theme.of(context)
                         .textTheme
-                        .headline5!
+                        .headlineSmall!
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),

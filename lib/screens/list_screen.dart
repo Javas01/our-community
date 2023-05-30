@@ -81,7 +81,10 @@ class _ListScreenState extends State<ListScreen> {
               height: 35,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                children: tagOptionsList
+                children: (Provider.of<Community>(context, listen: false).id !=
+                            'Lwdm-2023'
+                        ? tagOptionsList
+                        : conferenceTagOptionsList)
                     .map<Widget>(
                       (tag) => TagFilter(
                         name: tag.keys.first,

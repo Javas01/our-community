@@ -17,3 +17,12 @@ final tagOptionsList = <Map<String, MaterialAccentColor>>[
   {'Business': Colors.orangeAccent},
   {'Other': Colors.cyanAccent},
 ];
+
+final conferenceTagOptionsList = <Map<String, MaterialAccentColor>>[
+  {'Events': Colors.redAccent},
+  {'Conference': Colors.blueAccent},
+  {'Study': Colors.deepPurpleAccent},
+  {'Industry': Colors.greenAccent},
+  {'Skillshare': Colors.orangeAccent},
+  {'Other': Colors.cyanAccent},
+];

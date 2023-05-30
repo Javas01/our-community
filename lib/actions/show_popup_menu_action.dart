@@ -12,7 +12,7 @@ Future showPopupMenu(
   final user = FirebaseAuth.instance.currentUser!;
   final isCreator = user.uid == post.createdBy;
   final RenderBox overlay =
-      Overlay.of(context)!.context.findRenderObject() as RenderBox;
+      Overlay.of(context).context.findRenderObject() as RenderBox;
 
   final value = await showMenu<int>(
     context: context,
@@ -38,9 +38,9 @@ Future showPopupMenu(
               ),
             ),
           ),
-          child: Row(
+          child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(
                 Icons.delete,
                 color: Colors.red,
@@ -60,6 +60,7 @@ Future showPopupMenu(
     ),
   );
   if (value == 1 && isCreator) {
+    // ignore: use_build_context_synchronously
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
