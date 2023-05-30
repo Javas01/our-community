@@ -6,6 +6,9 @@ final tagOptions = {
   'Masjid': Colors.deepPurpleAccent,
   'Skillshare': Colors.greenAccent,
   'Business': Colors.orangeAccent,
+  'Conference': Colors.blueAccent,
+  'Study': Colors.deepPurpleAccent,
+  'Industry': Colors.greenAccent,
   'Other': Colors.cyanAccent,
 };
 
