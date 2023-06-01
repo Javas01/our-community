@@ -114,9 +114,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           hintText: 'Community code',
                           isLast: true,
                           validator: (String? value) {
-                            value = value?.toUpperCase().trim();
+                            value = value?.toLowerCase().trim();
                             final communities = snapshot.data!.docs
-                                .map((doc) => doc.id.toUpperCase())
+                                .map((doc) => doc.id.toLowerCase())
                                 .toList();
                             if (value == null || value.isEmpty) {
                               return 'Please enter a community code';
