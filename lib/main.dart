@@ -1,19 +1,57 @@
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/screens/home_screen.dart';
 import 'package:our_ummah/screens/OnboardingScreen/onboarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:our_ummah/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:our_ummah/models/user_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // TODO: Implement FCM push notifications
-  // final fcmToken = await FirebaseMessaging.instance.getToken();
-  // print(fcmToken);
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  final fcmToken = await messaging.getAPNSToken();
+  print(fcmToken);
+
+  final userDocRef = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .withConverter(
+        fromFirestore: userFromFirestore,
+        toFirestore: userToFirestore,
+      );
+
+  final userDoc = await userDocRef.get();
+  final user = userDoc.data()!;
+  if (!user.tokens.contains(fcmToken)) {
+    userDocRef.update({
+      'tokens': [...user.tokens, fcmToken],
+    });
+  }
+
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    print('User granted permission');
+  } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    print('User granted provisional permission');
+  } else {
+    print('User declined or has not accepted permission');
+  }
 
   runApp(const MyApp());
 }

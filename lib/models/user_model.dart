@@ -8,10 +8,11 @@ class AppUser {
     required this.communityCodes,
     this.blockedUsers = const [],
     this.profilePicUrl = '',
+    this.tokens = const [],
   });
 
   String id, firstName, lastName, profilePicUrl;
-  List<String> blockedUsers, communityCodes;
+  List<String> blockedUsers, communityCodes, tokens;
 
   @override
   String toString() {
@@ -28,7 +29,8 @@ AppUser userFromFirestore(DocumentSnapshot snapshot, options) {
       lastName: data['lastName'],
       profilePicUrl: data['profilePicUrl'] ?? '',
       blockedUsers: data['blockedUsers']?.cast<String>() ?? [],
-      communityCodes: data['communityCodes']?.cast<String>() ?? []);
+      communityCodes: data['communityCodes']?.cast<String>() ?? [],
+      tokens: data['tokens']?.cast<String>() ?? []);
 }
 
 Map<String, Object> userToFirestore(AppUser user, SetOptions? options) {
