@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:our_ummah/actions/send_notification.dart';
 import 'package:our_ummah/modals/create_post_modal.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
@@ -109,11 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         leading: IconButton(
                           onPressed: () async {},
-                          // onPressed: () async {
-                          //   sendNotification('Hey from the sim', [
-                          //     '9F7D4DD2260BB6B772C808084C2B78FC61D169A825710D8C591CDFADC2083B6C'
-                          //   ]);
-                          // },
                           icon: const Icon(
                             Icons.add_box_rounded,
                             color: Colors.white,
@@ -179,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   builder: (BuildContext c) {
                                     return Provider.value(
                                       value: selectedCommunity,
-                                      child: const CreatePostModal(),
+                                      child: CreatePostModal(users: users),
                                     );
                                   });
                               break;

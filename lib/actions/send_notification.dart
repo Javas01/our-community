@@ -9,9 +9,7 @@ Future<void> sendNotification(String message, List<String> devices) async {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'alert': message,
-        'token':
-            '9F7D4DD2260BB6B772C808084C2B78FC61D169A825710D8C591CDFADC2083B6C',
-        // 'token': devices.first,
+        'devices': devices,
       }),
     );
   } catch (e) {

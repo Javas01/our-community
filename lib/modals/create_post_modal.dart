@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_ummah/actions/pick_image_action.dart';
+import 'package:our_ummah/actions/send_notification.dart';
 import 'package:our_ummah/components/tag_component.dart';
 import 'package:our_ummah/components/text_form_field_components.dart';
 import 'package:our_ummah/actions/post_actions/create_post_action.dart';
@@ -10,10 +11,12 @@ import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:provider/provider.dart';
+import 'package:our_ummah/models/user_model.dart';
 
 class CreatePostModal extends StatefulWidget {
-  const CreatePostModal({Key? key, this.post}) : super(key: key);
+  const CreatePostModal({Key? key, this.post, this.users}) : super(key: key);
   final Post? post;
+  final List<AppUser>? users;
 
   @override
   State<CreatePostModal> createState() => _CreatePostModalState();
@@ -288,14 +291,23 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     ).id,
                                     userId,
                                     (e) => ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Failed to create post: $e',
-                                            ),
-                                          ),
-                                        ));
+                                        .showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Failed to create post: $e',
+                                        ),
+                                      ),
+                                    ),
+                                  );
                             Navigator.pop(context);
+                            sendNotification(
+                              titleController.text,
+                              widget.users
+                                      ?.map((e) => e.tokens.map((e) => e))
+                                      .expand((element) => element)
+                                      .toList() ??
+                                  [],
+                            );
                           }
                         },
                         child: const Text('Submit'),
