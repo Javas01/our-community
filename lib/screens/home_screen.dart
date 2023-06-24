@@ -71,6 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       users: users,
                     ),
                     const Scaffold(),
+                    const Scaffold(),
+                    const Scaffold(),
                     const SettingsScreen()
                   ];
 
@@ -149,8 +151,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             label: 'List',
                           ),
                           BottomNavigationBarItem(
+                            icon: Icon(Icons.event_outlined),
+                            label: 'Events',
+                          ),
+                          BottomNavigationBarItem(
                             icon: Icon(Icons.add),
                             label: 'Create',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.business_outlined),
+                            label: 'Businesses',
                           ),
                           BottomNavigationBarItem(
                             icon: Icon(Icons.settings),
@@ -158,10 +168,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                         currentIndex: currentIndex,
+                        unselectedItemColor: Colors.black,
                         onTap: (value) {
                           switch (value) {
-                            case 1:
-                              if (currentIndex == 2) {
+                            case 2:
+                              if (currentIndex != 2) {
                                 setState(() {
                                   currentIndex = 0;
                                 });

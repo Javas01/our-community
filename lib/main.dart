@@ -19,22 +19,6 @@ void main() async {
   final fcmToken = await messaging.getAPNSToken();
   print(fcmToken);
 
-  final userDocRef = FirebaseFirestore.instance
-      .collection('Users')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .withConverter(
-        fromFirestore: userFromFirestore,
-        toFirestore: userToFirestore,
-      );
-
-  final userDoc = await userDocRef.get();
-  final user = userDoc.data()!;
-  if (!user.tokens.contains(fcmToken)) {
-    userDocRef.update({
-      'tokens': [...user.tokens, fcmToken],
-    });
-  }
-
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
     announcement: false,
@@ -53,11 +37,15 @@ void main() async {
     print('User declined or has not accepted permission');
   }
 
-  runApp(const MyApp());
+  runApp(MyApp(
+    token: fcmToken ?? '',
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final String token;
+
+  const MyApp({Key? key, required this.token}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -98,16 +86,36 @@ class MyApp extends StatelessWidget {
           selectedItemColor: Colors.blueAccent,
         ),
       ),
-      home: _getLandingPage(),
+      home: _getLandingPage(token),
     );
   }
 }
 
-Widget _getLandingPage() {
+Future<void> updateToken(String token) async {
+  final userDocRef = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .withConverter(
+        fromFirestore: userFromFirestore,
+        toFirestore: userToFirestore,
+      );
+
+  final userDoc = await userDocRef.get();
+  final user = userDoc.data()!;
+
+  if (!user.tokens.contains(token)) {
+    userDocRef.update({
+      'tokens': [...user.tokens, token],
+    });
+  }
+}
+
+Widget _getLandingPage(String token) {
   return StreamBuilder(
     stream: FirebaseAuth.instance.authStateChanges(),
     builder: (context, snapshot) {
       if (snapshot.hasData) {
+        updateToken(token);
         return const HomeScreen();
       } else {
         return const OnboardingScreen();
