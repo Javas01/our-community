@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:our_ummah/components/EventCard/event_card_component.dart';
 import 'package:our_ummah/components/ImageCard/image_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_ummah/components/TextCard/text_card_component.dart';
@@ -102,17 +103,26 @@ class _ListScreenState extends State<ListScreen> {
             final AppUser postCreator =
                 widget.users.firstWhere((e) => e.id == post.createdBy);
 
-            return post.type == PostType.text
-                ? TextCardComponent(
-                    users: widget.users,
-                    post: post as TextPost,
-                    postCreator: postCreator,
-                  )
-                : ImageCardComponent(
-                    users: widget.users,
-                    post: post as ImagePost,
-                    postCreator: postCreator,
-                  );
+            switch (post.type) {
+              case PostType.text:
+                return TextCardComponent(
+                  users: widget.users,
+                  post: post as TextPost,
+                  postCreator: postCreator,
+                );
+              case PostType.image:
+                return ImageCardComponent(
+                  users: widget.users,
+                  post: post as ImagePost,
+                  postCreator: postCreator,
+                );
+              case PostType.event:
+                return EventCardComponent(
+                  users: widget.users,
+                  post: post as EventPost,
+                  postCreator: postCreator,
+                );
+            }
           }).toList()
         ]);
       },
