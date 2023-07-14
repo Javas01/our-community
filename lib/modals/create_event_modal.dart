@@ -2,12 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:our_ummah/actions/business_actions/create_business_action.dart';
 import 'package:our_ummah/actions/event_actions/create_event_action.dart';
+import 'package:our_ummah/actions/event_actions/edit_event_action.dart';
 import 'package:our_ummah/actions/pick_image_action.dart';
 import 'package:our_ummah/actions/send_notification.dart';
 import 'package:our_ummah/components/text_form_field_components.dart';
-import 'package:our_ummah/actions/post_actions/edit_post_action.dart';
 import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
@@ -16,7 +15,7 @@ import 'package:our_ummah/models/user_model.dart';
 
 class CreateEventModal extends StatefulWidget {
   const CreateEventModal({Key? key, this.post, this.users}) : super(key: key);
-  final Post? post;
+  final EventPost? post;
   final List<AppUser>? users;
 
   @override
@@ -37,14 +36,13 @@ class _CreateEventModalState extends State<CreateEventModal>
   File? image;
   String priceDropdownValue = 'Free';
   String audienceDropdownValue = 'All';
-  String tagDropdownValue = 'Other';
   bool isEdit = false;
   bool isInvalidImage = false;
   final List<String> _selectedTags = [];
 
   @override
   String? get restorationId => 'main';
-  final RestorableDateTime _selectedDate =
+  RestorableDateTime _selectedDate =
       RestorableDateTime(DateTime.now().add(const Duration(days: 1)));
   late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture =
       RestorableRouteFuture<DateTime?>(
@@ -99,11 +97,15 @@ class _CreateEventModalState extends State<CreateEventModal>
   void initState() {
     if (widget.post != null) {
       isEdit = true;
-      tagDropdownValue = widget.post!.tags.first;
-      titleController.text = widget.post!.type == PostType.text
-          ? (widget.post as TextPost).title
-          : '';
+      titleController.text = widget.post!.title;
       descriptionController.text = widget.post!.description;
+      addressController.text = widget.post!.location;
+      _selectedDate = RestorableDateTime(DateTime.fromMillisecondsSinceEpoch(
+        widget.post!.date.millisecondsSinceEpoch,
+      ));
+      priceDropdownValue = widget.post!.price;
+      audienceDropdownValue = widget.post!.audience;
+      _selectedTags.addAll(widget.post!.tags);
     }
     super.initState();
   }
@@ -132,42 +134,44 @@ class _CreateEventModalState extends State<CreateEventModal>
                   ),
                   Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            IconButton(
-                              iconSize: 250,
-                              padding: const EdgeInsets.all(0),
-                              onPressed: () async {
-                                final imageTemp = await pickImage(
-                                  (() => ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Failed to get image',
-                                          ),
-                                        ),
-                                      )),
-                                );
-                                setState(() {
-                                  image = imageTemp;
-                                });
-                              },
-                              icon: const Icon(Icons.image),
-                              color: isInvalidImage ? Colors.red : null,
-                            ),
-                            if (isInvalidImage)
-                              const Text(
-                                'Image cannot be empty',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
+                      // TODO: Add image picker functionality
+                      // Padding(
+                      //   padding: const EdgeInsets.only(bottom: 10),
+                      //   child: Stack(
+                      //     alignment: Alignment.bottomCenter,
+                      //     children: [
+                      //       IconButton(
+                      //         iconSize: 250,
+                      //         padding: const EdgeInsets.all(0),
+                      //         onPressed: () async {
+                      //           final imageTemp = await pickImage(
+                      //             (() => ScaffoldMessenger.of(context)
+                      //                     .showSnackBar(
+                      //                   const SnackBar(
+                      //                     content: Text(
+                      //                       'Failed to get image',
+                      //                     ),
+                      //                   ),
+                      //                 )),
+                      //           );
+                      //           setState(() {
+                      //             image = imageTemp;
+                      //           });
+                      //         },
+                      //         icon: const Icon(Icons.image),
+                      //         color: isInvalidImage ? Colors.red : null,
+                      //       ),
+                      //       if (isInvalidImage)
+                      //         const Text(
+                      //           'Image cannot be empty',
+                      //           style: TextStyle(
+                      //             color: Colors.red,
+                      //           ),
+                      //         ),
+                      //     ],
+                      //   ),
+                      // ),
+                      const SizedBox(height: 10),
                       FormInputField(
                         maxLength: 30,
                         icon: const Icon(Icons.title_outlined),
@@ -338,11 +342,15 @@ class _CreateEventModalState extends State<CreateEventModal>
                             //   });
                             // }
                             isEdit
-                                ? editPost(
+                                ? editEvent(
                                     titleController.text,
                                     descriptionController.text,
-                                    PostType.text,
-                                    tagDropdownValue,
+                                    PostType.event,
+                                    _selectedTags,
+                                    audienceDropdownValue,
+                                    priceDropdownValue,
+                                    _selectedDate.value,
+                                    addressController.text,
                                     image,
                                     context,
                                     widget.post!.id,

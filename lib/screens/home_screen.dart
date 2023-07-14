@@ -1,9 +1,7 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:our_ummah/modals/create_business_model.dart';
+import 'package:our_ummah/modals/create_business_modal.dart';
 import 'package:our_ummah/modals/create_event_modal.dart';
 import 'package:our_ummah/modals/create_post_modal.dart';
 import 'package:our_ummah/models/community_model.dart';
@@ -65,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return CreatePostModal(users: users);
       case 1:
         return CreateEventModal(users: users);
-      case 2:
+      case 3:
         return CreateBusinessModal(users: users);
       default:
         return CreatePostModal(users: users);

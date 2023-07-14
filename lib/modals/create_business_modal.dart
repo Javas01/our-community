@@ -2,22 +2,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_ummah/actions/business_actions/create_business_action.dart';
+import 'package:our_ummah/actions/business_actions/edit_business_action.dart';
 import 'package:our_ummah/actions/pick_image_action.dart';
 import 'package:our_ummah/actions/send_notification.dart';
-import 'package:our_ummah/components/tag_component.dart';
 import 'package:our_ummah/components/text_form_field_components.dart';
-import 'package:our_ummah/actions/post_actions/create_post_action.dart';
-import 'package:our_ummah/actions/post_actions/edit_post_action.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
-import 'package:our_ummah/models/post_model.dart';
 import 'package:provider/provider.dart';
 import 'package:our_ummah/models/user_model.dart';
 
 class CreateBusinessModal extends StatefulWidget {
-  const CreateBusinessModal({Key? key, this.post, this.users})
+  const CreateBusinessModal({Key? key, this.business, this.users})
       : super(key: key);
-  final Post? post;
+  final Business? business;
   final List<AppUser>? users;
 
   @override
@@ -35,22 +33,16 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
   final TextEditingController taglineController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   File? image;
-  PostType typeDropdownValue = PostType.text;
-  String tagDropdownValue = 'Other';
   bool isEdit = false;
   bool isInvalidImage = false;
   final List<String> _selectedTags = [];
 
   @override
   void initState() {
-    if (widget.post != null) {
+    if (widget.business != null) {
       isEdit = true;
-      typeDropdownValue = widget.post!.type;
-      tagDropdownValue = widget.post!.tags.first;
-      titleController.text = widget.post!.type == PostType.text
-          ? (widget.post as TextPost).title
-          : '';
-      taglineController.text = widget.post!.description;
+      titleController.text = widget.business!.title;
+      taglineController.text = widget.business!.tagline;
     }
     super.initState();
   }
@@ -77,15 +69,45 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                   ),
                   Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            IconButton(
-                              iconSize: 250,
-                              padding: const EdgeInsets.all(0),
-                              onPressed: () async {
+                      image == null && !isEdit
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Stack(
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  IconButton(
+                                    iconSize: 250,
+                                    padding: const EdgeInsets.all(0),
+                                    onPressed: () async {
+                                      final imageTemp = await pickImage(
+                                        (() => ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Failed to get image',
+                                                ),
+                                              ),
+                                            )),
+                                      );
+                                      setState(() {
+                                        image = imageTemp;
+                                      });
+                                    },
+                                    icon: const Icon(Icons.image),
+                                    color: isInvalidImage ? Colors.red : null,
+                                  ),
+                                  if (isInvalidImage)
+                                    const Text(
+                                      'Image cannot be empty',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: () async {
                                 final imageTemp = await pickImage(
                                   (() => ScaffoldMessenger.of(context)
                                           .showSnackBar(
@@ -100,19 +122,16 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                                   image = imageTemp;
                                 });
                               },
-                              icon: const Icon(Icons.image),
-                              color: isInvalidImage ? Colors.red : null,
+                              child: image != null
+                                  ? Image.file(
+                                      image!,
+                                      height: 300,
+                                    )
+                                  : Image.network(
+                                      widget.business!.businessLogoUrl,
+                                      height: 300,
+                                    ),
                             ),
-                            if (isInvalidImage)
-                              const Text(
-                                'Image cannot be empty',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
                       FormInputField(
                         maxLength: 30,
                         icon: const Icon(Icons.title_outlined),
@@ -204,9 +223,7 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            if (typeDropdownValue == PostType.image &&
-                                image == null &&
-                                !isEdit) {
+                            if (image == null && !isEdit) {
                               setState(() {
                                 isInvalidImage = true;
                               });
@@ -218,14 +235,12 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                               });
                             }
                             isEdit
-                                ? editPost(
+                                ? editBusiness(
                                     titleController.text,
                                     taglineController.text,
-                                    typeDropdownValue,
-                                    tagDropdownValue,
                                     image,
                                     context,
-                                    widget.post!.id,
+                                    widget.business!.id,
                                   )
                                 : createBusiness(
                                     titleController.text,
@@ -242,7 +257,7 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                                         .showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          'Failed to create post: $e',
+                                          'Failed to create business: $e',
                                         ),
                                       ),
                                     ),

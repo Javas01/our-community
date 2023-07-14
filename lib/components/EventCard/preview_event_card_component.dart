@@ -104,7 +104,7 @@ class PreviewEventCard extends StatelessWidget {
                   ...post.tags.map<Widget>(
                     (tag) {
                       return Tag(
-                        color: businessOptions[tag]!,
+                        color: eventOptions[tag]!,
                         title: tag,
                       );
                     },

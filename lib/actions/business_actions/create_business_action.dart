@@ -30,19 +30,19 @@ Future<void> createBusiness(
     );
     final businessDocRef = await businesses.add(newBusiness);
     print(businessDocRef.id);
-    // if (image != null) {
-    //   await FirebaseStorage.instance
-    //       .ref('BusinessPics')
-    //       .child(businessDocRef.id)
-    //       .putFile(image);
+    if (image != null) {
+      await FirebaseStorage.instance
+          .ref('businessPics')
+          .child(businessDocRef.id)
+          .putFile(image);
 
-    //   final imageUrl = await FirebaseStorage.instance
-    //       .ref('BusinessPics')
-    //       .child(businessDocRef.id)
-    //       .getDownloadURL();
+      final businessLogoUrl = await FirebaseStorage.instance
+          .ref('businessPics')
+          .child(businessDocRef.id)
+          .getDownloadURL();
 
-    //   businessDocRef.update({'imageUrl': imageUrl});
-    // }
+      businessDocRef.update({'businessLogoUrl': businessLogoUrl});
+    }
   } catch (e) {
     // ignore: avoid_print
     onError != null ? onError(e) : print(e);

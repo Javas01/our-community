@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/flag_content_action.dart';
+import 'package:our_ummah/modals/create_event_modal.dart';
 import 'package:our_ummah/modals/create_post_modal.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
@@ -67,7 +68,9 @@ Future showPopupMenu(
       builder: ((_) {
         return Provider.value(
           value: Provider.of<Community>(context, listen: false),
-          child: CreatePostModal(post: post),
+          child: post.type == PostType.event
+              ? CreateEventModal(post: post as EventPost)
+              : CreatePostModal(post: post),
         );
       }),
     );

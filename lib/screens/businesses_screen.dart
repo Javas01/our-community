@@ -5,7 +5,6 @@ import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
-import 'package:provider/provider.dart';
 
 class BusinessesScreen extends StatefulWidget {
   const BusinessesScreen({
@@ -24,11 +23,11 @@ class BusinessesScreen extends StatefulWidget {
 class _BusinessesScreenState extends State<BusinessesScreen> {
   bool isActive = false;
   String _selectedTag = '';
-  late final Future<QuerySnapshot<Business>> _businessesFuture;
+  late final Stream<QuerySnapshot<Business>> _businessesStream;
 
   @override
   void initState() {
-    _businessesFuture = FirebaseFirestore.instance
+    _businessesStream = FirebaseFirestore.instance
         .collection('Communities')
         .doc(widget.community.id)
         .collection('Businesses')
@@ -36,13 +35,12 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
           fromFirestore: businessFromFirestore,
           toFirestore: businessToFirestore,
         )
-        .get();
+        .snapshots();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    print(_businessesFuture.toString());
     return Column(
       children: [
         Padding(
@@ -81,8 +79,8 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
             ),
           ),
         ),
-        FutureBuilder<QuerySnapshot<Business>>(
-            future: _businessesFuture,
+        StreamBuilder<QuerySnapshot<Business>>(
+            stream: _businessesStream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return const Text('Failed to load businesses');
@@ -116,9 +114,12 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
                             children: [
-                              const Image(
+                              Image(
                                 image: NetworkImage(
-                                    'https://www.nicepng.com/png/detail/226-2262947_dunkin-donuts-dunkin-donuts-logo-transparent.png'),
+                                  business.businessLogoUrl.isNotEmpty
+                                      ? business.businessLogoUrl
+                                      : 'https://via.placeholder.com/150',
+                                ),
                                 // height: 100,
                                 width: 100,
                               ),
