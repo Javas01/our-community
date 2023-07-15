@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 void editBusiness(
   String title,
   String description,
+  String address,
+  List<String> tags,
   File? image,
   BuildContext context,
   String businessId,
@@ -26,7 +28,7 @@ void editBusiness(
     String? imageUrl;
     if (image != null) {
       await FirebaseStorage.instance
-          .ref('postPics')
+          .ref('businessPics')
           .child(businessId)
           .putFile(image);
 
@@ -38,14 +40,16 @@ void editBusiness(
     businesses.doc(businessId).update({
       'title': title,
       'description': description,
+      'address': address,
+      'tags': tags,
       'lastEdited': Timestamp.now(),
-      ...imageUrl != null ? {'imageUrl': imageUrl} : {}
+      ...imageUrl != null ? {'businessLogoUrl': imageUrl} : {}
     });
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-            'Failed to edit post: ${e.toString().replaceAll(RegExp(r'\[.*?\]'), '').trim()}'),
+            'Failed to edit business: ${e.toString().replaceAll(RegExp(r'\[.*?\]'), '').trim()}'),
       ),
     );
   }

@@ -2,6 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum PostType { text, image, event }
 
+class PostCreator {
+  PostCreator({
+    required this.id,
+    required this.name,
+    required this.picUrl,
+  });
+
+  String id, name, picUrl;
+}
+
 abstract class Post {
   Post({
     this.id = '',
@@ -10,12 +20,14 @@ abstract class Post {
     required this.tags,
     required this.type,
     required this.timestamp,
+    required this.isAd,
     this.hasSeen = const [],
     this.upVotes = const [],
     this.downVotes = const [],
     this.lastEdited,
   });
 
+  bool isAd;
   String id, createdBy, description;
   PostType type;
   List<String> tags, upVotes, downVotes, hasSeen;
@@ -26,6 +38,7 @@ abstract class Post {
 class ImagePost extends Post {
   ImagePost({
     super.id,
+    required super.isAd,
     required super.createdBy,
     required super.description,
     required super.tags,
@@ -48,6 +61,7 @@ class ImagePost extends Post {
 class TextPost extends Post {
   TextPost({
     super.id,
+    required super.isAd,
     required super.createdBy,
     required super.description,
     required super.tags,
@@ -70,6 +84,7 @@ class TextPost extends Post {
 class EventPost extends Post {
   EventPost({
     super.id,
+    required super.isAd,
     required super.createdBy,
     required super.description,
     required super.tags,
@@ -79,7 +94,8 @@ class EventPost extends Post {
     required this.location,
     required this.audience,
     required this.price,
-    required this.date,
+    required this.startDate,
+    required this.endDate,
     required this.imageUrl,
     super.hasSeen,
     super.downVotes,
@@ -92,7 +108,7 @@ class EventPost extends Post {
       audience,
       price,
       imageUrl; // TODO: Make audience and price enum
-  DateTime date;
+  DateTime startDate, endDate;
 
   @override
   String toString() =>
@@ -118,6 +134,7 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
     case PostType.text:
       return TextPost(
         id: snapshot.id,
+        isAd: data['isAd'] ?? false,
         createdBy: data['createdBy'],
         description: data['description'],
         tags: data['tags'].cast<String>(),
@@ -132,6 +149,7 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
     case PostType.image:
       return ImagePost(
         id: snapshot.id,
+        isAd: data['isAd'] ?? false,
         createdBy: data['createdBy'],
         description: data['description'],
         tags: data['tags'].cast<String>(),
@@ -146,6 +164,7 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
     case PostType.event:
       return EventPost(
         id: snapshot.id,
+        isAd: data['isAd'] ?? false,
         createdBy: data['createdBy'],
         description: data['description'],
         tags: data['tags']?.cast<String>() ?? [],
@@ -156,7 +175,8 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
         audience: data['audience'],
         imageUrl: data['imageUrl'] ?? '',
         price: data['price'],
-        date: data['date'].toDate(),
+        startDate: data['startDate'].toDate(),
+        endDate: data['endDate'].toDate(),
         upVotes: data['upVotes']?.cast<String>() ?? [],
         downVotes: data['downVotes']?.cast<String>() ?? [],
         lastEdited: data['lastEdited'],
@@ -169,6 +189,7 @@ Map<String, Object> postToFirestore(Post post, SetOptions? options) {
   switch (post.type) {
     case PostType.text:
       return {
+        'isAd': post.isAd,
         'createdBy': post.createdBy,
         'title': (post as TextPost).title,
         'description': post.description,
@@ -178,6 +199,7 @@ Map<String, Object> postToFirestore(Post post, SetOptions? options) {
       };
     case PostType.image:
       return {
+        'isAd': post.isAd,
         'createdBy': post.createdBy,
         'imageUrl': (post as ImagePost).imageUrl,
         'description': post.description,
@@ -187,6 +209,7 @@ Map<String, Object> postToFirestore(Post post, SetOptions? options) {
       };
     case PostType.event:
       return {
+        'isAd': post.isAd,
         'createdBy': post.createdBy,
         'title': (post as EventPost).title,
         'imageUrl': post.imageUrl,
@@ -194,7 +217,8 @@ Map<String, Object> postToFirestore(Post post, SetOptions? options) {
         'location': post.location,
         'audience': post.audience,
         'price': post.price,
-        'date': post.date,
+        'startDate': post.startDate,
+        'endDate': post.endDate,
         'tags': post.tags,
         'type': post.type.name,
         'timestamp': post.timestamp,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:our_ummah/models/community_model.dart';
+import 'package:our_ummah/models/post_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:our_ummah/modals/comment_options_modal.dart';
 import 'package:our_ummah/modals/user_info_modal.dart';
@@ -113,7 +114,12 @@ class UserComment extends StatelessWidget {
                     context: context,
                     builder: (modalContext) => UserInfoModal(
                       context: modalContext,
-                      contentCreator: commentCreator,
+                      contentCreator: PostCreator(
+                        id: commentCreator.id,
+                        name:
+                            '${commentCreator.firstName} ${commentCreator.lastName}',
+                        picUrl: commentCreator.profilePicUrl,
+                      ),
                       isCreator: isCreator,
                       isUserBlocked: isUserBlocked,
                     ),

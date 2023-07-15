@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:our_ummah/models/user_model.dart';
+import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/components/profile_pic_component.dart';
 import 'package:our_ummah/actions/user_actions/block_user_action.dart';
 import 'package:our_ummah/actions/user_actions/unblock_user_action.dart';
@@ -14,7 +14,7 @@ class UserInfoModal extends StatelessWidget {
   }) : super(key: key);
 
   final BuildContext context;
-  final AppUser contentCreator;
+  final PostCreator contentCreator;
   final bool isCreator, isUserBlocked;
 
   @override
@@ -26,11 +26,15 @@ class UserInfoModal extends StatelessWidget {
             onTap: () {},
             radius: 70,
             iconSize: 100,
-            url: contentCreator.profilePicUrl,
+            url: contentCreator.picUrl,
           ),
           Center(
             child: Text(
-              '${contentCreator.firstName} ${contentCreator.lastName}',
+              contentCreator.name,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

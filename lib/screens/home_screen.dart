@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:our_ummah/modals/create_business_modal.dart';
 import 'package:our_ummah/modals/create_event_modal.dart';
 import 'package:our_ummah/modals/create_post_modal.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/screens/businesses_screen.dart';
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
   String _listSortValue = 'Recent';
   String _eventsSortValue = 'Calendar';
+  String _businessSortValue = 'Rating';
   late List screens;
   Community? selectedCommunity;
   String? _string;
@@ -49,24 +51,25 @@ class _HomeScreenState extends State<HomeScreen> {
     String? community = prefs.getString('community');
     String? listSort = prefs.getString('listSortValue');
     String? eventsSort = prefs.getString('eventsSortValue');
-    print(community);
+    String? businessesSort = prefs.getString('businessesSortValue');
     setState(() {
       _string = community;
       _listSortValue = listSort ?? 'Recent';
-      _eventsSortValue = eventsSort ?? 'Recent';
+      _eventsSortValue = eventsSort ?? 'Calendar';
+      _businessSortValue = businessesSort ?? 'Rating';
     });
   }
 
-  Widget getModal(int index, List<AppUser> users) {
+  Widget getModal(int index, List<AppUser> users, List<Business> businesses) {
     switch (index) {
       case 0:
-        return CreatePostModal(users: users);
+        return CreatePostModal(users: users, businesses: businesses);
       case 1:
-        return CreateEventModal(users: users);
+        return CreateEventModal(users: users, businesses: businesses);
       case 3:
         return CreateBusinessModal(users: users);
       default:
-        return CreatePostModal(users: users);
+        return CreatePostModal(users: users, businesses: businesses);
     }
   }
 
@@ -93,6 +96,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void setBusinessesSortValue(String sort) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('businessesSortValue', sort);
+
+    setState(() {
+      _businessSortValue = sort;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -101,7 +113,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String sortValue = currentIndex == 1 ? _eventsSortValue : _listSortValue;
+    String sortValue = () {
+      switch (currentIndex) {
+        case 0:
+          return _listSortValue;
+        case 1:
+          return _eventsSortValue;
+        case 3:
+          return _businessSortValue;
+        default:
+          return _listSortValue;
+      }
+    }();
     return FutureBuilder<QuerySnapshot<Community>>(
       future: _getCommunities,
       builder: (context, snapshot) {
@@ -133,255 +156,321 @@ class _HomeScreenState extends State<HomeScreen> {
                     userCommunities
                         .firstWhere((element) => element.name == _string);
 
-                screens = [
-                  ListScreen(
-                    sortValue: _listSortValue,
-                    users: users,
-                  ),
-                  EventScreen(
-                    sortValue: _eventsSortValue,
-                    users: users,
-                  ),
-                  const Scaffold(),
-                  BusinessesScreen(
-                    users: users,
-                    community: selectedCommunity!,
-                  ),
-                  const SettingsScreen()
-                ];
+                return FutureBuilder<QuerySnapshot<Business>>(
+                    future: FirebaseFirestore.instance
+                        .collection('Communities')
+                        .doc(selectedCommunity!.id)
+                        .collection('Businesses')
+                        .withConverter(
+                          fromFirestore: businessFromFirestore,
+                          toFirestore: businessToFirestore,
+                        )
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Text('Failed to load businesses');
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+                      List<Business> businesses = snapshot.data!.docs
+                          .map((businessDoc) => businessDoc.data())
+                          .toList();
 
-                return Provider.value(
-                  value: selectedCommunity,
-                  child: Scaffold(
-                    appBar: AppBar(
-                      elevation: 1,
-                      title: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          alignment: Alignment.center,
-                          underline: null,
-                          borderRadius: BorderRadius.circular(15),
-                          hint: Text(selectedCommunity!.name),
-                          value: selectedCommunity!.id,
-                          icon: const Icon(Icons.arrow_drop_down),
-                          elevation: 16,
-                          onChanged: (newCommunity) {
-                            if (newCommunity == selectedCommunity?.id) {
-                              return;
-                            }
-                            setCommunity();
-                            setState(() {
-                              selectedCommunity = userCommunities.firstWhere(
-                                (community) => community.id == newCommunity,
-                              );
-                            });
-                          },
-                          items: userCommunities.map((community) {
-                            return DropdownMenuItem<String>(
-                              value: community.id,
-                              child: Text(community.name),
-                            );
-                          }).toList(),
+                      screens = [
+                        ListScreen(
+                          sortValue: _listSortValue,
+                          users: users,
+                          businesses: businesses,
                         ),
-                      ),
-                      leading: IconButton(
-                        onPressed: () async {
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text('Add a new community'),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      TextField(
-                                        controller: communityController,
-                                        decoration: const InputDecoration(
-                                          hintText: 'Enter community code',
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          final newCommunity =
-                                              communityController.text;
-                                          if (newCommunity.isEmpty) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Please enter a community code',
-                                                ),
-                                              ),
-                                            );
-
-                                            communityController.clear();
-                                            return;
-                                          }
-                                          if (userCommunities.any((element) =>
-                                              element.id.toLowerCase() ==
-                                              newCommunity.toLowerCase())) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'You are already a member of this community',
-                                                ),
-                                              ),
-                                            );
-
-                                            communityController.clear();
-                                            return;
-                                          }
-                                          if (!communities.any((element) =>
-                                              element.id.toLowerCase() ==
-                                              newCommunity.toLowerCase())) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'This community does not exist',
-                                                ),
-                                              ),
-                                            );
-
-                                            communityController.clear();
-                                            return;
-                                          }
-
-                                          await FirebaseFirestore.instance
-                                              .collection('Users')
-                                              .doc(currUser.id)
-                                              .update({
-                                            'communityCodes':
-                                                FieldValue.arrayUnion([
-                                              newCommunity.toLowerCase()
-                                            ])
-                                          });
-
-                                          communityController.clear();
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'Community added successfully',
+                        EventScreen(
+                          sortValue: _eventsSortValue,
+                          users: users,
+                          businesses: businesses,
+                        ),
+                        const Scaffold(),
+                        BusinessesScreen(
+                          sortValue: _businessSortValue,
+                          users: users,
+                          community: selectedCommunity!,
+                        ),
+                        SettingsScreen(
+                          community: selectedCommunity!,
+                        )
+                      ];
+                      return Provider.value(
+                        value: selectedCommunity,
+                        child: Scaffold(
+                          appBar: AppBar(
+                            elevation: 1,
+                            title: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                alignment: Alignment.center,
+                                underline: null,
+                                borderRadius: BorderRadius.circular(15),
+                                hint: Text(selectedCommunity!.name),
+                                value: selectedCommunity!.id,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                elevation: 16,
+                                onChanged: (newCommunity) {
+                                  if (newCommunity == selectedCommunity?.id) {
+                                    return;
+                                  }
+                                  setCommunity();
+                                  setState(() {
+                                    selectedCommunity =
+                                        userCommunities.firstWhere(
+                                      (community) =>
+                                          community.id == newCommunity,
+                                    );
+                                  });
+                                },
+                                items: userCommunities.map((community) {
+                                  return DropdownMenuItem<String>(
+                                    value: community.id,
+                                    child: Text(community.name),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            leading: IconButton(
+                              onPressed: () async {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title:
+                                            const Text('Add a new community'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            TextField(
+                                              controller: communityController,
+                                              decoration: const InputDecoration(
+                                                hintText:
+                                                    'Enter community code',
                                               ),
                                             ),
-                                          );
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('Add'),
-                                      )
-                                    ],
-                                  ),
-                                );
-                              });
-                        },
-                        icon: const Icon(
-                          Icons.add_box_rounded,
-                          color: Colors.white,
-                        ),
-                      ),
-                      actions: [
-                        PopupMenuButton(
-                            icon: getMenuIcon(sortValue),
-                            initialValue: sortValue,
-                            onSelected: (value) {
-                              if (sortValue == value.toString()) return;
-                              currentIndex == 1
-                                  ? setEventsSortValue(value.toString())
-                                  : setListSortValue(value.toString());
-                            },
-                            itemBuilder: (BuildContext context) {
-                              switch (currentIndex) {
-                                case 0:
-                                  return <PopupMenuEntry>[
-                                    const PopupMenuItem(
-                                      value: 'Upvotes',
-                                      child: Text('Upvotes'),
-                                    ),
-                                    const PopupMenuItem(
-                                      value: 'Recent',
-                                      child: Text('Recent'),
-                                    ),
-                                  ];
-                                case 1:
-                                  return <PopupMenuEntry>[
-                                    const PopupMenuItem(
-                                      value: 'Calendar',
-                                      child: Text('Calendar'),
-                                    ),
-                                    const PopupMenuItem(
-                                      value: 'List',
-                                      child: Text('List'),
-                                    ),
-                                  ];
-                                // case 3:
-                                // break;
-                                default:
-                                  return <PopupMenuEntry>[];
-                              }
-                            })
-                      ],
-                    ),
-                    body: Builder(
-                      builder: ((context) => screens[currentIndex]),
-                    ),
-                    bottomNavigationBar: BottomNavigationBar(
-                      items: const <BottomNavigationBarItem>[
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.list),
-                          label: 'List',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.event_outlined),
-                          label: 'Events',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.add),
-                          label: 'Create',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.business_outlined),
-                          label: 'Businesses',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.settings),
-                          label: 'Settings',
-                        ),
-                      ],
-                      currentIndex: currentIndex,
-                      unselectedItemColor: Colors.black,
-                      onTap: (value) {
-                        switch (value) {
-                          case 2:
-                            if (currentIndex == 4) {
-                              setState(() {
-                                currentIndex = 0;
-                              });
-                            }
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                final newCommunity =
+                                                    communityController.text;
+                                                if (newCommunity.isEmpty) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'Please enter a community code',
+                                                      ),
+                                                    ),
+                                                  );
 
-                            showModalBottomSheet<void>(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (BuildContext c) {
-                                return Provider.value(
-                                  value: selectedCommunity,
-                                  child: getModal(currentIndex, users),
-                                );
+                                                  communityController.clear();
+                                                  return;
+                                                }
+                                                if (userCommunities.any(
+                                                    (element) =>
+                                                        element
+                                                            .id
+                                                            .toLowerCase() ==
+                                                        newCommunity
+                                                            .toLowerCase())) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'You are already a member of this community',
+                                                      ),
+                                                    ),
+                                                  );
+
+                                                  communityController.clear();
+                                                  return;
+                                                }
+                                                if (!communities.any(
+                                                    (element) =>
+                                                        element.id
+                                                            .toLowerCase() ==
+                                                        newCommunity
+                                                            .toLowerCase())) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'This community does not exist',
+                                                      ),
+                                                    ),
+                                                  );
+
+                                                  communityController.clear();
+                                                  return;
+                                                }
+
+                                                await FirebaseFirestore.instance
+                                                    .collection('Users')
+                                                    .doc(currUser.id)
+                                                    .update({
+                                                  'communityCodes':
+                                                      FieldValue.arrayUnion([
+                                                    newCommunity.toLowerCase()
+                                                  ])
+                                                });
+
+                                                communityController.clear();
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Community added successfully',
+                                                    ),
+                                                  ),
+                                                );
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Add'),
+                                            )
+                                          ],
+                                        ),
+                                      );
+                                    });
                               },
-                            );
-                            break;
-                          default:
-                            setState(() {
-                              currentIndex = value;
-                            });
-                        }
-                      },
-                    ),
-                  ),
-                );
+                              icon: const Icon(
+                                Icons.add_box_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                            actions: [
+                              PopupMenuButton(
+                                icon: getMenuIcon(sortValue),
+                                initialValue: sortValue,
+                                onSelected: (value) {
+                                  if (sortValue == value.toString()) return;
+                                  switch (currentIndex) {
+                                    case 0:
+                                      setListSortValue(value.toString());
+                                      break;
+                                    case 1:
+                                      setEventsSortValue(value.toString());
+                                      break;
+                                    case 3:
+                                      setBusinessesSortValue(value.toString());
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) {
+                                  switch (currentIndex) {
+                                    case 0:
+                                      return <PopupMenuEntry>[
+                                        const PopupMenuItem(
+                                          value: 'Upvotes',
+                                          child: Text('Upvotes'),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'Recent',
+                                          child: Text('Recent'),
+                                        ),
+                                      ];
+                                    case 1:
+                                      return <PopupMenuEntry>[
+                                        const PopupMenuItem(
+                                          value: 'Calendar',
+                                          child: Text('Calendar'),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'List',
+                                          child: Text('List'),
+                                        ),
+                                      ];
+                                    case 3:
+                                      return <PopupMenuEntry>[
+                                        const PopupMenuItem(
+                                          value: 'Alphabetical',
+                                          child: Text('Alphabetical'),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'Rating',
+                                          child: Text('Rating'),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'Distance',
+                                          child: Text('Distance'),
+                                        ),
+                                      ];
+
+                                    default:
+                                      return <PopupMenuEntry>[];
+                                  }
+                                },
+                              )
+                            ],
+                          ),
+                          body: Builder(
+                            builder: ((context) => screens[currentIndex]),
+                          ),
+                          bottomNavigationBar: BottomNavigationBar(
+                            items: const <BottomNavigationBarItem>[
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.list),
+                                label: 'List',
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.event_outlined),
+                                label: 'Events',
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.add),
+                                label: 'Create',
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.business_outlined),
+                                label: 'Businesses',
+                              ),
+                              BottomNavigationBarItem(
+                                icon: Icon(Icons.settings),
+                                label: 'Settings',
+                              ),
+                            ],
+                            currentIndex: currentIndex,
+                            unselectedItemColor: Colors.black,
+                            onTap: (value) {
+                              switch (value) {
+                                case 2:
+                                  if (currentIndex == 4) {
+                                    setState(() {
+                                      currentIndex = 0;
+                                    });
+                                  }
+
+                                  showModalBottomSheet<void>(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext c) {
+                                      return Provider.value(
+                                        value: selectedCommunity,
+                                        child: getModal(
+                                          currentIndex,
+                                          users,
+                                          businesses,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                  break;
+                                default:
+                                  setState(() {
+                                    currentIndex = value;
+                                  });
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    });
               });
         } else {
           return const Text('');
@@ -401,6 +490,12 @@ getMenuIcon(String sortValue) {
       return const Icon(Icons.calendar_today_rounded);
     case 'List':
       return const Icon(Icons.list_rounded);
+    case 'Alphabetical':
+      return const Icon(Icons.sort_by_alpha_rounded);
+    case 'Rating':
+      return const Icon(Icons.star_rounded);
+    case 'Distance':
+      return const Icon(Icons.near_me_rounded);
     default:
       return const Icon(Icons.arrow_circle_up_rounded);
   }

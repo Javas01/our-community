@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:provider/provider.dart';
 
-void deletePost(
-    BuildContext context, String postId, VoidCallback onSuccess) async {
+void deletePost(BuildContext context, String postId, String type,
+    VoidCallback onSuccess) async {
   try {
     FirebaseFirestore.instance
         .collection('Communities')
         .doc(Provider.of<Community>(context, listen: false).id)
-        .collection('Posts')
+        .collection(type == 'business' ? 'Businesses' : 'Posts')
         .doc(postId)
         .delete();
 

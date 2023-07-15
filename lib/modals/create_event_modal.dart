@@ -4,26 +4,31 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:our_ummah/actions/event_actions/create_event_action.dart';
 import 'package:our_ummah/actions/event_actions/edit_event_action.dart';
-import 'package:our_ummah/actions/pick_image_action.dart';
 import 'package:our_ummah/actions/send_notification.dart';
 import 'package:our_ummah/components/text_form_field_components.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:provider/provider.dart';
 import 'package:our_ummah/models/user_model.dart';
 
 class CreateEventModal extends StatefulWidget {
-  const CreateEventModal({Key? key, this.post, this.users}) : super(key: key);
+  const CreateEventModal({
+    Key? key,
+    this.post,
+    this.users,
+    this.businesses,
+  }) : super(key: key);
   final EventPost? post;
   final List<AppUser>? users;
+  final List<Business>? businesses;
 
   @override
   State<CreateEventModal> createState() => _CreateEventModalState();
 }
 
-class _CreateEventModalState extends State<CreateEventModal>
-    with RestorationMixin {
+class _CreateEventModalState extends State<CreateEventModal> {
   final _formKey = GlobalKey<FormState>();
   final firstName =
       FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
@@ -36,62 +41,15 @@ class _CreateEventModalState extends State<CreateEventModal>
   File? image;
   String priceDropdownValue = 'Free';
   String audienceDropdownValue = 'All';
+  String? businessDropdownValue;
   bool isEdit = false;
   bool isInvalidImage = false;
   final List<String> _selectedTags = [];
+  TimeOfDay startTime = TimeOfDay.now();
+  TimeOfDay endTime = TimeOfDay.now();
 
-  @override
-  String? get restorationId => 'main';
-  RestorableDateTime _selectedDate =
-      RestorableDateTime(DateTime.now().add(const Duration(days: 1)));
-  late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture =
-      RestorableRouteFuture<DateTime?>(
-    onComplete: _selectDate,
-    onPresent: (NavigatorState navigator, Object? arguments) {
-      return navigator.restorablePush(
-        _datePickerRoute,
-        arguments: _selectedDate.value.millisecondsSinceEpoch,
-      );
-    },
-  );
-
-  @pragma('vm:entry-point')
-  static Route<DateTime> _datePickerRoute(
-    BuildContext context,
-    Object? arguments,
-  ) {
-    return DialogRoute<DateTime>(
-      context: context,
-      builder: (BuildContext context) {
-        return DatePickerDialog(
-          restorationId: 'date_picker_dialog',
-          initialEntryMode: DatePickerEntryMode.calendarOnly,
-          initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
-          firstDate: DateTime.now(),
-          lastDate: DateTime(2024),
-        );
-      },
-    );
-  }
-
-  void _selectDate(DateTime? newSelectedDate) {
-    if (newSelectedDate != null) {
-      setState(() {
-        _selectedDate.value = newSelectedDate;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}'),
-        ));
-      });
-    }
-  }
-
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_selectedDate, 'selected_date');
-    registerForRestoration(
-        _restorableDatePickerRouteFuture, 'date_picker_route_future');
-  }
+  DateTime _startDate = DateTime.now().add(const Duration(days: 1));
+  DateTime _endDate = DateTime.now().add(const Duration(days: 2));
 
   @override
   void initState() {
@@ -100,20 +58,30 @@ class _CreateEventModalState extends State<CreateEventModal>
       titleController.text = widget.post!.title;
       descriptionController.text = widget.post!.description;
       addressController.text = widget.post!.location;
-      _selectedDate = RestorableDateTime(DateTime.fromMillisecondsSinceEpoch(
-        widget.post!.date.millisecondsSinceEpoch,
-      ));
+      _startDate = DateTime.fromMillisecondsSinceEpoch(
+        widget.post!.startDate.millisecondsSinceEpoch,
+      );
+
+      startTime = TimeOfDay.fromDateTime(_startDate);
+      _endDate = DateTime.fromMillisecondsSinceEpoch(
+        widget.post!.endDate.millisecondsSinceEpoch,
+      );
+
+      endTime = TimeOfDay.fromDateTime(_endDate);
       priceDropdownValue = widget.post!.price;
       audienceDropdownValue = widget.post!.audience;
       _selectedTags.addAll(widget.post!.tags);
+      businessDropdownValue = widget.post!.isAd ? widget.post!.createdBy : null;
     }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final dateFormat = DateFormat('EEEE, MMMM d, yyyy');
-
+    final userBusinesses = widget.businesses!
+        .where((element) =>
+            element.createdBy == FirebaseAuth.instance.currentUser!.uid)
+        .toList();
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Container(
@@ -134,43 +102,24 @@ class _CreateEventModalState extends State<CreateEventModal>
                   ),
                   Column(
                     children: [
-                      // TODO: Add image picker functionality
-                      // Padding(
-                      //   padding: const EdgeInsets.only(bottom: 10),
-                      //   child: Stack(
-                      //     alignment: Alignment.bottomCenter,
-                      //     children: [
-                      //       IconButton(
-                      //         iconSize: 250,
-                      //         padding: const EdgeInsets.all(0),
-                      //         onPressed: () async {
-                      //           final imageTemp = await pickImage(
-                      //             (() => ScaffoldMessenger.of(context)
-                      //                     .showSnackBar(
-                      //                   const SnackBar(
-                      //                     content: Text(
-                      //                       'Failed to get image',
-                      //                     ),
-                      //                   ),
-                      //                 )),
-                      //           );
-                      //           setState(() {
-                      //             image = imageTemp;
-                      //           });
-                      //         },
-                      //         icon: const Icon(Icons.image),
-                      //         color: isInvalidImage ? Colors.red : null,
-                      //       ),
-                      //       if (isInvalidImage)
-                      //         const Text(
-                      //           'Image cannot be empty',
-                      //           style: TextStyle(
-                      //             color: Colors.red,
-                      //           ),
-                      //         ),
-                      //     ],
-                      //   ),
-                      // ),
+                      const SizedBox(height: 10),
+                      DropdownButton<String>(
+                        hint: const Text('Post as business'),
+                        items: userBusinesses
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e.id,
+                                child: Text(e.title),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            businessDropdownValue = value;
+                          });
+                        },
+                        value: businessDropdownValue,
+                      ),
                       const SizedBox(height: 10),
                       FormInputField(
                         maxLength: 30,
@@ -209,79 +158,233 @@ class _CreateEventModalState extends State<CreateEventModal>
                           minLines: 1,
                         ),
                       ),
-                      OutlinedButton(
-                        onPressed: () {
-                          _restorableDatePickerRouteFuture.present();
-                        },
-                        child: Text(
-                          DateFormat.yMMMMd('en_US')
-                              .format(_selectedDate.value),
-                        ),
+                      Row(
+                        children: [
+                          const Text('Start Date: '),
+                          const Spacer(),
+                          OutlinedButton(
+                            onPressed: () {
+                              showDatePicker(
+                                context: context,
+                                initialEntryMode:
+                                    DatePickerEntryMode.calendarOnly,
+                                initialDate:
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                  _startDate.millisecondsSinceEpoch,
+                                ),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2024),
+                              ).then((value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _startDate = value;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Selected: ${_startDate.day}/${_startDate.month}/${_startDate.year}',
+                                        ),
+                                      ),
+                                    );
+                                  });
+                                }
+                              });
+                            },
+                            child: Text(
+                              DateFormat.yMMMMd('en_US').format(_startDate),
+                            ),
+                          ),
+                          const Spacer(),
+                          OutlinedButton(
+                              child: Text(startTime.format(context)),
+                              onPressed: () async {
+                                final TimeOfDay? time = await showTimePicker(
+                                  context: context,
+                                  initialTime: startTime,
+                                  initialEntryMode: TimePickerEntryMode.dial,
+                                  orientation: Orientation.portrait,
+                                  builder:
+                                      (BuildContext context, Widget? child) {
+                                    // We just wrap these environmental changes around the
+                                    // child in this builder so that we can apply the
+                                    // options selected above. In regular usage, this is
+                                    // rarely necessary, because the default values are
+                                    // usually used as-is.
+                                    return Theme(
+                                      data: Theme.of(context).copyWith(
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.padded,
+                                      ),
+                                      child: MediaQuery(
+                                        data: MediaQuery.of(context).copyWith(
+                                          alwaysUse24HourFormat: false,
+                                        ),
+                                        child: child!,
+                                      ),
+                                    );
+                                  },
+                                );
+                                if (time != null) {
+                                  setState(() {
+                                    startTime = time;
+
+                                    _startDate = DateTime(
+                                      _startDate.year,
+                                      _startDate.month,
+                                      _startDate.day,
+                                      startTime.hour,
+                                      startTime.minute,
+                                    );
+                                  });
+                                }
+                              }),
+                        ],
                       ),
-                      Row(children: [
-                        DropdownButton<String>(
-                          value: audienceDropdownValue,
-                          icon: const Icon(Icons.arrow_downward),
-                          iconSize: 24,
-                          elevation: 16,
-                          style: const TextStyle(color: Colors.lightBlue),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.lightBlueAccent,
+                      Row(
+                        children: [
+                          const Text('End Date: '),
+                          const Spacer(),
+                          OutlinedButton(
+                            onPressed: () {
+                              showDatePicker(
+                                context: context,
+                                initialEntryMode:
+                                    DatePickerEntryMode.calendarOnly,
+                                initialDate:
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                  _endDate.millisecondsSinceEpoch,
+                                ),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(2024),
+                              ).then((value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _endDate = value;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Selected: ${_endDate.day}/${_endDate.month}/${_endDate.year}',
+                                        ),
+                                      ),
+                                    );
+                                  });
+                                }
+                              });
+                            },
+                            child: Text(
+                              DateFormat.yMMMMd('en_US').format(_endDate),
+                            ),
                           ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              audienceDropdownValue = newValue!;
-                            });
-                          },
-                          items: <String>[
-                            'All',
-                            'Teenagers only',
-                            'Adults only',
-                            'Men only',
-                            'Women only',
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                        const Spacer(),
-                        DropdownButton<String>(
-                          value: priceDropdownValue,
-                          icon: const Icon(Icons.arrow_downward),
-                          iconSize: 24,
-                          elevation: 16,
-                          style: const TextStyle(color: Colors.lightBlue),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.lightBlueAccent,
+                          const Spacer(),
+                          OutlinedButton(
+                            child: Text(endTime.format(context)),
+                            onPressed: () async {
+                              final TimeOfDay? time = await showTimePicker(
+                                context: context,
+                                initialTime: endTime,
+                                initialEntryMode: TimePickerEntryMode.dial,
+                                orientation: Orientation.portrait,
+                                builder: (BuildContext context, Widget? child) {
+                                  // We just wrap these environmental changes around the
+                                  // child in this builder so that we can apply the
+                                  // options selected above. In regular usage, this is
+                                  // rarely necessary, because the default values are
+                                  // usually used as-is.
+                                  return Theme(
+                                    data: Theme.of(context).copyWith(
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.padded,
+                                    ),
+                                    child: MediaQuery(
+                                      data: MediaQuery.of(context).copyWith(
+                                        alwaysUse24HourFormat: false,
+                                      ),
+                                      child: child!,
+                                    ),
+                                  );
+                                },
+                              );
+                              if (time != null) {
+                                setState(() {
+                                  endTime = time;
+                                  _endDate = DateTime(
+                                    _endDate.year,
+                                    _endDate.month,
+                                    _endDate.day,
+                                    endTime.hour,
+                                    endTime.minute,
+                                  );
+                                });
+                              }
+                            },
                           ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              priceDropdownValue = newValue!;
-                            });
-                          },
-                          items: <String>[
-                            'Free',
-                            '\$',
-                            '\$\$',
-                            '\$\$\$',
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                      ])
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          DropdownButton<String>(
+                            value: audienceDropdownValue,
+                            icon: const Icon(Icons.arrow_downward),
+                            iconSize: 24,
+                            elevation: 16,
+                            style: const TextStyle(color: Colors.lightBlue),
+                            underline: Container(
+                              height: 2,
+                              color: Colors.lightBlueAccent,
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                audienceDropdownValue = newValue!;
+                              });
+                            },
+                            items: <String>[
+                              'All',
+                              'Teenagers only',
+                              'Adults only',
+                              'Men only',
+                              'Women only',
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                          const Spacer(),
+                          DropdownButton<String>(
+                            value: priceDropdownValue,
+                            icon: const Icon(Icons.arrow_downward),
+                            iconSize: 24,
+                            elevation: 16,
+                            style: const TextStyle(color: Colors.lightBlue),
+                            underline: Container(
+                              height: 2,
+                              color: Colors.lightBlueAccent,
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                priceDropdownValue = newValue!;
+                              });
+                            },
+                            items: <String>[
+                              'Free',
+                              '\$',
+                              '\$\$',
+                              '\$\$\$',
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                   const SizedBox(height: 10),
                   Wrap(
                     children: [
-                      ...eventOptionsList.map((value) {
+                      ...eventOptionsList.map((option) {
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(4.0, 0, 4.0, 0),
                           child: ChoiceChip(
@@ -292,24 +395,24 @@ class _CreateEventModalState extends State<CreateEventModal>
                                     width: 10,
                                     height: 10,
                                     decoration: BoxDecoration(
-                                      color: value.values.first,
+                                      color: option.values.first,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
                                   const SizedBox(width: 5),
-                                  Text(value.keys.first)
+                                  Text(option.keys.first)
                                 ],
                               ),
                               selectedColor:
-                                  value.values.first.withOpacity(0.5),
+                                  option.values.first.withOpacity(0.5),
                               selected:
-                                  _selectedTags.contains(value.keys.first),
+                                  _selectedTags.contains(option.keys.first),
                               onSelected: (selected) {
                                 setState(() {
                                   if (selected) {
-                                    _selectedTags.add(value.keys.first);
+                                    _selectedTags.add(option.keys.first);
                                   } else {
-                                    _selectedTags.remove(value.keys.first);
+                                    _selectedTags.remove(option.keys.first);
                                   }
                                 });
                               }),
@@ -330,17 +433,6 @@ class _CreateEventModalState extends State<CreateEventModal>
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            // if (image == null && !isEdit) {
-                            //   setState(() {
-                            //     isInvalidImage = true;
-                            //   });
-
-                            //   return;
-                            // } else if (isInvalidImage) {
-                            //   setState(() {
-                            //     isInvalidImage = false;
-                            //   });
-                            // }
                             isEdit
                                 ? editEvent(
                                     titleController.text,
@@ -349,7 +441,8 @@ class _CreateEventModalState extends State<CreateEventModal>
                                     _selectedTags,
                                     audienceDropdownValue,
                                     priceDropdownValue,
-                                    _selectedDate.value,
+                                    _startDate,
+                                    _endDate,
                                     addressController.text,
                                     image,
                                     context,
@@ -365,10 +458,16 @@ class _CreateEventModalState extends State<CreateEventModal>
                                       context,
                                       listen: false,
                                     ).id,
-                                    userId,
+                                    businessDropdownValue != null
+                                        ? true
+                                        : false,
+                                    businessDropdownValue != null
+                                        ? businessDropdownValue!
+                                        : userId,
                                     audienceDropdownValue,
                                     priceDropdownValue,
-                                    _selectedDate.value,
+                                    _startDate,
+                                    _endDate,
                                     (e) => ScaffoldMessenger.of(context)
                                         .showSnackBar(
                                       SnackBar(

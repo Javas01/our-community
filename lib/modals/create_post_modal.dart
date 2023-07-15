@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_ummah/actions/pick_image_action.dart';
@@ -8,15 +9,22 @@ import 'package:our_ummah/components/text_form_field_components.dart';
 import 'package:our_ummah/actions/post_actions/create_post_action.dart';
 import 'package:our_ummah/actions/post_actions/edit_post_action.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:provider/provider.dart';
 import 'package:our_ummah/models/user_model.dart';
 
 class CreatePostModal extends StatefulWidget {
-  const CreatePostModal({Key? key, this.post, this.users}) : super(key: key);
+  const CreatePostModal({
+    Key? key,
+    this.post,
+    this.users,
+    this.businesses,
+  }) : super(key: key);
   final Post? post;
   final List<AppUser>? users;
+  final List<Business>? businesses;
 
   @override
   State<CreatePostModal> createState() => _CreatePostModalState();
@@ -34,6 +42,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
   File? image;
   PostType typeDropdownValue = PostType.text;
   String tagDropdownValue = 'Other';
+  String? businessDropdownValue;
   bool isEdit = false;
   bool isInvalidImage = false;
 
@@ -47,6 +56,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
           ? (widget.post as TextPost).title
           : '';
       descriptionController.text = widget.post!.description;
+      businessDropdownValue = widget.post!.isAd ? widget.post!.createdBy : null;
     }
     super.initState();
   }
@@ -54,6 +64,9 @@ class _CreatePostModalState extends State<CreatePostModal> {
   @override
   Widget build(BuildContext context) {
     bool isEvent = tagDropdownValue == 'Events';
+    List<Business> userBusinesses = widget.businesses!
+        .where((element) => element.createdBy == userId)
+        .toList();
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
@@ -74,6 +87,23 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
+                DropdownButton<String>(
+                  hint: const Text('Post as business'),
+                  items: userBusinesses
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.id,
+                          child: Text(e.title),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      businessDropdownValue = value;
+                    });
+                  },
+                  value: businessDropdownValue,
+                ),
                 Row(
                   children: [
                     const SizedBox(width: 5),
@@ -289,7 +319,10 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                     context,
                                     listen: false,
                                   ).id,
-                                  userId,
+                                  businessDropdownValue != null ? true : false,
+                                  businessDropdownValue != null
+                                      ? businessDropdownValue!
+                                      : userId,
                                   (e) => ScaffoldMessenger.of(context)
                                       .showSnackBar(
                                     SnackBar(

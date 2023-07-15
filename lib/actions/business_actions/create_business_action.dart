@@ -27,6 +27,7 @@ Future<void> createBusiness(
       tagline: tagline,
       address: address,
       tags: tags,
+      createdBy: userId,
     );
     final businessDocRef = await businesses.add(newBusiness);
     print(businessDocRef.id);

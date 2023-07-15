@@ -11,7 +11,6 @@ import 'package:our_ummah/models/comment_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/components/tag_component.dart';
-import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/constants/tag_options.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -28,7 +27,7 @@ class PreviewEventCard extends StatelessWidget {
   }) : super(key: key);
 
   final EventPost post;
-  final AppUser postCreator;
+  final PostCreator postCreator;
   final bool isSelected, isCreator;
   final GlobalKey itemKey;
 
@@ -80,7 +79,7 @@ class PreviewEventCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ProfilePic(
-                    url: postCreator.profilePicUrl,
+                    url: postCreator.picUrl,
                     onTap: () => showDialog(
                       context: context,
                       builder: (modalContext) => UserInfoModal(
@@ -94,7 +93,7 @@ class PreviewEventCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    '${postCreator.firstName} ${postCreator.lastName} - $postDate',
+                    '${postCreator.name} - $postDate',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,
@@ -187,7 +186,7 @@ class PreviewEventCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              DateFormat.yMMMMd().format(post.date),
+                              DateFormat.yMMMMd().format(post.startDate),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -207,7 +206,47 @@ class PreviewEventCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              DateFormat.jm().format(post.date),
+                              DateFormat.jm().format(post.startDate),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'End Date',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              DateFormat.yMMMMd().format(post.endDate),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'End Time',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              DateFormat.jm().format(post.endDate),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -267,7 +306,7 @@ class PreviewEventCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${postCreator.firstName} ${postCreator.lastName}',
+                              postCreator.name,
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,

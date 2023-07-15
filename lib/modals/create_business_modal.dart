@@ -43,6 +43,8 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
       isEdit = true;
       titleController.text = widget.business!.title;
       taglineController.text = widget.business!.tagline;
+      addressController.text = widget.business!.address;
+      _selectedTags.addAll(widget.business!.tags);
     }
     super.initState();
   }
@@ -238,6 +240,8 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                                 ? editBusiness(
                                     titleController.text,
                                     taglineController.text,
+                                    addressController.text,
+                                    _selectedTags,
                                     image,
                                     context,
                                     widget.business!.id,

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:our_ummah/components/TextCard/text_card_component.dart';
 import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/components/tag_filter_component.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/models/post_model.dart';
@@ -16,9 +17,11 @@ class ListScreen extends StatefulWidget {
     Key? key,
     required this.sortValue,
     required this.users,
+    required this.businesses,
   }) : super(key: key);
   final String sortValue;
   final List<AppUser> users;
+  final List<Business> businesses;
 
   @override
   State<ListScreen> createState() => _ListScreenState();
@@ -100,8 +103,25 @@ class _ListScreenState extends State<ListScreen> {
           ),
           ...filteredPosts.reversed.map((post) {
             // get post creator user object
-            final AppUser postCreator =
-                widget.users.firstWhere((e) => e.id == post.createdBy);
+            final PostCreator postCreator = post.isAd
+                ? () {
+                    final business = widget.businesses
+                        .firstWhere((e) => e.id == post.createdBy);
+                    return PostCreator(
+                      name: business.title,
+                      picUrl: business.businessLogoUrl,
+                      id: business.id,
+                    );
+                  }()
+                : () {
+                    final user =
+                        widget.users.firstWhere((e) => e.id == post.createdBy);
+                    return PostCreator(
+                      name: '${user.firstName} ${user.lastName}',
+                      picUrl: user.profilePicUrl,
+                      id: user.id,
+                    );
+                  }();
 
             switch (post.type) {
               case PostType.text:
@@ -109,18 +129,21 @@ class _ListScreenState extends State<ListScreen> {
                   users: widget.users,
                   post: post as TextPost,
                   postCreator: postCreator,
+                  businesses: widget.businesses,
                 );
               case PostType.image:
                 return ImageCardComponent(
                   users: widget.users,
                   post: post as ImagePost,
                   postCreator: postCreator,
+                  businesses: widget.businesses,
                 );
               case PostType.event:
                 return EventCardComponent(
                   users: widget.users,
                   post: post as EventPost,
                   postCreator: postCreator,
+                  businesses: widget.businesses,
                 );
             }
           }).toList()

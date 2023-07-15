@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/show_popup_menu_action.dart';
 import 'package:our_ummah/components/ImageCard/expanded_image_card_component.dart';
 import 'package:our_ummah/components/ImageCard/preview_image_card_component.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
@@ -15,11 +16,13 @@ class ImageCardComponent extends StatefulWidget {
     required this.postCreator,
     required this.post,
     required this.users,
+    required this.businesses,
   }) : super(key: key);
 
   final ImagePost post;
-  final AppUser postCreator;
+  final PostCreator postCreator;
   final List<AppUser> users;
+  final List<Business> businesses;
 
   @override
   State<ImageCardComponent> createState() => _ImageCardComponentState();
@@ -60,6 +63,8 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
 
   @override
   Widget build(BuildContext context) {
+    final currUser = widget.users.firstWhere((user) => user.id == userId);
+
     return SizedBox(
       key: dataKey,
       height: _isExpanded
@@ -77,7 +82,14 @@ class _ImageCardComponentState extends State<ImageCardComponent> {
                 setState(() {
                   _selectedPostKey = dataKey;
                 });
-                await showPopupMenu(context, widget.post, _tapPosition!);
+                await showPopupMenu(
+                  context,
+                  widget.post,
+                  _tapPosition!,
+                  widget.postCreator,
+                  widget.businesses,
+                  currUser,
+                );
                 setState(() {
                   _selectedPostKey = null;
                 });

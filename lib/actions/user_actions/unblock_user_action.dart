@@ -28,6 +28,7 @@ void unBlock(
 
     onSuccess.call();
   } catch (e) {
+    print(e);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('failed to unblock user'),

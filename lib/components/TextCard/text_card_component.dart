@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/show_popup_menu_action.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
@@ -15,11 +16,13 @@ class TextCardComponent extends StatefulWidget {
     required this.postCreator,
     required this.post,
     required this.users,
+    required this.businesses,
   }) : super(key: key);
 
   final TextPost post;
-  final AppUser postCreator;
+  final PostCreator postCreator;
   final List<AppUser> users;
+  final List<Business> businesses;
 
   @override
   State<TextCardComponent> createState() => _TextCardComponentState();
@@ -60,6 +63,8 @@ class _TextCardComponentState extends State<TextCardComponent> {
 
   @override
   Widget build(BuildContext context) {
+    final currUser = widget.users.firstWhere((user) => user.id == userId);
+
     return SizedBox(
       key: dataKey,
       height: _isExpanded
@@ -77,7 +82,14 @@ class _TextCardComponentState extends State<TextCardComponent> {
                 setState(() {
                   _selectedPostKey = dataKey;
                 });
-                await showPopupMenu(context, widget.post, _tapPosition!);
+                await showPopupMenu(
+                  context,
+                  widget.post,
+                  _tapPosition!,
+                  widget.postCreator,
+                  widget.businesses,
+                  currUser,
+                );
                 setState(() {
                   _selectedPostKey = null;
                 });

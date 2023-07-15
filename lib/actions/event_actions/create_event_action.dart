@@ -9,10 +9,12 @@ Future<void> createEvent(
   List<String> tags,
   File? image,
   String communityCode,
+  bool isAd,
   String userId,
   String audience,
   String price,
-  DateTime date,
+  DateTime startDate,
+  DateTime endDate,
   void Function(Object)? onError,
 ) async {
   try {
@@ -25,6 +27,7 @@ Future<void> createEvent(
           toFirestore: postToFirestore,
         );
     final newEvent = EventPost(
+      isAd: isAd,
       createdBy: userId,
       description: description,
       tags: tags,
@@ -33,7 +36,8 @@ Future<void> createEvent(
       location: location,
       audience: audience,
       price: price,
-      date: date,
+      startDate: startDate,
+      endDate: endDate,
       imageUrl: '',
     );
     final eventDocRef = await events.add(newEvent);

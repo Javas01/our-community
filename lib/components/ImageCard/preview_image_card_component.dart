@@ -10,7 +10,6 @@ import 'package:our_ummah/models/comment_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/components/tag_component.dart';
-import 'package:our_ummah/models/user_model.dart';
 import 'package:our_ummah/constants/tag_options.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -27,7 +26,7 @@ class PreviewImageCard extends StatelessWidget {
   }) : super(key: key);
 
   final ImagePost post;
-  final AppUser postCreator;
+  final PostCreator postCreator;
   final bool isSelected, isCreator;
   final GlobalKey itemKey;
 
@@ -79,7 +78,7 @@ class PreviewImageCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ProfilePic(
-                    url: postCreator.profilePicUrl,
+                    url: postCreator.picUrl,
                     onTap: () => showDialog(
                       context: context,
                       builder: (modalContext) => UserInfoModal(
@@ -93,7 +92,7 @@ class PreviewImageCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    '${postCreator.firstName} ${postCreator.lastName} - $postDate',
+                    '${postCreator.name} - $postDate',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w300,

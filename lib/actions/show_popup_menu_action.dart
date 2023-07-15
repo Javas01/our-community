@@ -1,17 +1,28 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/flag_content_action.dart';
+import 'package:our_ummah/modals/create_business_modal.dart';
 import 'package:our_ummah/modals/create_event_modal.dart';
 import 'package:our_ummah/modals/create_post_modal.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/actions/post_actions/delete_post_action.dart';
+import 'package:our_ummah/models/user_model.dart';
 import 'package:provider/provider.dart';
 
 Future showPopupMenu(
-    BuildContext context, Post post, Offset tapPosition) async {
+  BuildContext context,
+  dynamic post,
+  Offset tapPosition,
+  PostCreator? postCreator,
+  List<Business>? businesses, [
+  AppUser? appUser,
+]) async {
   final user = FirebaseAuth.instance.currentUser!;
-  final isCreator = user.uid == post.createdBy;
+  final isCreator = post.isAd
+      ? appUser!.businessIds.contains(postCreator!.id)
+      : user.uid == post.createdBy;
   final RenderBox overlay =
       Overlay.of(context).context.findRenderObject() as RenderBox;
 
@@ -33,9 +44,12 @@ Future showPopupMenu(
           onTap: () => deletePost(
             context,
             post.id,
+            post is Post ? 'post' : 'business',
             () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Post deleted'),
+              SnackBar(
+                content: Text(
+                  post is Post ? 'Post deleted' : 'Business deleted',
+                ),
               ),
             ),
           ),
@@ -68,9 +82,17 @@ Future showPopupMenu(
       builder: ((_) {
         return Provider.value(
           value: Provider.of<Community>(context, listen: false),
-          child: post.type == PostType.event
-              ? CreateEventModal(post: post as EventPost)
-              : CreatePostModal(post: post),
+          child: post is Post
+              ? post.type == PostType.event
+                  ? CreateEventModal(
+                      post: post as EventPost,
+                      businesses: businesses,
+                    )
+                  : CreatePostModal(
+                      post: post,
+                      businesses: businesses,
+                    )
+              : CreateBusinessModal(business: post as Business),
         );
       }),
     );

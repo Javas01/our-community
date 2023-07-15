@@ -10,6 +10,7 @@ Future<void> createPost(
   String tag,
   File? image,
   String communityCode,
+  bool isAd,
   String userId,
   void Function(Object)? onError, [
   CollectionReference<Post>? testCollection,
@@ -26,6 +27,7 @@ Future<void> createPost(
   try {
     final newPost = type == PostType.image
         ? ImagePost(
+            isAd: isAd,
             createdBy: userId,
             description: description,
             tags: [tag],
@@ -34,6 +36,7 @@ Future<void> createPost(
             imageUrl: '',
           )
         : TextPost(
+            isAd: isAd,
             createdBy: userId,
             description: description,
             tags: [tag],

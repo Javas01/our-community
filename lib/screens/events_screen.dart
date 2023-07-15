@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:our_ummah/components/EventCard/event_card_component.dart';
 import 'package:our_ummah/components/tag_filter_component.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
@@ -12,9 +14,15 @@ import 'package:table_calendar/table_calendar.dart';
 // import 'package:timeago/timeago.dart' as timeago;
 
 class EventScreen extends StatefulWidget {
-  const EventScreen({super.key, required this.users, required this.sortValue});
+  const EventScreen({
+    super.key,
+    required this.users,
+    required this.businesses,
+    required this.sortValue,
+  });
 
   final List<AppUser> users;
+  final List<Business> businesses;
   final String sortValue;
 
   @override
@@ -38,13 +46,12 @@ class _EventScreenState extends State<EventScreen> {
 
   List<EventPost> _getEventsForDay(DateTime day, List<EventPost> posts) {
     return posts
-        .where((element) => isSameDay((element as EventPost).date, day))
+        .where((element) => isSameDay((element).startDate, day))
         .toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    print(Provider.of<Community>(context, listen: false).id);
     final eventsStream = FirebaseFirestore.instance
         .collection('Communities')
         .doc(Provider.of<Community>(context, listen: false).id)
@@ -69,10 +76,6 @@ class _EventScreenState extends State<EventScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1,
-                          ),
                           borderRadius: BorderRadius.circular(50),
                           color: _audienceFilter != null
                               ? Colors.blueAccent.withOpacity(0.7)
@@ -99,7 +102,7 @@ class _EventScreenState extends State<EventScreen> {
                             }).toList(),
                             value: _audienceFilter,
                             style: const TextStyle(
-                              color: Colors.black,
+                              color: Color.fromARGB(255, 53, 93, 175),
                               fontSize: 16,
                             ),
                             alignment: AlignmentDirectional.center,
@@ -113,10 +116,6 @@ class _EventScreenState extends State<EventScreen> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1,
-                          ),
                           borderRadius: BorderRadius.circular(50),
                           color: _distanceFilter != null
                               ? Colors.greenAccent.withOpacity(0.7)
@@ -142,7 +141,7 @@ class _EventScreenState extends State<EventScreen> {
                             }).toList(),
                             value: _distanceFilter,
                             style: const TextStyle(
-                              color: Colors.black,
+                              color: Color.fromARGB(255, 39, 165, 104),
                               fontSize: 16,
                             ),
                             alignment: AlignmentDirectional.center,
@@ -156,14 +155,12 @@ class _EventScreenState extends State<EventScreen> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1,
-                          ),
                           borderRadius: BorderRadius.circular(50),
                           color: _priceFilter != null
-                              ? Colors.redAccent.withOpacity(0.7)
-                              : Colors.redAccent.withOpacity(0.3),
+                              ? Color.fromARGB(255, 197, 97, 181)
+                                  .withOpacity(0.7)
+                              : Color.fromARGB(255, 230, 149, 210)
+                                  .withOpacity(0.3),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(10),
@@ -185,7 +182,7 @@ class _EventScreenState extends State<EventScreen> {
                             }).toList(),
                             value: _priceFilter,
                             style: const TextStyle(
-                              color: Colors.black,
+                              color: Color.fromARGB(255, 184, 92, 163),
                               fontSize: 16,
                             ),
                             alignment: AlignmentDirectional.center,
@@ -199,19 +196,23 @@ class _EventScreenState extends State<EventScreen> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 1,
-                          ),
                           borderRadius: BorderRadius.circular(50),
                           color: _categoryFilter != null
-                              ? Colors.yellowAccent.withOpacity(0.7)
-                              : Colors.yellowAccent.withOpacity(0.3),
+                              ? Color.fromARGB(255, 187, 81, 225)
+                                  .withOpacity(0.7)
+                              : Color.fromARGB(255, 167, 97, 178)
+                                  .withOpacity(0.3),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(10),
                           child: DropdownButton(
-                            hint: const Text('Category'),
+                            hint: const Text(
+                              'Category',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 248, 246, 246),
+                                fontSize: 16,
+                              ),
+                            ),
                             borderRadius: BorderRadius.circular(40),
                             underline: Container(),
                             icon: const Icon(Icons.filter_list),
@@ -228,7 +229,7 @@ class _EventScreenState extends State<EventScreen> {
                             }).toList(),
                             value: _categoryFilter,
                             style: const TextStyle(
-                              color: Colors.black,
+                              color: Color.fromARGB(255, 4, 2, 2),
                               fontSize: 16,
                             ),
                             alignment: AlignmentDirectional.center,
@@ -302,15 +303,32 @@ class _EventScreenState extends State<EventScreen> {
                           .where((post) => _priceFilter != null
                               ? post.price == _priceFilter
                               : true)
-                          .where(
-                              (element) => element.date.isAfter(DateTime.now()))
+                          .where((element) =>
+                              element.startDate.isAfter(DateTime.now()))
                           .where((element) => _selectedTag.isNotEmpty
                               ? element.tags.contains(_selectedTag)
                               : true)
                           // .where((post) => _distanceFilter != null ? post.distance == _distanceFilter : true)
                           .map<Widget>((post) {
-                        final AppUser postCreator = widget.users
-                            .firstWhere((e) => e.id == post.createdBy);
+                        final PostCreator postCreator = post.isAd
+                            ? () {
+                                final business = widget.businesses
+                                    .firstWhere((e) => e.id == post.createdBy);
+                                return PostCreator(
+                                  name: business.title,
+                                  picUrl: business.businessLogoUrl,
+                                  id: business.id,
+                                );
+                              }()
+                            : () {
+                                final user = widget.users
+                                    .firstWhere((e) => e.id == post.createdBy);
+                                return PostCreator(
+                                  name: '${user.firstName} ${user.lastName}',
+                                  picUrl: user.profilePicUrl,
+                                  id: user.id,
+                                );
+                              }();
                         // final isCreator = userId == post.createdBy;
                         // final String postDate = post.lastEdited == null
                         //     ? 'Posted ${timeago.format(
@@ -328,6 +346,7 @@ class _EventScreenState extends State<EventScreen> {
                           postCreator: postCreator,
                           post: post,
                           users: widget.users,
+                          businesses: widget.businesses,
                         );
                       }).toList(),
                     ]),
@@ -336,6 +355,39 @@ class _EventScreenState extends State<EventScreen> {
                     child: Column(
                       children: [
                         TableCalendar(
+                          calendarBuilders: CalendarBuilders(
+                            markerBuilder:
+                                (context, day, List<EventPost> events) {
+                              if (events.isNotEmpty) {
+                                return Container(
+                                  margin: const EdgeInsets.all(4.0),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        eventOptions[events.first.tags.first],
+                                    shape: BoxShape.circle,
+                                  ),
+                                  width: 8.0,
+                                  height: 8.0,
+                                );
+                              }
+                            },
+                          ),
+                          calendarStyle: CalendarStyle(
+                            selectedDecoration: const BoxDecoration(
+                              color: Colors.blue,
+                              shape: BoxShape.circle,
+                            ),
+                            todayDecoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.3),
+                              shape: BoxShape.circle,
+                            ),
+                            selectedTextStyle: const TextStyle(
+                              color: Colors.white,
+                            ),
+                            todayTextStyle: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
                           firstDay: DateTime.utc(2010, 10, 16),
                           lastDay: DateTime.utc(2030, 3, 14),
                           availableCalendarFormats: const {
@@ -347,17 +399,18 @@ class _EventScreenState extends State<EventScreen> {
                             return isSameDay(_selectedDay, day);
                           },
                           onDaySelected: (selectedDay, focusedDay) {
-                            // setState(() {
-                            //   _selectedDay = selectedDay;
-                            //   _focusedDay = focusedDay; // update `_focusedDay` here as well
-                            // });
                             if (!isSameDay(_selectedDay, selectedDay)) {
+                              final eventsForDay = _getEventsForDay(
+                                selectedDay,
+                                posts,
+                              );
                               setState(() {
                                 _focusedDay = focusedDay;
                                 _selectedDay = selectedDay;
-                                _calendarFormat = CalendarFormat.week;
-                                _selectedEvents = _getEventsForDay(
-                                    selectedDay, posts as List<EventPost>);
+                                _calendarFormat = eventsForDay.isEmpty
+                                    ? CalendarFormat.month
+                                    : CalendarFormat.week;
+                                _selectedEvents = eventsForDay;
                               });
                             }
                           },
@@ -369,33 +422,70 @@ class _EventScreenState extends State<EventScreen> {
                           },
                           eventLoader: (day) {
                             return _getEventsForDay(
-                                day, posts as List<EventPost>);
+                              day,
+                              posts,
+                            );
                           },
                         ),
                         Flexible(
-                          child: ListView(
-                            children: _selectedEvents.map((event) {
-                              final AppUser postCreator = widget.users
-                                  .firstWhere((e) => e.id == event.createdBy);
-                              // final isCreator = userId == event.createdBy;
-                              // final String postDate = event.lastEdited == null
-                              //     ? 'Posted ${timeago.format(
-                              //         DateTime.fromMicrosecondsSinceEpoch(
-                              //           event.timestamp.microsecondsSinceEpoch,
-                              //         ),
-                              //       )}'
-                              //     : 'Edited ${timeago.format(
-                              //         DateTime.fromMicrosecondsSinceEpoch(
-                              //           event.lastEdited!.microsecondsSinceEpoch,
-                              //         ),
-                              //       )}';
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 8.0),
+                              Text(
+                                'Events on ${DateFormat.yMMMd().format(_selectedDay)}',
+                                style: Theme.of(context).textTheme.headline6,
+                              ),
+                              const SizedBox(height: 8.0),
+                              Expanded(
+                                child: ListView(
+                                  children: _selectedEvents.map((event) {
+                                    final PostCreator postCreator = event.isAd
+                                        ? () {
+                                            final business =
+                                                widget.businesses.firstWhere(
+                                              (e) => e.id == event.createdBy,
+                                            );
+                                            return PostCreator(
+                                              name: business.title,
+                                              picUrl: business.businessLogoUrl,
+                                              id: business.id,
+                                            );
+                                          }()
+                                        : () {
+                                            final user =
+                                                widget.users.firstWhere(
+                                              (e) => e.id == event.createdBy,
+                                            );
+                                            return PostCreator(
+                                              name:
+                                                  '${user.firstName} ${user.lastName}',
+                                              picUrl: user.profilePicUrl,
+                                              id: user.id,
+                                            );
+                                          }();
+                                    // final isCreator = userId == event.createdBy;
+                                    // final String postDate = event.lastEdited == null
+                                    //     ? 'Posted ${timeago.format(
+                                    //         DateTime.fromMicrosecondsSinceEpoch(
+                                    //           event.timestamp.microsecondsSinceEpoch,
+                                    //         ),
+                                    //       )}'
+                                    //     : 'Edited ${timeago.format(
+                                    //         DateTime.fromMicrosecondsSinceEpoch(
+                                    //           event.lastEdited!.microsecondsSinceEpoch,
+                                    //         ),
+                                    //       )}';
 
-                              return EventCardComponent(
-                                postCreator: postCreator,
-                                post: event,
-                                users: widget.users,
-                              );
-                            }).toList(),
+                                    return EventCardComponent(
+                                      postCreator: postCreator,
+                                      post: event,
+                                      users: widget.users,
+                                      businesses: widget.businesses,
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
