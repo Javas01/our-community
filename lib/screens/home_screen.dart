@@ -153,8 +153,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     .toList();
 
                 selectedCommunity = selectedCommunity ??
-                    userCommunities
-                        .firstWhere((element) => element.name == _string);
+                    userCommunities.firstWhere(
+                      (element) => element.name == _string,
+                      orElse: () => userCommunities.first,
+                    );
 
                 return FutureBuilder<QuerySnapshot<Business>>(
                     future: FirebaseFirestore.instance
