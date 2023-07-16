@@ -242,15 +242,11 @@ class _EventScreenState extends State<EventScreen> {
                             borderRadius: BorderRadius.circular(40),
                             underline: Container(),
                             icon: const Icon(Icons.filter_list),
-                            items: <String>[
-                              'Quran',
-                              'Recreation',
-                              'Meetup',
-                              'Other',
-                            ].map<DropdownMenuItem<String>>((String value) {
+                            items: eventOptionsList
+                                .map<DropdownMenuItem<String>>((value) {
                               return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
+                                value: value.keys.first,
+                                child: Text(value.keys.first),
                               );
                             }).toList(),
                             value: _categoryFilter,
@@ -279,13 +275,15 @@ class _EventScreenState extends State<EventScreen> {
                         child: IconButton.filledTonal(
                           onPressed: (_audienceFilter == null &&
                                   _priceFilter == null &&
-                                  _distanceFilter == null)
+                                  _distanceFilter == null &&
+                                  _categoryFilter == null)
                               ? null
                               : () {
                                   setState(() {
                                     _audienceFilter = null;
                                     _priceFilter = null;
                                     _distanceFilter = null;
+                                    _categoryFilter = null;
                                   });
                                 },
                           icon: const Icon(Icons.clear_rounded),
@@ -332,17 +330,29 @@ class _EventScreenState extends State<EventScreen> {
                     child: ListView(
                       children: [
                         ...posts
-                            .where((post) => _audienceFilter != null
-                                ? post.audience == _audienceFilter
-                                : true)
-                            .where((post) => _priceFilter != null
-                                ? post.price == _priceFilter
-                                : true)
-                            .where((element) =>
-                                element.startDate.isAfter(DateTime.now()))
-                            .where((element) => _selectedTag.isNotEmpty
-                                ? element.tags.contains(_selectedTag)
-                                : true)
+                            .where(
+                              (post) => _audienceFilter != null
+                                  ? post.audience == _audienceFilter
+                                  : true,
+                            )
+                            .where(
+                              (post) => _priceFilter != null
+                                  ? post.price == _priceFilter
+                                  : true,
+                            )
+                            .where(
+                              (post) => post.startDate.isAfter(DateTime.now()),
+                            )
+                            .where(
+                              (post) => _selectedTag.isNotEmpty
+                                  ? post.tags.contains(_selectedTag)
+                                  : true,
+                            )
+                            .where(
+                              (post) => _categoryFilter != null
+                                  ? post.tags.contains(_categoryFilter)
+                                  : true,
+                            )
                             // .where((post) => _distanceFilter != null ? post.distance == _distanceFilter : true)
                             .map<Widget>((post) {
                           final PostCreator postCreator = post.isAd
