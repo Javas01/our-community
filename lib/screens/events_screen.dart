@@ -11,7 +11,7 @@ import 'package:our_ummah/models/post_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-// import 'package:timeago/timeago.dart' as timeago;
+import 'package:our_ummah/extensions/string_extensions.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({
@@ -36,8 +36,8 @@ class _EventScreenState extends State<EventScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   List<EventPost> _selectedEvents = [];
   String _selectedTag = '';
-  String? _audienceFilter;
-  String? _priceFilter;
+  Audience? _audienceFilter;
+  Price? _priceFilter;
   String? _distanceFilter;
   String? _categoryFilter;
 
@@ -118,21 +118,16 @@ class _EventScreenState extends State<EventScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(10),
-                          child: DropdownButton(
+                          child: DropdownButton<Audience>(
                             hint: const Text('Audience'),
                             borderRadius: BorderRadius.circular(40),
                             underline: Container(),
                             icon: const Icon(Icons.filter_list),
-                            items: <String>[
-                              'Everyone',
-                              'Teenagers only',
-                              'Adults only',
-                              'Men only',
-                              'Women only',
-                            ].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
+                            items: Audience.values
+                                .map<DropdownMenuItem<Audience>>((value) {
+                              return DropdownMenuItem(
                                 value: value,
-                                child: Text(value),
+                                child: Text(value.name.toTitleCase()),
                               );
                             }).toList(),
                             value: _audienceFilter,
@@ -143,7 +138,7 @@ class _EventScreenState extends State<EventScreen> {
                             alignment: AlignmentDirectional.center,
                             onChanged: (value) {
                               setState(() {
-                                _audienceFilter = value.toString();
+                                _audienceFilter = value;
                               });
                             },
                           ),
@@ -199,20 +194,16 @@ class _EventScreenState extends State<EventScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(10),
-                          child: DropdownButton(
+                          child: DropdownButton<Price>(
                             hint: const Text('Price'),
                             borderRadius: BorderRadius.circular(40),
                             underline: Container(),
                             icon: const Icon(Icons.filter_list),
-                            items: <String>[
-                              'Free',
-                              '\$',
-                              '\$\$',
-                              '\$\$\$',
-                            ].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
+                            items: Price.values
+                                .map<DropdownMenuItem<Price>>((value) {
+                              return DropdownMenuItem<Price>(
                                 value: value,
-                                child: Text(value),
+                                child: Text(value.name.toTitleCase()),
                               );
                             }).toList(),
                             value: _priceFilter,
@@ -223,7 +214,7 @@ class _EventScreenState extends State<EventScreen> {
                             alignment: AlignmentDirectional.center,
                             onChanged: (value) {
                               setState(() {
-                                _priceFilter = value.toString();
+                                _priceFilter = value;
                               });
                             },
                           ),
@@ -328,63 +319,63 @@ class _EventScreenState extends State<EventScreen> {
                 .toList()
                 .cast<EventPost>();
 
+            // sort posts by vote count (in ascending order)
+            posts.sort((a, b) {
+              int aVoteCount = a.upVotes.length - a.downVotes.length;
+              int bVoteCount = b.upVotes.length - b.downVotes.length;
+
+              return bVoteCount.compareTo(aVoteCount);
+            });
+
             return widget.sortValue == 'List'
                 ? Expanded(
-                    child: ListView(children: [
-                      ...posts
-                          .where((post) => _audienceFilter != null
-                              ? post.audience == _audienceFilter
-                              : true)
-                          .where((post) => _priceFilter != null
-                              ? post.price == _priceFilter
-                              : true)
-                          .where((element) =>
-                              element.startDate.isAfter(DateTime.now()))
-                          .where((element) => _selectedTag.isNotEmpty
-                              ? element.tags.contains(_selectedTag)
-                              : true)
-                          // .where((post) => _distanceFilter != null ? post.distance == _distanceFilter : true)
-                          .map<Widget>((post) {
-                        final PostCreator postCreator = post.isAd
-                            ? () {
-                                final business = widget.businesses
-                                    .firstWhere((e) => e.id == post.createdBy);
-                                return PostCreator(
-                                  name: business.title,
-                                  picUrl: business.businessLogoUrl,
-                                  id: business.id,
-                                );
-                              }()
-                            : () {
-                                final user = widget.users
-                                    .firstWhere((e) => e.id == post.createdBy);
-                                return PostCreator(
-                                  name: '${user.firstName} ${user.lastName}',
-                                  picUrl: user.profilePicUrl,
-                                  id: user.id,
-                                );
-                              }();
-                        // final isCreator = userId == post.createdBy;
-                        // final String postDate = post.lastEdited == null
-                        //     ? 'Posted ${timeago.format(
-                        //         DateTime.fromMicrosecondsSinceEpoch(
-                        //           post.timestamp.microsecondsSinceEpoch,
-                        //         ),
-                        //       )}'
-                        //     : 'Edited ${timeago.format(
-                        //         DateTime.fromMicrosecondsSinceEpoch(
-                        //           post.lastEdited!.microsecondsSinceEpoch,
-                        //         ),
-                        //       )}';
+                    child: ListView(
+                      children: [
+                        ...posts
+                            .where((post) => _audienceFilter != null
+                                ? post.audience == _audienceFilter
+                                : true)
+                            .where((post) => _priceFilter != null
+                                ? post.price == _priceFilter
+                                : true)
+                            .where((element) =>
+                                element.startDate.isAfter(DateTime.now()))
+                            .where((element) => _selectedTag.isNotEmpty
+                                ? element.tags.contains(_selectedTag)
+                                : true)
+                            // .where((post) => _distanceFilter != null ? post.distance == _distanceFilter : true)
+                            .map<Widget>((post) {
+                          final PostCreator postCreator = post.isAd
+                              ? () {
+                                  final business = widget.businesses.firstWhere(
+                                    (e) => e.id == post.createdBy,
+                                  );
+                                  return PostCreator(
+                                    name: business.title,
+                                    picUrl: business.businessLogoUrl,
+                                    id: business.id,
+                                  );
+                                }()
+                              : () {
+                                  final user = widget.users.firstWhere(
+                                    (e) => e.id == post.createdBy,
+                                  );
+                                  return PostCreator(
+                                    name: '${user.firstName} ${user.lastName}',
+                                    picUrl: user.profilePicUrl,
+                                    id: user.id,
+                                  );
+                                }();
 
-                        return EventCardComponent(
-                          postCreator: postCreator,
-                          post: post,
-                          users: widget.users,
-                          businesses: widget.businesses,
-                        );
-                      }).toList(),
-                    ]),
+                          return EventCardComponent(
+                            postCreator: postCreator,
+                            post: post,
+                            users: widget.users,
+                            businesses: widget.businesses,
+                          );
+                        }).toList(),
+                      ],
+                    ),
                   )
                 : Expanded(
                     child: Column(

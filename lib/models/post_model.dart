@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum PostType { text, image, event }
 
+enum Audience { all, men, women, teens, kids }
+
+enum Price { free, $, $$, $$$ }
+
 class PostCreator {
   PostCreator({
     required this.id,
@@ -103,11 +107,9 @@ class EventPost extends Post {
     super.upVotes,
   });
 
-  String title,
-      location,
-      audience,
-      price,
-      imageUrl; // TODO: Make audience and price enum
+  String title, location, imageUrl;
+  Audience audience;
+  Price price;
   DateTime startDate, endDate;
 
   @override
@@ -162,6 +164,38 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
         hasSeen: data['hasSeen']?.cast<String>() ?? [],
       );
     case PostType.event:
+      final Audience audience = () {
+        switch (data['audience'] as String) {
+          case 'all':
+            return Audience.all;
+          case 'men':
+            return Audience.men;
+          case 'women':
+            return Audience.women;
+          case 'teens':
+            return Audience.teens;
+          case 'kids':
+            return Audience.kids;
+          default:
+            return Audience.all;
+        }
+      }();
+
+      final Price price = () {
+        switch (data['price'] as String) {
+          case 'free':
+            return Price.free;
+          case '\$':
+            return Price.$;
+          case '\$\$':
+            return Price.$$;
+          case '\$\$\$':
+            return Price.$$$;
+          default:
+            return Price.free;
+        }
+      }();
+
       return EventPost(
         id: snapshot.id,
         isAd: data['isAd'] ?? false,
@@ -172,9 +206,9 @@ Post postFromFirestore(DocumentSnapshot snapshot, options) {
         timestamp: data['timestamp'],
         title: data['title'],
         location: data['location'],
-        audience: data['audience'],
+        audience: audience,
+        price: price,
         imageUrl: data['imageUrl'] ?? '',
-        price: data['price'],
         startDate: data['startDate'].toDate(),
         endDate: data['endDate'].toDate(),
         upVotes: data['upVotes']?.cast<String>() ?? [],
@@ -215,8 +249,8 @@ Map<String, Object> postToFirestore(Post post, SetOptions? options) {
         'imageUrl': post.imageUrl,
         'description': post.description,
         'location': post.location,
-        'audience': post.audience,
-        'price': post.price,
+        'audience': post.audience.name,
+        'price': post.price.name,
         'startDate': post.startDate,
         'endDate': post.endDate,
         'tags': post.tags,

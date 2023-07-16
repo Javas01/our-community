@@ -7,6 +7,7 @@ import 'package:our_ummah/actions/event_actions/edit_event_action.dart';
 import 'package:our_ummah/actions/send_notification.dart';
 import 'package:our_ummah/components/text_form_field_components.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/extensions/string_extensions.dart';
 import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/post_model.dart';
@@ -39,8 +40,8 @@ class _CreateEventModalState extends State<CreateEventModal> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   File? image;
-  String priceDropdownValue = 'Free';
-  String audienceDropdownValue = 'All';
+  Price priceDropdownValue = Price.free;
+  Audience audienceDropdownValue = Audience.all;
   String? businessDropdownValue;
   bool isEdit = false;
   bool isInvalidImage = false;
@@ -322,7 +323,7 @@ class _CreateEventModalState extends State<CreateEventModal> {
                       ),
                       Row(
                         children: [
-                          DropdownButton<String>(
+                          DropdownButton<Audience>(
                             value: audienceDropdownValue,
                             icon: const Icon(Icons.arrow_downward),
                             iconSize: 24,
@@ -332,26 +333,21 @@ class _CreateEventModalState extends State<CreateEventModal> {
                               height: 2,
                               color: Colors.lightBlueAccent,
                             ),
-                            onChanged: (String? newValue) {
+                            onChanged: (newValue) {
                               setState(() {
                                 audienceDropdownValue = newValue!;
                               });
                             },
-                            items: <String>[
-                              'All',
-                              'Teenagers only',
-                              'Adults only',
-                              'Men only',
-                              'Women only',
-                            ].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
+                            items: Audience.values
+                                .map<DropdownMenuItem<Audience>>((value) {
+                              return DropdownMenuItem<Audience>(
                                 value: value,
-                                child: Text(value),
+                                child: Text(value.name.toTitleCase()),
                               );
                             }).toList(),
                           ),
                           const Spacer(),
-                          DropdownButton<String>(
+                          DropdownButton<Price>(
                             value: priceDropdownValue,
                             icon: const Icon(Icons.arrow_downward),
                             iconSize: 24,
@@ -361,20 +357,16 @@ class _CreateEventModalState extends State<CreateEventModal> {
                               height: 2,
                               color: Colors.lightBlueAccent,
                             ),
-                            onChanged: (String? newValue) {
+                            onChanged: (newValue) {
                               setState(() {
                                 priceDropdownValue = newValue!;
                               });
                             },
-                            items: <String>[
-                              'Free',
-                              '\$',
-                              '\$\$',
-                              '\$\$\$',
-                            ].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
+                            items: Price.values
+                                .map<DropdownMenuItem<Price>>((value) {
+                              return DropdownMenuItem<Price>(
                                 value: value,
-                                child: Text(value),
+                                child: Text(value.name.toTitleCase()),
                               );
                             }).toList(),
                           ),

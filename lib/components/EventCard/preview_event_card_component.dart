@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:our_ummah/actions/post_actions/vote_action.dart';
 import 'package:our_ummah/components/comments_count_component.dart';
 import 'package:our_ummah/components/profile_pic_component.dart';
+import 'package:our_ummah/extensions/string_extensions.dart';
 import 'package:our_ummah/modals/user_info_modal.dart';
 import 'package:our_ummah/models/comment_model.dart';
 import 'package:our_ummah/models/community_model.dart';
@@ -286,7 +287,7 @@ class PreviewEventCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              post.price,
+                              post.price.name.toTitleCase(),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -326,7 +327,7 @@ class PreviewEventCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              post.audience,
+                              post.audience.name.toTitleCase(),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
