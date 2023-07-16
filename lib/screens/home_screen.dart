@@ -322,6 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 });
 
                                                 communityController.clear();
+                                                if (!mounted) return;
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
                                                   const SnackBar(

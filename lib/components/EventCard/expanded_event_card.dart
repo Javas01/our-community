@@ -62,7 +62,7 @@ class ExpandedEventCard extends StatelessWidget {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
                                 child: post.imageUrl.isEmpty
-                                    ? Placeholder()
+                                    ? const Placeholder()
                                     : Image.network(
                                         post.imageUrl,
                                         height: 100,

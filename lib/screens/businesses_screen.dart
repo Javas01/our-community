@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:our_ummah/actions/show_popup_menu_action.dart';
 import 'package:our_ummah/components/tag_filter_component.dart';
 import 'package:our_ummah/constants/tag_options.dart';
+import 'package:our_ummah/modals/business_rating_modal.dart';
 import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
-import 'package:our_ummah/models/post_model.dart';
+import 'package:our_ummah/models/review_model.dart';
 import 'package:our_ummah/models/user_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BusinessesScreen extends StatefulWidget {
   const BusinessesScreen({
@@ -30,6 +33,7 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
   String _selectedTag = '';
   late final Stream<QuerySnapshot<Business>> _businessesStream;
   Offset? _tapPosition;
+  // ignore: unused_field
   GlobalKey? _selectedPostKey;
 
   @override
@@ -191,25 +195,162 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                       Text(business.tagline),
                                       const Text('Open 24 hours'),
                                       Text(
-                                          '1.7 mi - ${business.address}'), // get distance by location
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          ...List.generate(5, (index) {
-                                            return Icon(
-                                              index < business.rating
-                                                  ? Icons.thumb_up_sharp
-                                                  : Icons.thumb_up_alt_outlined,
-                                            );
+                                        '1.7 mi - ${business.address}',
+                                      ), // get distance by location
+                                      StreamBuilder<QuerySnapshot<Review>>(
+                                          stream: FirebaseFirestore.instance
+                                              .collection('Communities')
+                                              .doc(widget.community.id)
+                                              .collection('Businesses')
+                                              .doc(business.id)
+                                              .collection('Reviews')
+                                              .withConverter(
+                                                fromFirestore:
+                                                    reviewFromFirestore,
+                                                toFirestore: reviewToFirestore,
+                                              )
+                                              .snapshots(),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasError) {
+                                              return const Text(
+                                                'Failed to load reviews',
+                                              );
+                                            }
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting) {
+                                              return const CircularProgressIndicator();
+                                            }
+                                            List<Review> reviews = snapshot
+                                                .data!.docs
+                                                .map((reviewDoc) =>
+                                                    reviewDoc.data())
+                                                .toList();
+
+                                            Review? userReview = reviews
+                                                    .map((e) => e.createdBy)
+                                                    .contains(
+                                                      FirebaseAuth.instance
+                                                          .currentUser!.uid,
+                                                    )
+                                                ? reviews.firstWhere(
+                                                    (review) =>
+                                                        review.createdBy ==
+                                                        FirebaseAuth.instance
+                                                            .currentUser!.uid,
+                                                  )
+                                                : null;
+                                            if (reviews.isEmpty) {
+                                              return GestureDetector(
+                                                onTap: () => showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      BusinessRatingModal(
+                                                    business: business,
+                                                    community: widget.community,
+                                                    user:
+                                                        widget.users.firstWhere(
+                                                      (user) =>
+                                                          user.id ==
+                                                          FirebaseAuth.instance
+                                                              .currentUser!.uid,
+                                                    ),
+                                                    review: null,
+                                                  ),
+                                                ),
+                                                child: const Text('No reviews'),
+                                              );
+                                            } else {
+                                              final double businessRating =
+                                                  reviews
+                                                          .map((review) =>
+                                                              review.rating)
+                                                          .reduce(
+                                                              (a, b) => a + b) /
+                                                      reviews.length;
+                                              return GestureDetector(
+                                                onTap: () => showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      BusinessRatingModal(
+                                                    business: business,
+                                                    community: widget.community,
+                                                    user:
+                                                        widget.users.firstWhere(
+                                                      (user) =>
+                                                          user.id ==
+                                                          FirebaseAuth.instance
+                                                              .currentUser!.uid,
+                                                    ),
+                                                    review: userReview,
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    ...List.generate(5,
+                                                        (index) {
+                                                      return Icon(
+                                                        index < businessRating
+                                                            ? Icons
+                                                                .thumb_up_sharp
+                                                            : Icons
+                                                                .thumb_up_alt_outlined,
+                                                        color:
+                                                            userReview != null
+                                                                ? Colors.blue
+                                                                : Colors.grey,
+                                                      );
+                                                    }),
+                                                  ],
+                                                ),
+                                              );
+                                            }
                                           }),
-                                        ],
-                                      ),
                                     ],
                                   ),
                                 ),
-                                // const Column(
-                                //   children: [Icon(Icons.phone), Icon(Icons.web_asset)],
-                                // )
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () async {
+                                        final call = Uri.parse(
+                                            'tel:+1${business.phoneNumber}');
+                                        if (await canLaunchUrl(call)) {
+                                          launchUrl(call);
+                                        } else {
+                                          throw 'Could not launch $call';
+                                        }
+                                      },
+                                      icon: const Icon(Icons.phone),
+                                    ),
+                                    IconButton(
+                                      onPressed: () async {
+                                        final url = Uri.parse(
+                                            'https://www.google.com/maps/search/?api=1&query=${business.address}');
+                                        if (await canLaunchUrl(url)) {
+                                          launchUrl(url);
+                                        } else {
+                                          throw 'Could not launch $url';
+                                        }
+                                      },
+                                      icon: const Icon(Icons.directions),
+                                    ),
+                                    IconButton(
+                                      onPressed: () async {
+                                        final url = Uri.parse(
+                                          'https://www.google.com/search?q=${business.title}',
+                                        );
+                                        if (await canLaunchUrl(url)) {
+                                          launchUrl(url);
+                                        } else {
+                                          throw 'Could not launch $url';
+                                        }
+                                      },
+                                      icon: const Icon(Icons.web_asset),
+                                    ),
+                                  ],
+                                )
                               ],
                             ),
                           ),

@@ -103,6 +103,45 @@ class _CreateEventModalState extends State<CreateEventModal> {
                   Column(
                     children: [
                       const SizedBox(height: 10),
+                      FormInputField(
+                        maxLength: 30,
+                        icon: const Icon(Icons.title_outlined),
+                        hintText: 'Title',
+                        controller: titleController,
+                        isLast: false,
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: FormInputField(
+                          maxLength: 100,
+                          icon: const Icon(Icons.description_rounded),
+                          controller: descriptionController,
+                          isLast: false,
+                          hintText: 'Description',
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 3,
+                          minLines: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                        child: FormInputField(
+                          maxLength: 100,
+                          icon: const Icon(Icons.location_on),
+                          controller: addressController,
+                          isLast: true,
+                          hintText: 'Location',
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 3,
+                          minLines: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       DropdownButton<String>(
                         hint: const Text('Post as business'),
                         items: userBusinesses
@@ -119,44 +158,6 @@ class _CreateEventModalState extends State<CreateEventModal> {
                           });
                         },
                         value: businessDropdownValue,
-                      ),
-                      const SizedBox(height: 10),
-                      FormInputField(
-                        maxLength: 30,
-                        icon: const Icon(Icons.title_outlined),
-                        hintText: 'Title',
-                        controller: titleController,
-                        isLast: false,
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                        child: FormInputField(
-                          maxLength: 100,
-                          icon: const Icon(Icons.description_rounded),
-                          controller: descriptionController,
-                          isLast: true,
-                          hintText: 'Description',
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 3,
-                          minLines: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                        child: FormInputField(
-                          maxLength: 100,
-                          icon: const Icon(Icons.description_rounded),
-                          controller: addressController,
-                          isLast: true,
-                          hintText: 'Location',
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 3,
-                          minLines: 1,
-                        ),
                       ),
                       Row(
                         children: [

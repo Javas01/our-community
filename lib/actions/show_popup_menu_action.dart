@@ -20,9 +20,11 @@ Future showPopupMenu(
   AppUser? appUser,
 ]) async {
   final user = FirebaseAuth.instance.currentUser!;
-  final isCreator = post.isAd
-      ? appUser!.businessIds.contains(postCreator!.id)
-      : user.uid == post.createdBy;
+  final isCreator = post is Business
+      ? user.uid == post.createdBy
+      : post?.isAd
+          ? appUser!.businessIds.contains(postCreator!.id)
+          : user.uid == post.createdBy;
   final RenderBox overlay =
       Overlay.of(context).context.findRenderObject() as RenderBox;
 

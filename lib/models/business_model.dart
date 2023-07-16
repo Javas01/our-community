@@ -9,10 +9,11 @@ class Business {
     required this.address,
     required this.tags,
     required this.createdBy,
+    required this.phoneNumber,
     this.businessLogoUrl = '',
   });
 
-  String id, title, tagline, address, businessLogoUrl, createdBy;
+  String id, title, tagline, address, businessLogoUrl, createdBy, phoneNumber;
   double rating;
   List<String> tags;
 
@@ -34,6 +35,7 @@ Business businessFromFirestore(DocumentSnapshot snapshot, options) {
     tags: data['tags'].cast<String>(),
     businessLogoUrl: data['businessLogoUrl'] ?? '',
     createdBy: data['createdBy'],
+    phoneNumber: data['phoneNumber'],
   );
 }
 
@@ -47,5 +49,6 @@ Map<String, Object> businessToFirestore(
     'tags': business.tags,
     'businessLogoUrl': business.businessLogoUrl,
     'createdBy': business.createdBy,
+    'phoneNumber': business.phoneNumber,
   };
 }

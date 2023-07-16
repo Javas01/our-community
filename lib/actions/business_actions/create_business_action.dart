@@ -7,6 +7,7 @@ Future<void> createBusiness(
   String title,
   String tagline,
   String address,
+  String phoneNumber,
   List<String> tags,
   File? image,
   String communityCode,
@@ -28,9 +29,9 @@ Future<void> createBusiness(
       address: address,
       tags: tags,
       createdBy: userId,
+      phoneNumber: phoneNumber,
     );
     final businessDocRef = await businesses.add(newBusiness);
-    print(businessDocRef.id);
     if (image != null) {
       await FirebaseStorage.instance
           .ref('businessPics')

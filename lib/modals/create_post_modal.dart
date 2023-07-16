@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:our_ummah/actions/pick_image_action.dart';
@@ -63,7 +62,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
 
   @override
   Widget build(BuildContext context) {
-    bool isEvent = tagDropdownValue == 'Events';
     List<Business> userBusinesses = widget.businesses!
         .where((element) => element.createdBy == userId)
         .toList();
@@ -181,8 +179,8 @@ class _CreatePostModalState extends State<CreatePostModal> {
                           const SizedBox(height: 10),
                           Padding(
                             padding: EdgeInsets.only(
-                                bottom:
-                                    MediaQuery.of(context).viewInsets.bottom),
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
                             child: FormInputField(
                               maxLength: 500,
                               icon: const Icon(Icons.description_rounded),

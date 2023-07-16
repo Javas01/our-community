@@ -30,14 +30,11 @@ class EventScreen extends StatefulWidget {
 }
 
 class _EventScreenState extends State<EventScreen> {
-  bool isActive = false;
-  final dataKey = GlobalKey();
   final userId = FirebaseAuth.instance.currentUser!.uid;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
   List<EventPost> _selectedEvents = [];
-  // GlobalKey? _selectedPostKey;
   String _selectedTag = '';
   String? _audienceFilter;
   String? _priceFilter;
@@ -157,9 +154,9 @@ class _EventScreenState extends State<EventScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
                           color: _priceFilter != null
-                              ? Color.fromARGB(255, 197, 97, 181)
+                              ? const Color.fromARGB(255, 197, 97, 181)
                                   .withOpacity(0.7)
-                              : Color.fromARGB(255, 230, 149, 210)
+                              : const Color.fromARGB(255, 230, 149, 210)
                                   .withOpacity(0.3),
                         ),
                         child: Padding(
@@ -198,9 +195,9 @@ class _EventScreenState extends State<EventScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
                           color: _categoryFilter != null
-                              ? Color.fromARGB(255, 187, 81, 225)
+                              ? const Color.fromARGB(255, 187, 81, 225)
                                   .withOpacity(0.7)
-                              : Color.fromARGB(255, 167, 97, 178)
+                              : const Color.fromARGB(255, 167, 97, 178)
                                   .withOpacity(0.3),
                         ),
                         child: Padding(
@@ -369,6 +366,8 @@ class _EventScreenState extends State<EventScreen> {
                                   width: 8.0,
                                   height: 8.0,
                                 );
+                              } else {
+                                return Container();
                               }
                             },
                           ),
@@ -398,7 +397,15 @@ class _EventScreenState extends State<EventScreen> {
                           selectedDayPredicate: (day) {
                             return isSameDay(_selectedDay, day);
                           },
+                          headerStyle: const HeaderStyle(
+                            titleCentered: true,
+                            formatButtonVisible: false,
+                          ),
+                          onPageChanged: (focusedDay) {
+                            _focusedDay = focusedDay;
+                          },
                           onDaySelected: (selectedDay, focusedDay) {
+                            print('hey mr west');
                             if (!isSameDay(_selectedDay, selectedDay)) {
                               final eventsForDay = _getEventsForDay(
                                 selectedDay,
@@ -433,7 +440,7 @@ class _EventScreenState extends State<EventScreen> {
                               const SizedBox(height: 8.0),
                               Text(
                                 'Events on ${DateFormat.yMMMd().format(_selectedDay)}',
-                                style: Theme.of(context).textTheme.headline6,
+                                style: Theme.of(context).textTheme.titleLarge,
                               ),
                               const SizedBox(height: 8.0),
                               Expanded(

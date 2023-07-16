@@ -40,8 +40,8 @@ Future<void> createEvent(
       endDate: endDate,
       imageUrl: '',
     );
+    // ignore: unused_local_variable
     final eventDocRef = await events.add(newEvent);
-    print(eventDocRef.id);
     // if (image != null) {
     //   await FirebaseStorage.instance
     //       .ref('BusinessPics')

@@ -12,8 +12,18 @@ void main() {
             fromFirestore: postFromFirestore,
             toFirestore: postToFirestore,
           );
-      await createPost('title', 'description', PostType.text, 'tag', null, '',
-          'userId', null, collection);
+      await createPost(
+        'title',
+        'description',
+        PostType.text,
+        'tag',
+        null,
+        '',
+        false,
+        'userId',
+        null,
+        collection,
+      );
 
       final snapshot = await collection.get();
       final newPost = snapshot.docs.first.data();
@@ -24,6 +34,7 @@ void main() {
         tags: ['tag'],
         timestamp: newPost.timestamp, // would never match otherwise
         title: 'title',
+        isAd: false,
       );
 
       print(expectedPost.toString());
@@ -44,6 +55,7 @@ void main() {
         'tag',
         null, // cant test image storage without fake firebase storage
         '',
+        false,
         'userId',
         null,
         collection,
@@ -57,7 +69,7 @@ void main() {
         description: 'description',
         tags: ['tag'],
         timestamp: newPost.timestamp, // would never match otherwise
-        imageUrl: '',
+        imageUrl: '', isAd: false,
       );
 
       print(expectedPost.toString());

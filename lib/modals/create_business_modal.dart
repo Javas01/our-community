@@ -32,6 +32,7 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController taglineController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
   File? image;
   bool isEdit = false;
   bool isInvalidImage = false;
@@ -144,7 +145,8 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                       const SizedBox(height: 10),
                       Padding(
                         padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
                         child: FormInputField(
                           maxLength: 100,
                           icon: const Icon(Icons.description_rounded),
@@ -159,16 +161,30 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                       const SizedBox(height: 10),
                       Padding(
                         padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
                         child: FormInputField(
                           maxLength: 100,
-                          icon: const Icon(Icons.description_rounded),
+                          icon: const Icon(Icons.location_on),
                           controller: addressController,
                           isLast: true,
                           hintText: 'Address',
                           keyboardType: TextInputType.multiline,
                           maxLines: 3,
                           minLines: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: FormInputField(
+                          icon: const Icon(Icons.phone),
+                          controller: phoneNumberController,
+                          isLast: true,
+                          hintText: 'Phone Number',
+                          keyboardType: TextInputType.phone,
                         ),
                       ),
                     ],
@@ -250,6 +266,7 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                                     titleController.text,
                                     taglineController.text,
                                     addressController.text,
+                                    phoneNumberController.text,
                                     _selectedTags,
                                     image,
                                     Provider.of<Community>(
