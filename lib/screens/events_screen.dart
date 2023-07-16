@@ -48,6 +48,44 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.sortValue != 'Calendar') return;
+
+    FirebaseFirestore.instance
+        .collection('Communities')
+        .doc(Provider.of<Community>(context, listen: false).id)
+        .collection('Posts')
+        .where('type', isEqualTo: 'event')
+        .withConverter(
+          fromFirestore: postFromFirestore,
+          toFirestore: postToFirestore,
+        )
+        .get()
+        .then((value) {
+      if (value.docs.isEmpty) return;
+      if (value.docs
+          .map((e) => e.data())
+          .toList()
+          .cast<EventPost>()
+          .where(
+            (element) => isSameDay(_selectedDay, element.startDate),
+          )
+          .isEmpty) return;
+      setState(() {
+        _calendarFormat = CalendarFormat.week;
+        _selectedEvents = value.docs
+            .map((e) => e.data())
+            .cast<EventPost>()
+            .where(
+              (element) => isSameDay(_selectedDay, element.startDate),
+            )
+            .toList();
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final eventsStream = FirebaseFirestore.instance
         .collection('Communities')
@@ -401,9 +439,9 @@ class _EventScreenState extends State<EventScreen> {
                             titleCentered: true,
                             formatButtonVisible: false,
                           ),
-                          onPageChanged: (focusedDay) {
-                            _focusedDay = focusedDay;
-                          },
+                          // onPageChanged: (focusedDay) {
+                          //   _focusedDay = focusedDay;
+                          // },
                           onDaySelected: (selectedDay, focusedDay) {
                             print('hey mr west');
                             if (!isSameDay(_selectedDay, selectedDay)) {

@@ -112,7 +112,7 @@ class EventPost extends Post {
 
   @override
   String toString() =>
-      'TextPost(\n createdBy: $createdBy\n title: $title\n description: $description\n tags: $tags\n type: $type\n hasSeen: $hasSeen\n $timestamp\n)';
+      'EventPost(\n createdBy: $createdBy\n title: $title\n description: $description\n tags: $tags\n type: $type\n hasSeen: $hasSeen\n $startDate\n $timestamp\n)';
 }
 
 Post postFromFirestore(DocumentSnapshot snapshot, options) {
