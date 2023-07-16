@@ -35,6 +35,8 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
   Offset? _tapPosition;
   // ignore: unused_field
   GlobalKey? _selectedPostKey;
+  String _searchTerm = '';
+  final focusNode = FocusNode();
 
   @override
   void initState() {
@@ -56,6 +58,10 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    focusNode.addListener(() {
+      if (!focusNode.hasFocus) setState(() => isActive = false);
+    });
+
     return Column(
       children: [
         Padding(
@@ -77,6 +83,12 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                       BorderSide(color: Colors.grey[300]!),
                     ),
                     onTap: () => setState(() => isActive = !isActive),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchTerm = value;
+                      });
+                    },
+                    focusNode: focusNode,
                   ),
                 ),
                 ...businessOptionsList.map<Widget>(
@@ -125,6 +137,13 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                 if (_selectedTag.isEmpty) return true;
 
                 return post.tags.contains(_selectedTag);
+              }).toList();
+
+              // filter posts by search term
+              filteredBusinesses = filteredBusinesses.where((post) {
+                if (_searchTerm.isEmpty) return true;
+
+                return post.title.toLowerCase().contains(_searchTerm);
               }).toList();
 
               return Expanded(
