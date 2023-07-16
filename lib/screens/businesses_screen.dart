@@ -279,13 +279,6 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                                 child: const Text('No reviews'),
                                               );
                                             } else {
-                                              final double businessRating =
-                                                  reviews
-                                                          .map((review) =>
-                                                              review.rating)
-                                                          .reduce(
-                                                              (a, b) => a + b) /
-                                                      reviews.length;
                                               return GestureDetector(
                                                 onTap: () => showDialog(
                                                   context: context,
@@ -310,7 +303,7 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                                     ...List.generate(5,
                                                         (index) {
                                                       return Icon(
-                                                        index < businessRating
+                                                        index < business.rating
                                                             ? Icons
                                                                 .thumb_up_sharp
                                                             : Icons
@@ -321,6 +314,12 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                                                 : Colors.grey,
                                                       );
                                                     }),
+                                                    const SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(
+                                                      '(${reviews.length})',
+                                                    ),
                                                   ],
                                                 ),
                                               );

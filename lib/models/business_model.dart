@@ -4,6 +4,7 @@ class Business {
   Business({
     this.id = '',
     this.rating = 0.0,
+    this.reviewCount = 0,
     required this.title,
     required this.tagline,
     required this.address,
@@ -15,6 +16,7 @@ class Business {
 
   String id, title, tagline, address, businessLogoUrl, createdBy, phoneNumber;
   double rating;
+  int reviewCount = 0;
   List<String> tags;
 
   @override
@@ -32,6 +34,7 @@ Business businessFromFirestore(DocumentSnapshot snapshot, options) {
     tagline: data['tagline'],
     address: data['address'],
     rating: double.parse(data['rating'].toString()),
+    reviewCount: data['reviewCount'],
     tags: data['tags'].cast<String>(),
     businessLogoUrl: data['businessLogoUrl'] ?? '',
     createdBy: data['createdBy'],
@@ -46,6 +49,7 @@ Map<String, Object> businessToFirestore(
     'tagline': business.tagline,
     'address': business.address,
     'rating': business.rating,
+    'reviewCount': business.reviewCount,
     'tags': business.tags,
     'businessLogoUrl': business.businessLogoUrl,
     'createdBy': business.createdBy,

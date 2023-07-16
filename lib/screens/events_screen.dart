@@ -443,7 +443,6 @@ class _EventScreenState extends State<EventScreen> {
                           //   _focusedDay = focusedDay;
                           // },
                           onDaySelected: (selectedDay, focusedDay) {
-                            print('hey mr west');
                             if (!isSameDay(_selectedDay, selectedDay)) {
                               final eventsForDay = _getEventsForDay(
                                 selectedDay,
