@@ -34,7 +34,6 @@ class _EventScreenState extends State<EventScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  List<EventPost> _selectedEvents = [];
   String _selectedTag = '';
   Audience? _audienceFilter;
   Price? _priceFilter;
@@ -74,13 +73,6 @@ class _EventScreenState extends State<EventScreen> {
           .isEmpty) return;
       setState(() {
         _calendarFormat = CalendarFormat.week;
-        _selectedEvents = value.docs
-            .map((e) => e.data())
-            .cast<EventPost>()
-            .where(
-              (element) => isSameDay(_selectedDay, element.startDate),
-            )
-            .toList();
       });
     });
   }
@@ -455,7 +447,6 @@ class _EventScreenState extends State<EventScreen> {
                                 _calendarFormat = eventsForDay.isEmpty
                                     ? CalendarFormat.month
                                     : CalendarFormat.week;
-                                _selectedEvents = eventsForDay;
                               });
                             }
                           },
@@ -483,7 +474,10 @@ class _EventScreenState extends State<EventScreen> {
                               const SizedBox(height: 8.0),
                               Expanded(
                                 child: ListView(
-                                  children: _selectedEvents.map((event) {
+                                  children: posts
+                                      .where((post) => isSameDay(
+                                          post.startDate, _selectedDay))
+                                      .map((event) {
                                     final PostCreator postCreator = event.isAd
                                         ? () {
                                             final business =
@@ -508,18 +502,6 @@ class _EventScreenState extends State<EventScreen> {
                                               id: user.id,
                                             );
                                           }();
-                                    // final isCreator = userId == event.createdBy;
-                                    // final String postDate = event.lastEdited == null
-                                    //     ? 'Posted ${timeago.format(
-                                    //         DateTime.fromMicrosecondsSinceEpoch(
-                                    //           event.timestamp.microsecondsSinceEpoch,
-                                    //         ),
-                                    //       )}'
-                                    //     : 'Edited ${timeago.format(
-                                    //         DateTime.fromMicrosecondsSinceEpoch(
-                                    //           event.lastEdited!.microsecondsSinceEpoch,
-                                    //         ),
-                                    //       )}';
 
                                     return EventCardComponent(
                                       postCreator: postCreator,
