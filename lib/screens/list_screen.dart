@@ -66,6 +66,26 @@ class _ListScreenState extends State<ListScreen> {
           return post.tags.contains(_selectedTag);
         }).toList();
 
+        // filter posts by end date
+        filteredPosts = filteredPosts.where((post) {
+          if (post.type != PostType.event) return true;
+
+          final eventPost = post as EventPost;
+          final eventEndDate = eventPost.endDate;
+
+          return eventEndDate.isAfter(DateTime.now());
+        }).toList();
+
+        // filter out posts older than 30 days
+        filteredPosts = filteredPosts.where((post) {
+          final postDate = DateTime.fromMicrosecondsSinceEpoch(
+              post.timestamp.microsecondsSinceEpoch);
+          final thirtyDaysAgo =
+              DateTime.now().subtract(const Duration(days: 30));
+
+          return postDate.isAfter(thirtyDaysAgo);
+        }).toList();
+
         // sort posts by vote count (in ascending order)
         filteredPosts.sort((a, b) {
           if (widget.sortValue == 'Upvotes') {

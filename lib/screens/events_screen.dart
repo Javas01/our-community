@@ -333,7 +333,7 @@ class _EventScreenState extends State<EventScreen> {
                                   : true,
                             )
                             .where(
-                              (post) => post.startDate.isAfter(DateTime.now()),
+                              (post) => post.endDate.isAfter(DateTime.now()),
                             )
                             .where(
                               (post) => _selectedTag.isNotEmpty
