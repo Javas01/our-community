@@ -106,9 +106,12 @@ class PreviewEventCard extends StatelessWidget {
                   const Spacer(),
                   ...post.tags.map<Widget>(
                     (tag) {
-                      return Tag(
-                        color: eventOptions[tag]!,
-                        title: tag,
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(1.0, 0, 1.0, 0),
+                        child: Tag(
+                          color: eventOptions[tag]!,
+                          title: tag,
+                        ),
                       );
                     },
                   ).toList()

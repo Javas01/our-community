@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
+import 'package:our_ummah/actions/open_map_action.dart';
 import 'package:our_ummah/components/post_comments_component.dart';
 import 'package:our_ummah/components/comment_field_component.dart';
 import 'package:our_ummah/extensions/string_extensions.dart';
@@ -16,10 +17,12 @@ class ExpandedEventCard extends StatelessWidget {
     required this.post,
     required this.setExpanded,
     required this.users,
+    required this.distanceFromUser,
   }) : super(key: key);
 
   final EventPost post;
   final List<AppUser> users;
+  final double? distanceFromUser;
 
   final void Function(bool) setExpanded;
   @override
@@ -103,160 +106,104 @@ class ExpandedEventCard extends StatelessWidget {
                                           'Event Details',
                                           style: TextStyle(
                                             fontSize: 20,
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
                                         const SizedBox(height: 10),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                              MainAxisAlignment.spaceAround,
                                           children: [
-                                            const Text(
-                                              'Start Date',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
                                             Text(
-                                              DateFormat.yMMMMd()
-                                                  .format(post.startDate),
+                                              '${DateFormat.MMMMd().format(post.startDate)} at ${DateFormat.jm().format(post.startDate)}',
                                               style: const TextStyle(
                                                 fontSize: 15,
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const Icon(
+                                                Icons.arrow_right_alt_rounded),
+                                            Text(
+                                              '${DateFormat.MMMMd().format(post.endDate)} at ${DateFormat.jm().format(post.endDate)}',
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ],
                                         ),
                                         const SizedBox(height: 10),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              'Start Time',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
+                                        GestureDetector(
+                                          onTap: () async {
+                                            openMap(post.location);
+                                          },
+                                          child: Wrap(
+                                            alignment: WrapAlignment.center,
+                                            children: [
+                                              Text(
+                                                post.location,
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                textAlign: TextAlign.center,
                                               ),
-                                            ),
-                                            Text(
-                                              DateFormat.jm()
-                                                  .format(post.startDate),
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                         const SizedBox(height: 10),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                              MainAxisAlignment.spaceAround,
                                           children: [
-                                            const Text(
-                                              'End Date',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                    Icons.attach_money_rounded),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  post.price.name.toTitleCase(),
+                                                  style: const TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            Text(
-                                              DateFormat.yMMMMd()
-                                                  .format(post.endDate),
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                    Icons.people_rounded),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  post.audience.name
+                                                      .toTitleCase(),
+                                                  style: const TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                    Icons.location_on_rounded),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  distanceFromUser != null
+                                                      ? '$distanceFromUser miles away'
+                                                      : 'unavailable',
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              'End Time',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              DateFormat.jm()
-                                                  .format(post.endDate),
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              'Location',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              post.location,
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              'Price',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              post.price.name.toTitleCase(),
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              'Audience',
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text(
-                                              post.audience.name.toTitleCase(),
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        )
                                       ],
                                     ),
                                   ),

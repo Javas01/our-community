@@ -45,6 +45,7 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
       titleController.text = widget.business!.title;
       taglineController.text = widget.business!.tagline;
       addressController.text = widget.business!.address;
+      phoneNumberController.text = widget.business!.phoneNumber;
       _selectedTags.addAll(widget.business!.tags);
     }
     super.initState();
@@ -72,6 +73,60 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                   ),
                   Column(
                     children: [
+                      const SizedBox(height: 10),
+                      FormInputField(
+                        maxLength: 30,
+                        icon: const Icon(Icons.title_outlined),
+                        hintText: 'Title',
+                        controller: titleController,
+                        isLast: false,
+                      ),
+                      const SizedBox(height: 10),
+                      FormInputField(
+                        maxLength: 100,
+                        icon: const Icon(Icons.description_rounded),
+                        controller: taglineController,
+                        isLast: false,
+                        hintText: 'Tagline',
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 3,
+                        minLines: 1,
+                      ),
+                      const SizedBox(height: 10),
+                      FormInputField(
+                        maxLength: 100,
+                        icon: const Icon(Icons.location_on),
+                        controller: addressController,
+                        isLast: false,
+                        hintText: 'Address',
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 3,
+                        minLines: 1,
+                      ),
+                      const SizedBox(height: 10),
+                      FormInputField(
+                        icon: const Icon(Icons.phone),
+                        controller: phoneNumberController,
+                        isLast: true,
+                        maxLength: 10,
+                        hintText: 'Phone Number',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          signed: true,
+                          decimal: true,
+                        ),
+                        validator: (p0) {
+                          if (p0!.isEmpty) {
+                            return 'Phone number cannot be empty';
+                          }
+                          if (p0.length < 10) {
+                            return 'Phone number must be 10 digits';
+                          }
+                          if (RegExp(r'^[0-9]+$').hasMatch(p0) == false) {
+                            return 'Phone number must be digits only';
+                          }
+                          return null;
+                        },
+                      ),
                       image == null && !isEdit
                           ? Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -135,58 +190,6 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                                       height: 300,
                                     ),
                             ),
-                      FormInputField(
-                        maxLength: 30,
-                        icon: const Icon(Icons.title_outlined),
-                        hintText: 'Title',
-                        controller: titleController,
-                        isLast: false,
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: FormInputField(
-                          maxLength: 100,
-                          icon: const Icon(Icons.description_rounded),
-                          controller: taglineController,
-                          isLast: true,
-                          hintText: 'Tagline',
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 3,
-                          minLines: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: FormInputField(
-                          maxLength: 100,
-                          icon: const Icon(Icons.location_on),
-                          controller: addressController,
-                          isLast: true,
-                          hintText: 'Address',
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 3,
-                          minLines: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: FormInputField(
-                          icon: const Icon(Icons.phone),
-                          controller: phoneNumberController,
-                          isLast: true,
-                          hintText: 'Phone Number',
-                          keyboardType: TextInputType.phone,
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -257,6 +260,7 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                                     titleController.text,
                                     taglineController.text,
                                     addressController.text,
+                                    phoneNumberController.text,
                                     _selectedTags,
                                     image,
                                     context,

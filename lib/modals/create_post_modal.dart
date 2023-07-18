@@ -85,87 +85,6 @@ class _CreatePostModalState extends State<CreatePostModal> {
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
-                DropdownButton<String>(
-                  hint: const Text('Post as business'),
-                  items: userBusinesses
-                      .map(
-                        (e) => DropdownMenuItem(
-                          value: e.id,
-                          child: Text(e.title),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      businessDropdownValue = value;
-                    });
-                  },
-                  value: businessDropdownValue,
-                ),
-                Row(
-                  children: [
-                    const SizedBox(width: 5),
-                    DropdownButton<PostType>(
-                      disabledHint:
-                          isEdit ? Text(widget.post!.type.name) : null,
-                      borderRadius: BorderRadius.circular(15),
-                      hint: const Text('Type'),
-                      value: typeDropdownValue,
-                      icon: const Icon(Icons.arrow_drop_down),
-                      elevation: 16,
-                      onChanged: (newValue) {
-                        setState(() {
-                          typeDropdownValue = newValue!;
-                        });
-                      },
-                      items: isEdit
-                          ? null // items null disables dropdown button
-                          : PostType.values.map((value) {
-                              return DropdownMenuItem<PostType>(
-                                value: value,
-                                child: Text(value.name),
-                              );
-                            }).toList(),
-                    ),
-                    const Spacer(),
-                    DropdownButton<String>(
-                      borderRadius: BorderRadius.circular(15),
-                      hint: const Text('Tag'),
-                      value: tagDropdownValue,
-                      icon: const Icon(Icons.arrow_drop_down),
-                      elevation: 16,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          tagDropdownValue = newValue!;
-                        });
-                      },
-                      items:
-                          (Provider.of<Community>(context, listen: false).id !=
-                                      'Lwdm-2023'
-                                  ? tagOptionsList
-                                  : conferenceTagOptionsList)
-                              .map((value) {
-                        return DropdownMenuItem<String>(
-                          value: value.keys.first,
-                          child: Row(
-                            children: [
-                              Tag(
-                                color: value.values.first,
-                                title: '',
-                                dontExpand: true,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(value.keys.first),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
                 typeDropdownValue == PostType.text
                     ? Column(
                         children: [
@@ -179,7 +98,11 @@ class _CreatePostModalState extends State<CreatePostModal> {
                           const SizedBox(height: 10),
                           Padding(
                             padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                              bottom: MediaQuery.of(context).viewInsets.bottom >
+                                      150
+                                  ? MediaQuery.of(context).viewInsets.bottom -
+                                      150
+                                  : MediaQuery.of(context).viewInsets.bottom,
                             ),
                             child: FormInputField(
                               maxLength: 500,
@@ -192,10 +115,153 @@ class _CreatePostModalState extends State<CreatePostModal> {
                               minLines: 8,
                             ),
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              DropdownButton<String>(
+                                hint: const Text('Post as business'),
+                                items: userBusinesses
+                                    .map(
+                                      (e) => DropdownMenuItem(
+                                        value: e.id,
+                                        child: Text(e.title),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    businessDropdownValue = value;
+                                  });
+                                },
+                                value: businessDropdownValue,
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    businessDropdownValue = null;
+                                  });
+                                },
+                                icon: const Icon(Icons.close),
+                              )
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const SizedBox(width: 5),
+                              DropdownButton<PostType>(
+                                disabledHint: isEdit
+                                    ? Text(widget.post!.type.name)
+                                    : null,
+                                borderRadius: BorderRadius.circular(15),
+                                hint: const Text('Type'),
+                                value: typeDropdownValue,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                elevation: 16,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    typeDropdownValue = newValue!;
+                                  });
+                                },
+                                items: isEdit
+                                    ? null // items null disables dropdown button
+                                    : PostType.values
+                                        .where((element) =>
+                                            element.name != 'event')
+                                        .map((value) {
+                                        return DropdownMenuItem<PostType>(
+                                          value: value,
+                                          child: Text(value.name),
+                                        );
+                                      }).toList(),
+                              ),
+                              const Spacer(),
+                              DropdownButton<String>(
+                                borderRadius: BorderRadius.circular(15),
+                                hint: const Text('Tag'),
+                                value: tagDropdownValue,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                elevation: 16,
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    tagDropdownValue = newValue!;
+                                  });
+                                },
+                                items: (Provider.of<Community>(context,
+                                                    listen: false)
+                                                .id !=
+                                            'Lwdm-2023'
+                                        ? tagOptionsList
+                                        : conferenceTagOptionsList)
+                                    .map((value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value.keys.first,
+                                    child: Row(
+                                      children: [
+                                        Tag(
+                                          color: value.values.first,
+                                          title: '',
+                                          dontExpand: true,
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(value.keys.first),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
                         ],
                       )
                     : Column(
                         children: [
+                          FormInputField(
+                            maxLength: 50,
+                            icon: const Icon(Icons.description_rounded),
+                            hintText: 'Caption',
+                            controller: descriptionController,
+                            isLast: true,
+                            maxLines: 1,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Caption cannot be empty';
+                              }
+                              return null;
+                            },
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              DropdownButton<String>(
+                                hint: const Text('Post as business'),
+                                items: userBusinesses
+                                    .map(
+                                      (e) => DropdownMenuItem(
+                                        value: e.id,
+                                        child: Text(e.title),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    businessDropdownValue = value;
+                                  });
+                                },
+                                value: businessDropdownValue,
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    businessDropdownValue = null;
+                                  });
+                                },
+                                icon: const Icon(Icons.close),
+                              )
+                            ],
+                          ),
                           image == null && !isEdit
                               ? Padding(
                                   padding: const EdgeInsets.only(bottom: 10),
@@ -260,14 +326,73 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                           height: 300,
                                         ),
                                 ),
-                          FormInputField(
-                            maxLength: 50,
-                            icon: const Icon(Icons.description_rounded),
-                            hintText: 'Caption',
-                            controller: descriptionController,
-                            isLast: true,
-                            maxLines: 1,
-                            validator: (_) => null,
+                          Row(
+                            children: [
+                              const SizedBox(width: 5),
+                              DropdownButton<PostType>(
+                                disabledHint: isEdit
+                                    ? Text(widget.post!.type.name)
+                                    : null,
+                                borderRadius: BorderRadius.circular(15),
+                                hint: const Text('Type'),
+                                value: typeDropdownValue,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                elevation: 16,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    typeDropdownValue = newValue!;
+                                  });
+                                },
+                                items: isEdit
+                                    ? null // items null disables dropdown button
+                                    : PostType.values
+                                        .where((element) =>
+                                            element.name != 'event')
+                                        .map((value) {
+                                        return DropdownMenuItem<PostType>(
+                                          value: value,
+                                          child: Text(value.name),
+                                        );
+                                      }).toList(),
+                              ),
+                              const Spacer(),
+                              DropdownButton<String>(
+                                borderRadius: BorderRadius.circular(15),
+                                hint: const Text('Tag'),
+                                value: tagDropdownValue,
+                                icon: const Icon(Icons.arrow_drop_down),
+                                elevation: 16,
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    tagDropdownValue = newValue!;
+                                  });
+                                },
+                                items: (Provider.of<Community>(context,
+                                                    listen: false)
+                                                .id !=
+                                            'Lwdm-2023'
+                                        ? tagOptionsList
+                                        : conferenceTagOptionsList)
+                                    .map((value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value.keys.first,
+                                    child: Row(
+                                      children: [
+                                        Tag(
+                                          color: value.values.first,
+                                          title: '',
+                                          dontExpand: true,
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(value.keys.first),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -304,6 +429,10 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                   typeDropdownValue,
                                   tagDropdownValue,
                                   image,
+                                  businessDropdownValue != null ? true : false,
+                                  businessDropdownValue != null
+                                      ? businessDropdownValue!
+                                      : userId,
                                   context,
                                   widget.post!.id,
                                 )

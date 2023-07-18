@@ -112,35 +112,26 @@ class _CreateEventModalState extends State<CreateEventModal> {
                         isLast: false,
                       ),
                       const SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: FormInputField(
-                          maxLength: 100,
-                          icon: const Icon(Icons.description_rounded),
-                          controller: descriptionController,
-                          isLast: false,
-                          hintText: 'Description',
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 3,
-                          minLines: 1,
-                        ),
+                      FormInputField(
+                        maxLength: 100,
+                        icon: const Icon(Icons.description_rounded),
+                        controller: descriptionController,
+                        isLast: false,
+                        hintText: 'Description',
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 3,
+                        minLines: 1,
                       ),
                       const SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                        child: FormInputField(
-                          maxLength: 100,
-                          icon: const Icon(Icons.location_on),
-                          controller: addressController,
-                          isLast: true,
-                          hintText: 'Location',
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 3,
-                          minLines: 1,
-                        ),
+                      FormInputField(
+                        maxLength: 100,
+                        icon: const Icon(Icons.location_on),
+                        controller: addressController,
+                        isLast: true,
+                        hintText: 'Location',
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 3,
+                        minLines: 1,
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -164,12 +155,13 @@ class _CreateEventModalState extends State<CreateEventModal> {
                             value: businessDropdownValue,
                           ),
                           IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  businessDropdownValue = null;
-                                });
-                              },
-                              icon: const Icon(Icons.close))
+                            onPressed: () {
+                              setState(() {
+                                businessDropdownValue = null;
+                              });
+                            },
+                            icon: const Icon(Icons.close),
+                          )
                         ],
                       ),
                       Row(

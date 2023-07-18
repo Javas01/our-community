@@ -12,6 +12,8 @@ void editPost(
   PostType type,
   String tag,
   File? image,
+  bool isAd,
+  String userId,
   BuildContext context,
   String postId,
 ) async {
@@ -43,6 +45,8 @@ void editPost(
       'type': type.name,
       'tags': [tag],
       'lastEdited': Timestamp.now(),
+      'isAd': isAd,
+      'createdBy': userId,
       ...imageUrl != null ? {'imageUrl': imageUrl} : {}
     });
   } catch (e) {

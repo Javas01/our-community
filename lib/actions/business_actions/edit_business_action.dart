@@ -10,6 +10,7 @@ void editBusiness(
   String title,
   String description,
   String address,
+  String phoneNumber,
   List<String> tags,
   File? image,
   BuildContext context,
@@ -41,6 +42,7 @@ void editBusiness(
       'title': title,
       'description': description,
       'address': address,
+      'phoneNumber': phoneNumber,
       'tags': tags,
       'lastEdited': Timestamp.now(),
       ...imageUrl != null ? {'businessLogoUrl': imageUrl} : {}
