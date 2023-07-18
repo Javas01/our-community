@@ -97,15 +97,19 @@ class _EventScreenState extends State<EventScreen> {
 
   Future<void> getLocationFromAddress(String address) async {
     if (address == '') return;
-    if (address == 'online only') return;
-    List<Location> locations = await locationFromAddress(address);
-    if (_businessLocations[address] != null) return;
-    setState(() {
-      _businessLocations = {
-        ..._businessLocations,
-        address: locations.first,
-      };
-    });
+
+    try {
+      List<Location> locations = await locationFromAddress(address);
+      if (_businessLocations[address] != null) return;
+      setState(() {
+        _businessLocations = {
+          ..._businessLocations,
+          address: locations.first,
+        };
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
@@ -216,11 +220,11 @@ class _EventScreenState extends State<EventScreen> {
                             underline: Container(),
                             icon: const Icon(Icons.filter_list),
                             items: <int>[
+                              10,
+                              25,
+                              50,
                               100,
-                              250,
                               500,
-                              1000,
-                              5000,
                             ].map<DropdownMenuItem<int>>((int value) {
                               return DropdownMenuItem<int>(
                                 value: value,
@@ -351,16 +355,6 @@ class _EventScreenState extends State<EventScreen> {
                         ),
                       ),
                       const SizedBox(width: 5),
-                      // ...eventOptionsList
-                      //     .map<Widget>(
-                      //       (tag) => TagFilter(
-                      //         name: tag.keys.first,
-                      //         color: tag.values.first,
-                      //         selectedTag: _selectedTag,
-                      //         selectTagFilter: selectTagFilter,
-                      //       ),
-                      //     )
-                      //     .toList()
                     ],
                   ),
                 ),
@@ -553,6 +547,8 @@ class _EventScreenState extends State<EventScreen> {
                                       .where((post) => isSameDay(
                                           post.startDate, _selectedDay))
                                       .map((event) {
+                                    getLocationFromAddress(event.location);
+
                                     final PostCreator postCreator = event.isAd
                                         ? () {
                                             final business =
@@ -583,7 +579,8 @@ class _EventScreenState extends State<EventScreen> {
                                       post: event,
                                       users: widget.users,
                                       businesses: widget.businesses,
-                                      distanceFromUser: null,
+                                      distanceFromUser:
+                                          getDistanceFromPost(event),
                                     );
                                   }).toList(),
                                 ),

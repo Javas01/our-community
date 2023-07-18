@@ -189,6 +189,13 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                   businesses.sort((a, b) => b.rating.compareTo(a.rating));
                   break;
                 case 'Distance':
+                  businesses.sort((a, b) {
+                    if (_pos == null) return 0;
+                    if (_businessLocations[a.address] == null) return 0;
+                    if (_businessLocations[b.address] == null) return 0;
+                    return getDistanceFromPost(a)
+                        .compareTo(getDistanceFromPost(b));
+                  });
                   break;
                 case 'Alphabetical':
                   businesses.sort((a, b) => a.title.compareTo(b.title));
@@ -240,185 +247,201 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               children: [
-                                Image(
-                                  image: NetworkImage(
-                                    business.businessLogoUrl.isNotEmpty
-                                        ? business.businessLogoUrl
-                                        : 'https://via.placeholder.com/150',
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Image(
+                                    image: NetworkImage(
+                                      business.businessLogoUrl.isNotEmpty
+                                          ? business.businessLogoUrl
+                                          : 'https://via.placeholder.com/150',
+                                    ),
+                                    width: 125,
                                   ),
-                                  // height: 100,
-                                  width: 100,
                                 ),
                                 Expanded(
-                                  child: Column(
-                                    children: [
-                                      Text(business.title,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                      const SizedBox(height: 5),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          ...business.tags.map((tag) {
-                                            return Container(
-                                              padding: const EdgeInsets.all(3),
-                                              decoration: BoxDecoration(
-                                                color: businessOptionsList
-                                                    .firstWhere((option) =>
-                                                        option.keys.first ==
-                                                        tag)
-                                                    .values
-                                                    .first,
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                              ),
-                                              child: Text(tag),
-                                            );
-                                          }).toList(),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        business.tagline,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      // const Text('Open 24 hours'),
-                                      // const SizedBox(height: 5),
-                                      Text(
-                                        '${(Geolocator.distanceBetween(
-                                              _pos?.latitude ?? 0,
-                                              _pos?.longitude ?? 0,
-                                              _businessLocations[
-                                                          business.address]
-                                                      ?.latitude ??
-                                                  0,
-                                              _businessLocations[
-                                                          business.address]
-                                                      ?.longitude ??
-                                                  0,
-                                            ) / 1609.344).ceilToDouble()} miles - ${business.address}',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      StreamBuilder<QuerySnapshot<Review>>(
-                                          stream: FirebaseFirestore.instance
-                                              .collection('Communities')
-                                              .doc(widget.community.id)
-                                              .collection('Businesses')
-                                              .doc(business.id)
-                                              .collection('Reviews')
-                                              .withConverter(
-                                                fromFirestore:
-                                                    reviewFromFirestore,
-                                                toFirestore: reviewToFirestore,
-                                              )
-                                              .snapshots(),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.hasError) {
-                                              return const Text(
-                                                'Failed to load reviews',
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(1.0),
+                                    child: Column(
+                                      children: [
+                                        Text(business.title,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            )),
+                                        const SizedBox(height: 5),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            ...business.tags.map((tag) {
+                                              return Container(
+                                                padding:
+                                                    const EdgeInsets.all(3),
+                                                decoration: BoxDecoration(
+                                                  color: businessOptionsList
+                                                      .firstWhere((option) =>
+                                                          option.keys.first ==
+                                                          tag)
+                                                      .values
+                                                      .first,
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                ),
+                                                child: Text(tag),
                                               );
-                                            }
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return const CircularProgressIndicator();
-                                            }
-                                            List<Review> reviews = snapshot
-                                                .data!.docs
-                                                .map((reviewDoc) =>
-                                                    reviewDoc.data())
-                                                .toList();
+                                            }).toList(),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          business.tagline,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        // const Text('Open 24 hours'),
+                                        // const SizedBox(height: 5),
+                                        Text(
+                                          '${(Geolocator.distanceBetween(
+                                                _pos?.latitude ?? 0,
+                                                _pos?.longitude ?? 0,
+                                                _businessLocations[
+                                                            business.address]
+                                                        ?.latitude ??
+                                                    0,
+                                                _businessLocations[
+                                                            business.address]
+                                                        ?.longitude ??
+                                                    0,
+                                              ) / 1609.344).ceilToDouble()} mi - ${business.address}',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        StreamBuilder<QuerySnapshot<Review>>(
+                                            stream: FirebaseFirestore.instance
+                                                .collection('Communities')
+                                                .doc(widget.community.id)
+                                                .collection('Businesses')
+                                                .doc(business.id)
+                                                .collection('Reviews')
+                                                .withConverter(
+                                                  fromFirestore:
+                                                      reviewFromFirestore,
+                                                  toFirestore:
+                                                      reviewToFirestore,
+                                                )
+                                                .snapshots(),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.hasError) {
+                                                return const Text(
+                                                  'Failed to load reviews',
+                                                );
+                                              }
+                                              if (snapshot.connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return const CircularProgressIndicator();
+                                              }
+                                              List<Review> reviews = snapshot
+                                                  .data!.docs
+                                                  .map((reviewDoc) =>
+                                                      reviewDoc.data())
+                                                  .toList();
 
-                                            Review? userReview = reviews
-                                                    .map((e) => e.createdBy)
-                                                    .contains(
-                                                      FirebaseAuth.instance
-                                                          .currentUser!.uid,
-                                                    )
-                                                ? reviews.firstWhere(
-                                                    (review) =>
-                                                        review.createdBy ==
+                                              Review? userReview = reviews
+                                                      .map((e) => e.createdBy)
+                                                      .contains(
                                                         FirebaseAuth.instance
                                                             .currentUser!.uid,
-                                                  )
-                                                : null;
-                                            if (reviews.isEmpty) {
-                                              return GestureDetector(
-                                                onTap: () => showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      BusinessRatingModal(
-                                                    business: business,
-                                                    community: widget.community,
-                                                    user:
-                                                        widget.users.firstWhere(
-                                                      (user) =>
-                                                          user.id ==
+                                                      )
+                                                  ? reviews.firstWhere(
+                                                      (review) =>
+                                                          review.createdBy ==
                                                           FirebaseAuth.instance
                                                               .currentUser!.uid,
+                                                    )
+                                                  : null;
+                                              if (reviews.isEmpty) {
+                                                return GestureDetector(
+                                                  onTap: () => showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        BusinessRatingModal(
+                                                      business: business,
+                                                      community:
+                                                          widget.community,
+                                                      user: widget.users
+                                                          .firstWhere(
+                                                        (user) =>
+                                                            user.id ==
+                                                            FirebaseAuth
+                                                                .instance
+                                                                .currentUser!
+                                                                .uid,
+                                                      ),
+                                                      review: null,
                                                     ),
-                                                    review: null,
                                                   ),
-                                                ),
-                                                child: const Text('No reviews'),
-                                              );
-                                            } else {
-                                              return GestureDetector(
-                                                onTap: () => showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      BusinessRatingModal(
-                                                    business: business,
-                                                    community: widget.community,
-                                                    user:
-                                                        widget.users.firstWhere(
-                                                      (user) =>
-                                                          user.id ==
-                                                          FirebaseAuth.instance
-                                                              .currentUser!.uid,
+                                                  child:
+                                                      const Text('No reviews'),
+                                                );
+                                              } else {
+                                                return GestureDetector(
+                                                  onTap: () => showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        BusinessRatingModal(
+                                                      business: business,
+                                                      community:
+                                                          widget.community,
+                                                      user: widget.users
+                                                          .firstWhere(
+                                                        (user) =>
+                                                            user.id ==
+                                                            FirebaseAuth
+                                                                .instance
+                                                                .currentUser!
+                                                                .uid,
+                                                      ),
+                                                      review: userReview,
                                                     ),
-                                                    review: userReview,
                                                   ),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    ...List.generate(5,
-                                                        (index) {
-                                                      return Icon(
-                                                        index < business.rating
-                                                            ? Icons
-                                                                .thumb_up_sharp
-                                                            : Icons
-                                                                .thumb_up_alt_outlined,
-                                                        color:
-                                                            userReview != null
-                                                                ? Colors.blue
-                                                                : Colors.grey,
-                                                      );
-                                                    }),
-                                                    const SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(
-                                                      '(${reviews.length})',
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            }
-                                          }),
-                                    ],
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      ...List.generate(5,
+                                                          (index) {
+                                                        return Icon(
+                                                          index <
+                                                                  business
+                                                                      .rating
+                                                              ? Icons
+                                                                  .thumb_up_sharp
+                                                              : Icons
+                                                                  .thumb_up_alt_outlined,
+                                                          color:
+                                                              userReview != null
+                                                                  ? Colors.blue
+                                                                  : Colors.grey,
+                                                        );
+                                                      }),
+                                                      const SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                        '(${reviews.length})',
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }
+                                            }),
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 Column(
@@ -475,4 +498,13 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
       _selectedTag = _selectedTag == tagName ? '' : tagName;
     });
   }
+
+  double getDistanceFromPost(Business event) => (Geolocator.distanceBetween(
+            _pos?.latitude ?? 0,
+            _pos?.longitude ?? 0,
+            _businessLocations[event.address]?.latitude ?? 0,
+            _businessLocations[event.address]?.longitude ?? 0,
+          ) /
+          1609.344)
+      .ceilToDouble();
 }

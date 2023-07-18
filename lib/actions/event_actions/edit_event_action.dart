@@ -19,6 +19,8 @@ void editEvent(
   File? image,
   BuildContext context,
   String postId,
+  String userId,
+  bool isAd,
 ) async {
   final posts = FirebaseFirestore.instance
       .collection('Communities')
@@ -47,12 +49,14 @@ void editEvent(
       'description': description,
       'type': type.name,
       'tags': tags,
-      'audience': audience,
-      'price': price,
+      'audience': audience.name,
+      'price': price.name,
       'startDate': startDate,
       'endDate': endDate,
       'location': location,
       'lastEdited': Timestamp.now(),
+      'createdBy': userId,
+      'isAd': isAd,
       ...imageUrl != null ? {'imageUrl': imageUrl} : {}
     });
   } catch (e) {

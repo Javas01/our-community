@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:our_ummah/models/business_model.dart';
+import 'package:our_ummah/models/user_model.dart';
 
 Future<void> createBusiness(
   String title,
@@ -22,6 +23,11 @@ Future<void> createBusiness(
         fromFirestore: businessFromFirestore,
         toFirestore: businessToFirestore,
       );
+  final userRef =
+      FirebaseFirestore.instance.collection('Users').doc(userId).withConverter(
+            fromFirestore: userFromFirestore,
+            toFirestore: userToFirestore,
+          );
   try {
     final newBusiness = Business(
       title: title,
@@ -32,6 +38,13 @@ Future<void> createBusiness(
       phoneNumber: phoneNumber,
     );
     final businessDocRef = await businesses.add(newBusiness);
+
+    final userDoc = await userRef.get();
+    final user = userDoc.data()!;
+    final userBusinesses = user.businessIds;
+    userBusinesses.add(businessDocRef.id);
+    userRef.update({'businessIds': userBusinesses});
+
     if (image != null) {
       await FirebaseStorage.instance
           .ref('businessPics')

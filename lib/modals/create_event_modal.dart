@@ -143,22 +143,34 @@ class _CreateEventModalState extends State<CreateEventModal> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      DropdownButton<String>(
-                        hint: const Text('Post as business'),
-                        items: userBusinesses
-                            .map(
-                              (e) => DropdownMenuItem(
-                                value: e.id,
-                                child: Text(e.title),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            businessDropdownValue = value;
-                          });
-                        },
-                        value: businessDropdownValue,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          DropdownButton<String>(
+                            hint: const Text('Post as business'),
+                            items: userBusinesses
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(e.title),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                businessDropdownValue = value;
+                              });
+                            },
+                            value: businessDropdownValue,
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  businessDropdownValue = null;
+                                });
+                              },
+                              icon: const Icon(Icons.close))
+                        ],
                       ),
                       Row(
                         children: [
@@ -440,6 +452,12 @@ class _CreateEventModalState extends State<CreateEventModal> {
                                     image,
                                     context,
                                     widget.post!.id,
+                                    businessDropdownValue != null
+                                        ? businessDropdownValue!
+                                        : userId,
+                                    businessDropdownValue != null
+                                        ? true
+                                        : false,
                                   )
                                 : createEvent(
                                     titleController.text,

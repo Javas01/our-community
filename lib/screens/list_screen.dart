@@ -82,15 +82,18 @@ class _ListScreenState extends State<ListScreen> {
 
   Future<void> getLocationFromAddress(String address) async {
     if (address == '') return;
-    if (address == 'online only') return;
-    List<Location> locations = await locationFromAddress(address);
-    if (_businessLocations[address] != null) return;
-    setState(() {
-      _businessLocations = {
-        ..._businessLocations,
-        address: locations.first,
-      };
-    });
+    try {
+      List<Location> locations = await locationFromAddress(address);
+      if (_businessLocations[address] != null) return;
+      setState(() {
+        _businessLocations = {
+          ..._businessLocations,
+          address: locations.first,
+        };
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
