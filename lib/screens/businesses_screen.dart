@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:our_ummah/actions/open_map_action.dart';
 import 'package:our_ummah/actions/show_popup_menu_action.dart';
 import 'package:our_ummah/components/tag_filter_component.dart';
 import 'package:our_ummah/constants/tag_options.dart';
@@ -10,6 +11,50 @@ import 'package:our_ummah/models/community_model.dart';
 import 'package:our_ummah/models/review_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:geolocator/geolocator.dart';
+
+/// Determine the current position of the device.
+///
+/// When the location services are not enabled or permissions
+/// are denied the `Future` will return an error.
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  final pos = await Geolocator.getCurrentPosition();
+  debugPrint(pos.toString());
+  return pos;
+}
 
 class BusinessesScreen extends StatefulWidget {
   const BusinessesScreen({
@@ -40,6 +85,7 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
 
   @override
   void initState() {
+    _determinePosition();
     _businessesStream = FirebaseFirestore.instance
         .collection('Communities')
         .doc(widget.community.id)
@@ -188,8 +234,8 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                   child: Column(
                                     children: [
                                       Text(business.title),
+                                      const SizedBox(height: 5),
                                       Row(
-                                        // mainAxisSize: MainAxisSize.max,
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
                                         children: [
@@ -211,11 +257,18 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                           }).toList(),
                                         ],
                                       ),
-                                      Text(business.tagline),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        business.tagline,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 5),
                                       const Text('Open 24 hours'),
+                                      const SizedBox(height: 5),
                                       Text(
                                         '1.7 mi - ${business.address}',
-                                      ), // get distance by location
+                                      ), // TODO: get distance by location
+                                      const SizedBox(height: 5),
                                       StreamBuilder<QuerySnapshot<Review>>(
                                           stream: FirebaseFirestore.instance
                                               .collection('Communities')
@@ -344,13 +397,7 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                     ),
                                     IconButton(
                                       onPressed: () async {
-                                        final url = Uri.parse(
-                                            'https://www.google.com/maps/search/?api=1&query=${business.address}');
-                                        if (await canLaunchUrl(url)) {
-                                          launchUrl(url);
-                                        } else {
-                                          throw 'Could not launch $url';
-                                        }
+                                        openMap(business.address);
                                       },
                                       icon: const Icon(Icons.directions),
                                     ),

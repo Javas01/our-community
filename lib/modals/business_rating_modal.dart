@@ -85,25 +85,49 @@ class _BusinessRatingModalState extends State<BusinessRatingModal> {
         ),
         TextButton(
           onPressed: () => {
-            widget.review != null
-                ? editReview(
-                    context,
-                    _rating.toDouble(),
-                    reviewController.text,
-                    widget.business.id,
-                    widget.community.id,
-                    widget.user.id,
-                    widget.review!.id,
-                  )
-                : addReview(
-                    context,
-                    _rating.toDouble(),
-                    reviewController.text,
-                    widget.business.id,
-                    widget.community.id,
-                    widget.user.id,
+            if (reviewController.text.isEmpty)
+              {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please write a review'),
                   ),
-            Navigator.pop(context)
+                ),
+              }
+            else if (_rating == 0)
+              {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please select a rating'),
+                  ),
+                ),
+              }
+            else
+              {
+                if (widget.review != null)
+                  {
+                    editReview(
+                      context,
+                      _rating.toDouble(),
+                      reviewController.text,
+                      widget.business.id,
+                      widget.community.id,
+                      widget.user.id,
+                      widget.review!.id,
+                    ),
+                  }
+                else
+                  {
+                    addReview(
+                      context,
+                      _rating.toDouble(),
+                      reviewController.text,
+                      widget.business.id,
+                      widget.community.id,
+                      widget.user.id,
+                    ),
+                  },
+                Navigator.pop(context),
+              }
           },
           child: const Text('Submit'),
         ),

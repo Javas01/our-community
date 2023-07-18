@@ -45,6 +45,7 @@ dependencies:
   fake_cloud_firestore: ^2.4.1+1
   table_calendar: ^3.0.9
   shared_preferences: ^2.2.0
+  geolocator: ^9.0.2
 
 dev_dependencies:
   test: ^1.21.1

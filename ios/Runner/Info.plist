@@ -28,6 +28,13 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app uses your photo libraray to update your profile picture</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location to determine distance from community events.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+			<string>googlechromes</string>
+			<string>comgooglemaps</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
