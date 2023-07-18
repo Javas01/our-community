@@ -12,49 +12,7 @@ import 'package:our_ummah/models/review_model.dart';
 import 'package:our_ummah/models/user_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
-
-/// Determine the current position of the device.
-///
-/// When the location services are not enabled or permissions
-/// are denied the `Future` will return an error.
-Future<Position> _determinePosition() async {
-  bool serviceEnabled;
-  LocationPermission permission;
-
-  // Test if location services are enabled.
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // Location services are not enabled don't continue
-    // accessing the position and request users of the
-    // App to enable the location services.
-    return Future.error('Location services are disabled.');
-  }
-
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      // Permissions are denied, next time you could try
-      // requesting permissions again (this is also where
-      // Android's shouldShowRequestPermissionRationale
-      // returned true. According to Android guidelines
-      // your App should show an explanatory UI now.
-      return Future.error('Location permissions are denied');
-    }
-  }
-
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately.
-    return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
-  }
-
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
-  final pos = await Geolocator.getCurrentPosition();
-  debugPrint(pos.toString());
-  return pos;
-}
+import 'package:geocoding/geocoding.dart';
 
 class BusinessesScreen extends StatefulWidget {
   const BusinessesScreen({
@@ -82,6 +40,8 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
   GlobalKey? _selectedPostKey;
   String _searchTerm = '';
   final focusNode = FocusNode();
+  Position? _pos;
+  Map<String, Location> _businessLocations = {};
 
   @override
   void initState() {
@@ -96,6 +56,64 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
         )
         .snapshots();
     super.initState();
+  }
+
+  /// Determine the current position of the device.
+  ///
+  /// When the location services are not enabled or permissions
+  /// are denied the `Future` will return an error.
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    final pos = await Geolocator.getCurrentPosition();
+    debugPrint(pos.toString());
+    setState(() {
+      _pos = pos;
+    });
+  }
+
+  Future<void> getLocationFromAddress(String address) async {
+    if (address == '') return;
+    if (address == 'online only') return;
+    List<Location> locations = await locationFromAddress(address);
+    if (_businessLocations[address] != null) return;
+    setState(() {
+      _businessLocations = {
+        ..._businessLocations,
+        address: locations.first,
+      };
+    });
   }
 
   void _storePosition(TapDownDetails details) {
@@ -196,6 +214,7 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                 child: ListView(
                   children: [
                     ...filteredBusinesses.map((business) {
+                      getLocationFromAddress(business.address);
                       return GestureDetector(
                         onLongPress: () async {
                           setState(() {
@@ -266,8 +285,19 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                       const Text('Open 24 hours'),
                                       const SizedBox(height: 5),
                                       Text(
-                                        '1.7 mi - ${business.address}',
-                                      ), // TODO: get distance by location
+                                        '${(Geolocator.distanceBetween(
+                                              _pos?.latitude ?? 0,
+                                              _pos?.longitude ?? 0,
+                                              _businessLocations[
+                                                          business.address]
+                                                      ?.latitude ??
+                                                  0,
+                                              _businessLocations[
+                                                          business.address]
+                                                      ?.longitude ??
+                                                  0,
+                                            ) / 1609.344).ceilToDouble()} miles - ${business.address}',
+                                      ),
                                       const SizedBox(height: 5),
                                       StreamBuilder<QuerySnapshot<Review>>(
                                           stream: FirebaseFirestore.instance
