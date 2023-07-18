@@ -252,7 +252,10 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                 Expanded(
                                   child: Column(
                                     children: [
-                                      Text(business.title),
+                                      Text(business.title,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          )),
                                       const SizedBox(height: 5),
                                       Row(
                                         mainAxisAlignment:
@@ -280,10 +283,13 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                       Text(
                                         business.tagline,
                                         textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                       const SizedBox(height: 5),
-                                      const Text('Open 24 hours'),
-                                      const SizedBox(height: 5),
+                                      // const Text('Open 24 hours'),
+                                      // const SizedBox(height: 5),
                                       Text(
                                         '${(Geolocator.distanceBetween(
                                               _pos?.latitude ?? 0,
@@ -297,6 +303,10 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
                                                       ?.longitude ??
                                                   0,
                                             ) / 1609.344).ceilToDouble()} miles - ${business.address}',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                       const SizedBox(height: 5),
                                       StreamBuilder<QuerySnapshot<Review>>(

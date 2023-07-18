@@ -26,12 +26,14 @@ class PreviewEventCard extends StatelessWidget {
     required this.postCreator,
     required this.isSelected,
     required this.isCreator,
+    required this.distanceFromUser,
   }) : super(key: key);
 
   final EventPost post;
   final PostCreator postCreator;
   final bool isSelected, isCreator;
   final GlobalKey itemKey;
+  final double? distanceFromUser;
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +153,7 @@ class PreviewEventCard extends StatelessWidget {
                           'Event Details',
                           style: TextStyle(
                             fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -162,7 +164,7 @@ class PreviewEventCard extends StatelessWidget {
                               '${DateFormat.MMMMd().format(post.startDate)} at ${DateFormat.jm().format(post.startDate)}',
                               style: const TextStyle(
                                 fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             const Icon(Icons.arrow_right_alt_rounded),
@@ -170,7 +172,7 @@ class PreviewEventCard extends StatelessWidget {
                               '${DateFormat.MMMMd().format(post.endDate)} at ${DateFormat.jm().format(post.endDate)}',
                               style: const TextStyle(
                                 fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -187,8 +189,9 @@ class PreviewEventCard extends StatelessWidget {
                                 post.location,
                                 style: const TextStyle(
                                   fontSize: 15,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
@@ -205,7 +208,7 @@ class PreviewEventCard extends StatelessWidget {
                                   post.price.name.toTitleCase(),
                                   style: const TextStyle(
                                     fontSize: 15,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
@@ -218,7 +221,23 @@ class PreviewEventCard extends StatelessWidget {
                                   post.audience.name.toTitleCase(),
                                   style: const TextStyle(
                                     fontSize: 15,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on_rounded),
+                                const SizedBox(width: 5),
+                                Text(
+                                  distanceFromUser != null
+                                      ? '$distanceFromUser miles away'
+                                      : 'unavailable',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],

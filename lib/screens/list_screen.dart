@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:our_ummah/components/EventCard/event_card_component.dart';
 import 'package:our_ummah/components/ImageCard/image_card_component.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,6 +32,73 @@ class ListScreen extends StatefulWidget {
 class _ListScreenState extends State<ListScreen> {
   final currUserId = FirebaseAuth.instance.currentUser!.uid;
   String _selectedTag = '';
+  Position? _pos;
+  Map<String, Location> _businessLocations = {};
+
+  /// Determine the current position of the device.
+  ///
+  /// When the location services are not enabled or permissions
+  /// are denied the `Future` will return an error.
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    final pos = await Geolocator.getCurrentPosition();
+    debugPrint(pos.toString());
+    setState(() {
+      _pos = pos;
+    });
+  }
+
+  Future<void> getLocationFromAddress(String address) async {
+    if (address == '') return;
+    if (address == 'online only') return;
+    List<Location> locations = await locationFromAddress(address);
+    if (_businessLocations[address] != null) return;
+    setState(() {
+      _businessLocations = {
+        ..._businessLocations,
+        address: locations.first,
+      };
+    });
+  }
+
+  @override
+  void initState() {
+    _determinePosition();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +191,8 @@ class _ListScreenState extends State<ListScreen> {
             ),
           ),
           ...filteredPosts.reversed.map((post) {
+            if (post is EventPost) getLocationFromAddress(post.location);
+
             // get post creator user object
             final PostCreator postCreator = post.isAd
                 ? () {
@@ -164,6 +235,7 @@ class _ListScreenState extends State<ListScreen> {
                   post: post as EventPost,
                   postCreator: postCreator,
                   businesses: widget.businesses,
+                  distanceFromUser: getDistanceFromPost(post),
                 );
             }
           }).toList()
@@ -177,4 +249,13 @@ class _ListScreenState extends State<ListScreen> {
       _selectedTag = _selectedTag == tagName ? '' : tagName;
     });
   }
+
+  double getDistanceFromPost(EventPost event) => (Geolocator.distanceBetween(
+            _pos?.latitude ?? 0,
+            _pos?.longitude ?? 0,
+            _businessLocations[event.location]?.latitude ?? 0,
+            _businessLocations[event.location]?.longitude ?? 0,
+          ) /
+          1609.344)
+      .ceilToDouble();
 }

@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:our_ummah/components/EventCard/event_card_component.dart';
-import 'package:our_ummah/components/tag_filter_component.dart';
+// import 'package:our_ummah/components/tag_filter_component.dart';
 import 'package:our_ummah/constants/tag_options.dart';
 import 'package:our_ummah/models/business_model.dart';
 import 'package:our_ummah/models/community_model.dart';
@@ -37,8 +39,10 @@ class _EventScreenState extends State<EventScreen> {
   String _selectedTag = '';
   Audience? _audienceFilter;
   Price? _priceFilter;
-  String? _distanceFilter;
+  double? _distanceFilter;
   String? _categoryFilter;
+  Position? _pos;
+  Map<String, Location> _businessLocations = {};
 
   List<EventPost> _getEventsForDay(DateTime day, List<EventPost> posts) {
     return posts
@@ -46,8 +50,68 @@ class _EventScreenState extends State<EventScreen> {
         .toList();
   }
 
+  /// Determine the current position of the device.
+  ///
+  /// When the location services are not enabled or permissions
+  /// are denied the `Future` will return an error.
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    final pos = await Geolocator.getCurrentPosition();
+    debugPrint(pos.toString());
+    setState(() {
+      _pos = pos;
+    });
+  }
+
+  Future<void> getLocationFromAddress(String address) async {
+    if (address == '') return;
+    if (address == 'online only') return;
+    List<Location> locations = await locationFromAddress(address);
+    if (_businessLocations[address] != null) return;
+    setState(() {
+      _businessLocations = {
+        ..._businessLocations,
+        address: locations.first,
+      };
+    });
+  }
+
   @override
   void initState() {
+    _determinePosition();
+
     super.initState();
     if (widget.sortValue != 'Calendar') return;
 
@@ -98,9 +162,9 @@ class _EventScreenState extends State<EventScreen> {
                 child: SizedBox(
                   height: 50,
                   child: ListView(
-                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     scrollDirection: Axis.horizontal,
                     children: [
+                      const SizedBox(width: 5),
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
@@ -136,6 +200,7 @@ class _EventScreenState extends State<EventScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 5),
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
@@ -145,23 +210,24 @@ class _EventScreenState extends State<EventScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(10),
-                          child: DropdownButton(
+                          child: DropdownButton<int>(
                             hint: const Text('Distance'),
                             borderRadius: BorderRadius.circular(40),
                             underline: Container(),
                             icon: const Icon(Icons.filter_list),
-                            items: <String>[
-                              '5 miles',
-                              '10 miles',
-                              '15 miles',
-                              '30 miles',
-                            ].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
+                            items: <int>[
+                              100,
+                              250,
+                              500,
+                              1000,
+                              5000,
+                            ].map<DropdownMenuItem<int>>((int value) {
+                              return DropdownMenuItem<int>(
                                 value: value,
-                                child: Text(value),
+                                child: Text('$value miles'),
                               );
                             }).toList(),
-                            value: _distanceFilter,
+                            value: _distanceFilter?.toInt(),
                             style: const TextStyle(
                               color: Color.fromARGB(255, 39, 165, 104),
                               fontSize: 16,
@@ -169,12 +235,13 @@ class _EventScreenState extends State<EventScreen> {
                             alignment: AlignmentDirectional.center,
                             onChanged: (value) {
                               setState(() {
-                                _distanceFilter = value.toString();
+                                _distanceFilter = value!.toDouble();
                               });
                             },
                           ),
                         ),
                       ),
+                      const SizedBox(width: 5),
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
@@ -212,6 +279,7 @@ class _EventScreenState extends State<EventScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 5),
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
@@ -255,6 +323,7 @@ class _EventScreenState extends State<EventScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 5),
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(
@@ -281,16 +350,17 @@ class _EventScreenState extends State<EventScreen> {
                           icon: const Icon(Icons.clear_rounded),
                         ),
                       ),
-                      ...eventOptionsList
-                          .map<Widget>(
-                            (tag) => TagFilter(
-                              name: tag.keys.first,
-                              color: tag.values.first,
-                              selectedTag: _selectedTag,
-                              selectTagFilter: selectTagFilter,
-                            ),
-                          )
-                          .toList()
+                      const SizedBox(width: 5),
+                      // ...eventOptionsList
+                      //     .map<Widget>(
+                      //       (tag) => TagFilter(
+                      //         name: tag.keys.first,
+                      //         color: tag.values.first,
+                      //         selectedTag: _selectedTag,
+                      //         selectTagFilter: selectTagFilter,
+                      //       ),
+                      //     )
+                      //     .toList()
                     ],
                   ),
                 ),
@@ -345,8 +415,12 @@ class _EventScreenState extends State<EventScreen> {
                                   ? post.tags.contains(_categoryFilter)
                                   : true,
                             )
-                            // .where((post) => _distanceFilter != null ? post.distance == _distanceFilter : true)
+                            .where((post) => _distanceFilter != null
+                                ? getDistanceFromPost(post) <= _distanceFilter!
+                                : true)
                             .map<Widget>((post) {
+                          getLocationFromAddress(post.location);
+
                           final PostCreator postCreator = post.isAd
                               ? () {
                                   final business = widget.businesses.firstWhere(
@@ -374,6 +448,7 @@ class _EventScreenState extends State<EventScreen> {
                             post: post,
                             users: widget.users,
                             businesses: widget.businesses,
+                            distanceFromUser: getDistanceFromPost(post),
                           );
                         }).toList(),
                       ],
@@ -508,6 +583,7 @@ class _EventScreenState extends State<EventScreen> {
                                       post: event,
                                       users: widget.users,
                                       businesses: widget.businesses,
+                                      distanceFromUser: null,
                                     );
                                   }).toList(),
                                 ),
@@ -529,4 +605,13 @@ class _EventScreenState extends State<EventScreen> {
       _selectedTag = _selectedTag == tagName ? '' : tagName;
     });
   }
+
+  double getDistanceFromPost(EventPost event) => (Geolocator.distanceBetween(
+            _pos?.latitude ?? 0,
+            _pos?.longitude ?? 0,
+            _businessLocations[event.location]?.latitude ?? 0,
+            _businessLocations[event.location]?.longitude ?? 0,
+          ) /
+          1609.344)
+      .ceilToDouble();
 }
