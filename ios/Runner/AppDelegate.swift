@@ -10,4 +10,9 @@ import Flutter
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+
+  // remove badge when app is opened
+  override func applicationDidBecomeActive(_ application: UIApplication) {
+    UIApplication.shared.applicationIconBadgeNumber = 0
+  }
 }

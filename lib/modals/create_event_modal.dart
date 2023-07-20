@@ -31,11 +31,8 @@ class CreateEventModal extends StatefulWidget {
 
 class _CreateEventModalState extends State<CreateEventModal> {
   final _formKey = GlobalKey<FormState>();
-  final firstName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
-  final lastName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
   final userId = FirebaseAuth.instance.currentUser!.uid;
+  late final AppUser currUser;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
@@ -54,6 +51,7 @@ class _CreateEventModalState extends State<CreateEventModal> {
 
   @override
   void initState() {
+    currUser = widget.users!.firstWhere((element) => element.id == userId);
     if (widget.post != null) {
       isEdit = true;
       titleController.text = widget.post!.title;
@@ -482,6 +480,11 @@ class _CreateEventModalState extends State<CreateEventModal> {
                                   );
                             Navigator.pop(context);
                             sendNotification(
+                              businessDropdownValue != null
+                                  ? '${userBusinesses.firstWhere((e) => e.id == businessDropdownValue).title} created a new event'
+                                  : '${currUser.firstName} ${currUser.lastName} created a new event',
+                              Provider.of<Community>(context, listen: false)
+                                  .name,
                               titleController.text,
                               widget.users
                                       ?.map((e) => e.tokens.map((e) => e))

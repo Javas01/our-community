@@ -24,11 +24,8 @@ class CreateBusinessModal extends StatefulWidget {
 
 class _CreateBusinessModalState extends State<CreateBusinessModal> {
   final _formKey = GlobalKey<FormState>();
-  final firstName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
-  final lastName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
   final userId = FirebaseAuth.instance.currentUser!.uid;
+  late final AppUser currUser;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController taglineController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
@@ -40,6 +37,7 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
 
   @override
   void initState() {
+    currUser = widget.users!.firstWhere((element) => element.id == userId);
     if (widget.business != null) {
       isEdit = true;
       titleController.text = widget.business!.title;
@@ -289,6 +287,9 @@ class _CreateBusinessModalState extends State<CreateBusinessModal> {
                                   );
                             Navigator.pop(context);
                             sendNotification(
+                              '${currUser.firstName} ${currUser.lastName} created a new business',
+                              Provider.of<Community>(context, listen: false)
+                                  .name,
                               titleController.text,
                               widget.users
                                       ?.map((e) => e.tokens.map((e) => e))

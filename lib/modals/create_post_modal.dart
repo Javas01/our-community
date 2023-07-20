@@ -31,11 +31,8 @@ class CreatePostModal extends StatefulWidget {
 
 class _CreatePostModalState extends State<CreatePostModal> {
   final _formKey = GlobalKey<FormState>();
-  final firstName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[0];
-  final lastName =
-      FirebaseAuth.instance.currentUser!.displayName?.split(' ')[1];
   final userId = FirebaseAuth.instance.currentUser!.uid;
+  late final AppUser currUser;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   File? image;
@@ -47,6 +44,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
 
   @override
   void initState() {
+    currUser = widget.users!.firstWhere((element) => element.id == userId);
     if (widget.post != null) {
       isEdit = true;
       typeDropdownValue = widget.post!.type;
@@ -461,6 +459,10 @@ class _CreatePostModalState extends State<CreatePostModal> {
                                 );
                           Navigator.pop(context);
                           sendNotification(
+                            businessDropdownValue != null
+                                ? '${userBusinesses.firstWhere((e) => e.id == businessDropdownValue).title} created a new event'
+                                : '${currUser.firstName} ${currUser.lastName} created a new post',
+                            Provider.of<Community>(context, listen: false).name,
                             titleController.text,
                             widget.users
                                     ?.map((e) => e.tokens.map((e) => e))

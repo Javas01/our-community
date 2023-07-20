@@ -5,14 +5,21 @@ import 'dart:convert';
 // const host = 'http://localhost:3000';
 const host = 'https://push-notification-service.onrender.com';
 
-Future<void> sendNotification(String message, List<String> devices) async {
+Future<void> sendNotification(
+  String title,
+  String subtitle,
+  String body,
+  List<String> devices,
+) async {
   try {
     final url = Uri.parse('$host/new-comment');
     await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'alert': message,
+        'title': title,
+        'subtitle': subtitle,
+        'body': body,
         'devices': devices,
       }),
     );
