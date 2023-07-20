@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:our_ummah/screens/home_screen.dart';
 import 'package:our_ummah/screens/OnboardingScreen/onboarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -35,6 +36,25 @@ void main() async {
     debugPrint('User granted provisional permission');
   } else {
     debugPrint('User declined or has not accepted permission');
+  }
+
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('Location services are disabled.');
+  }
+
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error(
+      'Location permissions are permanently denied, we cannot request permissions.',
+    );
   }
 
   runApp(MyApp(
