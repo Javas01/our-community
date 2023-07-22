@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return _listSortValue;
         case 1:
           return _eventsSortValue;
-        case 3:
+        case 2:
           return _businessSortValue;
         default:
           return _listSortValue;
@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           users: users,
                           businesses: businesses,
                         ),
-                        const Scaffold(),
+                        // const Scaffold(),
                         BusinessesScreen(
                           sortValue: _businessSortValue,
                           users: users,
@@ -358,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     case 1:
                                       setEventsSortValue(value.toString());
                                       break;
-                                    case 3:
+                                    case 2:
                                       setBusinessesSortValue(value.toString());
                                       break;
                                     default:
@@ -389,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: Text('List'),
                                         ),
                                       ];
-                                    case 3:
+                                    case 2:
                                       return <PopupMenuEntry>[
                                         const PopupMenuItem(
                                           value: 'Alphabetical',
@@ -415,6 +415,83 @@ class _HomeScreenState extends State<HomeScreen> {
                           body: Builder(
                             builder: ((context) => screens[currentIndex]),
                           ),
+                          floatingActionButton: currentIndex != 3
+                              ? PopupMenuButton(
+                                  // color: Colors.lightBlueAccent,
+                                  icon: const Icon(Icons.add_circle),
+                                  iconSize: 35,
+                                  shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10))),
+                                  itemBuilder: (context) {
+                                    return [
+                                      PopupMenuItem(
+                                        child: TextButton(
+                                          onPressed: () {
+                                            showModalBottomSheet<void>(
+                                              context: context,
+                                              isScrollControlled: true,
+                                              builder: (BuildContext c) {
+                                                return Provider.value(
+                                                  value: selectedCommunity,
+                                                  child: getModal(
+                                                    0,
+                                                    users,
+                                                    businesses,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: const Text("Post"),
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        child: TextButton(
+                                          onPressed: () {
+                                            showModalBottomSheet<void>(
+                                              context: context,
+                                              isScrollControlled: true,
+                                              builder: (BuildContext c) {
+                                                return Provider.value(
+                                                  value: selectedCommunity,
+                                                  child: getModal(
+                                                    1,
+                                                    users,
+                                                    businesses,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: const Text("Event"),
+                                        ),
+                                      ),
+                                      PopupMenuItem(
+                                        child: TextButton(
+                                          onPressed: () {
+                                            showModalBottomSheet<void>(
+                                              context: context,
+                                              isScrollControlled: true,
+                                              builder: (BuildContext c) {
+                                                return Provider.value(
+                                                  value: selectedCommunity,
+                                                  child: getModal(
+                                                    3,
+                                                    users,
+                                                    businesses,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: const Text("Business"),
+                                        ),
+                                      ),
+                                    ];
+                                  },
+                                )
+                              : Container(),
                           bottomNavigationBar: BottomNavigationBar(
                             items: const <BottomNavigationBarItem>[
                               BottomNavigationBarItem(
@@ -425,10 +502,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 icon: Icon(Icons.event_outlined),
                                 label: 'Events',
                               ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.add),
-                                label: 'Create',
-                              ),
+                              // BottomNavigationBarItem(
+                              //   icon: Icon(Icons.add),
+                              //   label: 'Create',
+                              // ),
                               BottomNavigationBarItem(
                                 icon: Icon(Icons.business_outlined),
                                 label: 'Businesses',
@@ -442,28 +519,28 @@ class _HomeScreenState extends State<HomeScreen> {
                             unselectedItemColor: Colors.black,
                             onTap: (value) {
                               switch (value) {
-                                case 2:
-                                  if (currentIndex == 4) {
-                                    setState(() {
-                                      currentIndex = 0;
-                                    });
-                                  }
+                                // case 2:
+                                //   if (currentIndex == 4) {
+                                //     setState(() {
+                                //       currentIndex = 0;
+                                //     });
+                                //   }
 
-                                  showModalBottomSheet<void>(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (BuildContext c) {
-                                      return Provider.value(
-                                        value: selectedCommunity,
-                                        child: getModal(
-                                          currentIndex,
-                                          users,
-                                          businesses,
-                                        ),
-                                      );
-                                    },
-                                  );
-                                  break;
+                                //   showModalBottomSheet<void>(
+                                //     context: context,
+                                //     isScrollControlled: true,
+                                //     builder: (BuildContext c) {
+                                //       return Provider.value(
+                                //         value: selectedCommunity,
+                                //         child: getModal(
+                                //           currentIndex,
+                                //           users,
+                                //           businesses,
+                                //         ),
+                                //       );
+                                //     },
+                                //   );
+                                //   break;
                                 default:
                                   setState(() {
                                     currentIndex = value;
