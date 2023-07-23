@@ -89,10 +89,12 @@ Future showPopupMenu(
                   ? CreateEventModal(
                       post: post as EventPost,
                       businesses: businesses,
+                      users: [appUser!],
                     )
                   : CreatePostModal(
                       post: post,
                       businesses: businesses,
+                      users: [appUser!],
                     )
               : CreateBusinessModal(business: post as Business),
         );

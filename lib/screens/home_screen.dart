@@ -443,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               },
                                             );
                                           },
-                                          child: const Text("Post"),
+                                          child: const Text('Post'),
                                         ),
                                       ),
                                       PopupMenuItem(
@@ -464,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               },
                                             );
                                           },
-                                          child: const Text("Event"),
+                                          child: const Text('Event'),
                                         ),
                                       ),
                                       PopupMenuItem(
@@ -485,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               },
                                             );
                                           },
-                                          child: const Text("Business"),
+                                          child: const Text('Business'),
                                         ),
                                       ),
                                     ];
