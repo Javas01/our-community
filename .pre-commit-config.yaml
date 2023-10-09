@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -12,10 +12,10 @@ repos:
   #   hooks:
   #     - id: dart-format
   - repo: https://github.com/dluksza/flutter-analyze-pre-commit
-    rev: 'master'
+    rev: '4afcaa82fc368d40d486256bf4edba329bf667bb'
     hooks:
       - id: flutter-analyze
   - repo: https://github.com/dluksza/flutter-test-pre-commit
-    rev: ed4387d1e32d655e8f5cf58b410c9b4768f2950f
+    rev: 4a23051c2c808bc2eb693c58fe0e69893168839d
     hooks:
       - id: flutter-test
